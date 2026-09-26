@@ -1,0 +1,323 @@
+<title>คู่มือปุ๊กปิ๊กออนไลน์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F6E6C4;--paper:#FFFBF3;--paper-2:#FBF0DA;--ink:#33284A;--ink-soft:#6F6485;--line:#E3D3B3;
+  --accent:#FF8A45;--accent-2:#FFE08A;--good:#2FAE62;--hp:#F2485B;--mp:#3F86F5;--sky:#CDEBF5;--secret:#2B2340;--secret-ink:#F3EEFF;
+  --f-display:"Mali","IBM Plex Sans Thai",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#1C1629;--paper:#2A2240;--paper-2:#332A4C;--ink:#EDE6FF;--ink-soft:#B7ACCF;--line:#473C63;
+  --accent:#FF9A5C;--accent-2:#5A4A24;--good:#5CD18C;--hp:#FF6F7F;--mp:#7FA8FF;--sky:#23374A;--secret:#130F1E;--secret-ink:#F3EEFF}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#1C1629;--paper:#2A2240;--paper-2:#332A4C;--ink:#EDE6FF;--ink-soft:#B7ACCF;--line:#473C63;
+  --accent:#FF9A5C;--accent-2:#5A4A24;--good:#5CD18C;--hp:#FF6F7F;--mp:#7FA8FF;--sky:#23374A;--secret:#130F1E;--secret-ink:#F3EEFF}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.7 var(--f-body)}
+.wrap{max-width:820px;margin:0 auto;padding-inline:16px;padding-block:20px 64px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.3;margin:0}
+h1{font-size:clamp(30px,6vw,44px)}
+h2{font-size:24px}
+h3{font-size:17px;margin-top:6px}
+p{margin:0}
+.lead{color:var(--ink-soft);max-width:62ch}
+.hero{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.eyebrow{font:600 12px var(--f-body);letter-spacing:.1em;color:var(--ink-soft)}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;background:var(--bg);padding-block:8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;border-bottom:2px dashed var(--line)}
+.nav a{flex:none;font:600 13px var(--f-body);color:var(--ink);text-decoration:none;background:var(--paper);border:2px solid var(--ink);border-radius:99px;padding:3px 12px}
+.nav a:hover,.nav a:focus-visible{background:var(--accent-2);outline:none}
+section{background:var(--paper);border:2px solid var(--ink);border-radius:20px;box-shadow:0 4px 0 var(--ink);padding:18px;display:flex;flex-direction:column;gap:12px;scroll-margin-top:64px}
+section .sub{display:flex;flex-direction:column;gap:8px}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.tbl{overflow-x:auto;border:2px solid var(--ink);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--paper-2);font-weight:700;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+kbd{font:700 12px var(--f-body);background:var(--ink);color:var(--paper);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.keys{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;font-size:14px;align-items:baseline}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.box{background:var(--paper-2);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.chip{display:inline-block;font:600 12px var(--f-body);border:2px solid var(--ink);border-radius:99px;padding:0 9px;background:var(--paper);margin:2px 2px 0 0;white-space:nowrap}
+.note{font-size:14px;color:var(--ink-soft)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font:600 14px var(--f-body)}
+.flow span{border:2px solid var(--ink);border-radius:10px;padding:2px 10px;background:var(--paper)}
+.flow i{font-style:normal;color:var(--ink-soft)}
+details{border:2px dashed var(--ink-soft);border-radius:14px;padding:10px 14px;background:var(--paper-2)}
+details[open]{background:var(--secret);color:var(--secret-ink);border-style:solid;border-color:var(--ink)}
+details[open] th{background:rgba(255,255,255,.08);color:var(--secret-ink)}
+details[open] td{border-color:rgba(255,255,255,.15)}
+details[open] .tbl{border-color:rgba(255,255,255,.4)}
+details[open] .note{color:#C9BFE3}
+summary{cursor:pointer;font:700 15px var(--f-display)}
+details>div{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+a{color:var(--mp)}
+@media (prefers-reduced-motion:no-preference){.nav a{transition:background .15s}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">คู่มือระบบเกม · ฉบับเต็ม</p>
+    <h1>คู่มือปุ๊กปิ๊กออนไลน์</h1>
+    <p class="lead">เริ่มจากไข่ใบเดียว ฟักเป็นสไลม์กลมๆ แล้วเติบโตจนถึง Lv 200 ผ่าน 24 ดินแดน คู่มือนี้อธิบายทุกระบบในเกม ตั้งแต่การควบคุมไปจนถึงระบบแฝงที่เกมไม่ได้บอกไว้ (ส่วนสปอยล์พับซ่อนไว้ แตะเพื่อเปิด)</p>
+  </header>
+
+  <nav class="nav" aria-label="สารบัญ">
+    <a href="#start">เริ่มเล่น</a><a href="#controls">ปุ่มควบคุม</a><a href="#char">ตัวละคร</a><a href="#forms">ร่าง</a><a href="#skills">สกิล</a>
+    <a href="#world">โลก</a><a href="#monsters">มอนสเตอร์</a><a href="#gear">อุปกรณ์</a><a href="#runes">รูน</a><a href="#pets">สัตว์เลี้ยง</a>
+    <a href="#hidden">ระบบแฝง</a><a href="#tools">แผนที่ & Codex</a><a href="#online">เล่นหลายคน</a>
+  </nav>
+
+  <section id="start">
+    <h2>เริ่มเล่น</h2>
+    <p>แตะไข่จนแตก แล้วจะได้สไลม์ 1 ใน 5 สีแบบสุ่ม แต่ละสีเก่งคนละค่าพลัง (ค่าหลักโตเร็วเป็น 2 เท่าทุกเลเวล) และมีสกิลชุดของตัวเอง</p>
+    <div class="tbl"><table>
+      <tr><th>สี</th><th>ชื่อ</th><th>ค่าเด่น</th><th>สไตล์</th></tr>
+      <tr><td>แดง</td><td>ปุ๊กเพลิง</td><td>ATK</td><td>ตีแรง สกิลระเบิดและอุกกาบาต</td></tr>
+      <tr><td>น้ำเงิน</td><td>ปุ๊กวารี</td><td>DEF</td><td>ทน มีโล่และคลื่นวงกว้าง</td></tr>
+      <tr><td>เหลือง</td><td>ปุ๊กสายฟ้า</td><td>SPD</td><td>ไว สายฟ้าลูกโซ่และพุ่งชน</td></tr>
+      <tr><td>น้ำตาล</td><td>ปุ๊กผืนดิน</td><td>HP</td><td>อึด ฟื้นเลือดเก่ง</td></tr>
+      <tr><td>เขียว</td><td>ปุ๊กใบไม้</td><td>LUK</td><td>คริง่าย ดูดเลือด ของดรอปบ่อย</td></tr>
+    </table></div>
+    <p class="note">เซฟอัตโนมัติในเบราว์เซอร์ ปิดแล้วกลับมาเล่นต่อได้ ถ้าล้ม ทองหาย 10% แล้วกลับไปเกิดที่เมือง</p>
+  </section>
+
+  <section id="controls">
+    <h2>ปุ่มควบคุม</h2>
+    <div class="cols">
+      <div class="box"><h3>คอมพิวเตอร์</h3><div class="keys">
+        <kbd>คลิกพื้น</kbd><span>เดินไปตรงนั้น</span>
+        <kbd>คลิกมอน</kbd><span>เดินไปตีจนมอนตาย</span>
+        <kbd>W A S D</kbd><span>เดิน (ลูกศรก็ได้)</span>
+        <kbd>Space</kbd><span>ตี (กดค้าง = ตีรัว)</span>
+        <kbd>1–5</kbd><span>สกิล (5 = สกิลร่าง)</span>
+        <kbd>Q / R</kbd><span>ยา HP / ยา MP</span>
+        <kbd>Tab</kbd><span>เล็งมอนใกล้สุด</span>
+        <kbd>I · C · K</kbd><span>กระเป๋า · ตัวละคร · สกิล</span>
+        <kbd>P · T</kbd><span>สัตว์เลี้ยง · ฉายา</span>
+        <kbd>M · J</kbd><span>แผนที่ · Codex</span>
+        <kbd>Enter</kbd><span>แชท</span>
+        <kbd>Esc</kbd><span>ปิดหน้าต่าง</span>
+      </div></div>
+      <div class="box"><h3>มือถือ</h3><div class="keys">
+        <kbd>ลากนิ้ว</kbd><span>เดิน (จุดไหนของจอก็ได้)</span>
+        <kbd>แตะมอน</kbd><span>เดินไปตีอัตโนมัติ</span>
+        <kbd>⚔️</kbd><span>ตีตัวที่ใกล้ที่สุด</span>
+        <kbd>แถบล่าง</kbd><span>ยา + สกิล 1–5 เป็นช่องๆ</span>
+        <kbd>แผนที่ย่อ</kbd><span>แตะเพื่อเปิดแผนที่ใหญ่</span>
+        <kbd>ไอคอนสัตว์</kbd><span>แตะเพื่อเปิดหน้าสัตว์เลี้ยง</span>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="char">
+    <h2>ตัวละคร</h2>
+    <div class="sub">
+      <p>ค่าพลังมี 5 ค่า: <b>HP</b> (เลือด) <b>ATK</b> (แรงตี) <b>DEF</b> (ป้องกัน) <b>SPD</b> (ตีเร็ว เดินเร็ว หลบ) <b>LUK</b> (คริ ของดรอป ทอง) ขึ้นเลเวลได้แต้มสถานะ 2 แต้มกับแต้มสกิล 1 แต้ม เลเวลสูงสุด 200</p>
+      <p>ดาเมจคิดจาก ATK² ÷ (ATK + DEF) และห่างกันทุก 1 เลเวล ฝ่ายที่เลเวลสูงกว่าแรงขึ้น 4% (สูงสุด 2.5 เท่า) ฝ่ายที่ต่ำกว่าเบาลง 3% จึงอย่าไปแมพที่เลเวลสูงเกินไปมาก มอนที่ต่ำกว่าเราเกิน 3 เลเวลให้ EXP น้อยลง</p>
+    </div>
+    <h3>แรงค์ (รูปร่างโตตามเลเวล)</h3>
+    <div class="flow"><span>สไลม์ 1</span><i>→</i><span>คน 10</span><i>→</i><span>นักรบ 20</span><i>→</i><span>หัวหน้า 30</span><i>→</i><span>นายพล 40</span><i>→</i><span>เทพสงคราม 50</span><i>→</i><span>จอมทัพ 60</span><i>→</i><span>ผู้กล้า 70</span></div>
+    <p class="note">ทุกแรงค์ได้ส่วนร่างกายเพิ่ม: แขนขา แขนตามธาตุ เกราะไหล่ ผ้าคลุม ปีกและหาง ธงรบ และร่างทองของผู้กล้า</p>
+    <h3>ฉายา (16 แบบ)</h3>
+    <p>ได้จากความสำเร็จ ใส่ได้ทีละ 1 อัน เพิ่มค่าพลังและขึ้นเหนือชื่อ เช่น
+      <span class="chip">นักล่ามือใหม่ · ปราบ 50</span><span class="chip">ราชาแห่งบอส · บอส 60</span><span class="chip">นักสำรวจ · ไปครบทุกดินแดน</span><span class="chip">จอมดันเจี้ยน · ผ่าน 20 ครั้ง</span><span class="chip">เศรษฐีปุ๊กปิ๊ก · ทอง 100,000</span><span class="chip">ช่างตีเหล็กเทวดา · ตีบวก +10</span><span class="chip">ตำนานผู้ล่ามอนลับ</span><span class="chip">ตำนานแห่งปุ๊กปิ๊ก · Lv 80</span></p>
+  </section>
+
+  <section id="forms">
+    <h2>ร่าง</h2>
+    <p>ถึง Lv 20 เปลี่ยนร่างได้ ร่างที่ได้เป็นการสุ่ม แต่ค่าพลังไหนสูงกว่าปกติ โอกาสได้ร่างสายนั้นยิ่งมาก (หน้าเปลี่ยนร่างโชว์ % ก่อนสุ่ม) สุ่มใหม่ได้ 3,000 ทอง</p>
+    <div class="tbl"><table>
+      <tr><th>สาย</th><th>โบนัส</th></tr>
+      <tr><td>สายโจมตี</td><td>ATK +25% · ตีบอสแรงขึ้น 20%</td></tr>
+      <tr><td>สายป้องกัน</td><td>DEF +30% · HP +10% · กันดาเมจได้หมด 15%</td></tr>
+      <tr><td>สายความเร็ว</td><td>SPD +30% · ตีเร็วขึ้น 15% · หลบเก่งขึ้น 10%</td></tr>
+      <tr><td>สายพลังชีวิต</td><td>HP +35% · ฟื้น HP นอกการต่อสู้เร็ว 3 เท่า</td></tr>
+      <tr><td>สายโชค</td><td>LUK +40% · ของดรอปบ่อยขึ้น 50% · ทอง +30%</td></tr>
+      <tr><td>ร่างลับ ×2 (0.5% ต่อแบบ)</td><td>สายราชันย์: ทุกค่า +20% · สายเงา: ATK +35% คริ ดูดเลือด (ชื่อและหน้าตาต่างกันทุกสี)</td></tr>
+    </table></div>
+    <h3>วิวัฒน์ทุก 20 เลเวล และแตกแขนง</h3>
+    <div class="flow"><span>ร่าง 2 · Lv 20</span><i>→</i><span>ร่าง 3 · Lv 40</span><i>→</i><span>ร่าง 4 · Lv 60</span><i>→</i><span>ร่าง 5 · Lv 80</span></div>
+    <ul>
+      <li><b>ร่าง 3</b> แตกเป็น 1 ใน 3 สาย: <b>ทำลาย</b> (ATK/คริ) · <b>ปราการ</b> (DEF/HP/โล่) · <b>พายุ</b> (SPD/LUK/คูลดาวน์) หรือ <b>ร่างยูนิค "อมตะ"</b> 1%</li>
+      <li><b>ร่าง 4</b> และ <b>ร่าง 5</b> แตกต่ออีกขั้นละ 3 ทาง + ยูนิค 1% ทุกครั้ง รวมร่าง 5 ได้ 64 แบบ</li>
+      <li>ทุกขั้นชื่อร่างอัปเกรด (มหา → ราชา/อัคร → เทพ) สีตัว หน้า และชิ้นส่วนบนตัวเปลี่ยนตามสายและแขนง ร่าง 5 ตาเรืองแสง</li>
+      <li>โอกาสแตกแต่ละทางขึ้นกับค่าพลัง ดูการ์ดพร้อม % ได้ในหน้าร่างก่อนกดวิวัฒน์</li>
+    </ul>
+  </section>
+
+  <section id="skills">
+    <h2>สกิล</h2>
+    <ul>
+      <li>ทุกสีมีสกิล 4 สกิล ปลดล็อกที่ Lv 1, 3, 7, 12 และสกิลร่างเป็นสกิลที่ 5 หลังเปลี่ยนร่าง</li>
+      <li>ใช้แต้มสกิลอัปแต่ละสกิลได้ถึง Lv 5 (กด K) แรงขึ้นและคูลดาวน์สั้นลง</li>
+      <li><b>สกิลเปลี่ยนตามร่าง</b>: พอเปลี่ยนร่าง สกิล 4 สกิลจะกลายเป็นเวอร์ชันของร่างนั้น ชื่อมาจากธาตุของสี + ธีมร่าง (เช่น คลื่นเพลิงทำลาย, พรศิลาพิทักษ์) และสกิล 3 เปลี่ยนเป็นสกิลเสริมของร่าง เช่น โทสะ ปราการ วายุเร่ง ธารชีวิต ดาวนำโชค รวม 160 แบบ</li>
+      <li>สกิลร่างไม่ซ้ำกันทุกสีทุกร่าง ทุกครั้งที่วิวัฒน์ สกิลได้ชื่อใหม่ แรงขึ้น วงกว้างขึ้น และได้ความสามารถของสายหรือแขนง (โล่ ฟื้น HP ดูดเลือด ยิงเพิ่ม)</li>
+    </ul>
+  </section>
+
+  <section id="world">
+    <h2>โลก</h2>
+    <p>เมืองอยู่ซ้ายสุด แล้วมี 24 ดินแดนเรียงต่อกันไปทางขวาตามถนน แต่ละดินแดนเป็นสี่เหลี่ยม 80×80 ช่อง มีกำแพงกั้น ข้ามได้ทางประตูบนถนน ในแต่ละดินแดนมีจุดวาร์ป (แตะครั้งแรกเพื่อปลดล็อก แล้ววาร์ปไปมาได้) มอน 18 ตัวและบอส 1 ตัว</p>
+    <div class="tbl"><table>
+      <tr><th>Lv</th><th>ดินแดน</th><th>Lv</th><th>ดินแดน</th></tr>
+      <tr><td>1</td><td>ทุ่งหญ้าสดใส</td><td>80</td><td>ทะเลลึกปะการัง</td></tr>
+      <tr><td>4</td><td>ป่าลึกลับ</td><td>90</td><td>ทุ่งสะวันนาไร้สิ้นสุด</td></tr>
+      <tr><td>8</td><td>ถ้ำคริสตัล</td><td>100</td><td>ป่าดึกดำบรรพ์</td></tr>
+      <tr><td>12</td><td>ภูเขาไฟ</td><td>110</td><td>สุสานฟาโรห์</td></tr>
+      <tr><td>16</td><td>ปราสาทมืด</td><td>120</td><td>ภูเขาหิมะมรณะ</td></tr>
+      <tr><td>20</td><td>ทะเลทรายต้องสาป</td><td>130</td><td>ดินแดนฝันร้าย</td></tr>
+      <tr><td>28</td><td>ทุ่งน้ำแข็งนิรันดร์</td><td>140</td><td>ป่าแมลงยักษ์</td></tr>
+      <tr><td>36</td><td>หนองน้ำพิษ</td><td>150</td><td>เมืองจักรกลร้าง</td></tr>
+      <tr><td>44</td><td>แดนสวรรค์ลอยฟ้า</td><td>160</td><td>นรกเพลิงกัลป์</td></tr>
+      <tr><td>52</td><td>มิติอสูร</td><td>170</td><td>ทะเลดวงดาว</td></tr>
+      <tr><td>60</td><td>หิมพานต์ต้องมนต์</td><td>180</td><td>วิหารทวยเทพ</td></tr>
+      <tr><td>70</td><td>สุดขอบจักรวาล</td><td>190</td><td>ปลายสุดของกาลเวลา (บอส Lv 200)</td></tr>
+    </table></div>
+    <div class="cols">
+      <div class="box"><h3>ในเมือง</h3><ul>
+        <li>🛒 ร้านป้าแมวเหมียว: ยา ม้วนกลับเมือง ถุงรูนสุ่ม ขายของ</li>
+        <li>🔨 ร้านตีเหล็กลุงเม่น: ซื้ออุปกรณ์ตามขั้น ตีบวกถึง +10</li>
+        <li>🐾 ร้านสัตว์เลี้ยงคุณยาย: ไข่ใบแรกฟรี อาหาร ของสวมใส่ ศิลาวิวัฒน์</li>
+        <li>⛲ น้ำพุ: ยืนใกล้ๆ ฟื้น HP/MP เร็วมาก</li>
+        <li>🌀 ประตูดันเจี้ยน</li>
+      </ul></div>
+      <div class="box"><h3>ดันเจี้ยน (เล่นคนเดียว)</h3><ul>
+        <li>🦑 ถ้ำใต้พิภพ · Lv 10</li><li>🐲 หอคอยมืด · Lv 25</li><li>👁️ เหวนิรันดร์ · Lv 45</li><li>🦿 ป้อมจักรกลไททัน · Lv 100</li><li>⌛ ประตูกาลเวลา · Lv 160</li>
+      </ul><p class="note">เสียค่าเข้า สู้ 3 คลื่นแล้วบอส ผ่านแล้วได้อุปกรณ์หายากขึ้นไป 3 ชิ้น ทอง ยาอายุวัฒนะ และศิลาวิวัฒน์</p></div>
+    </div>
+  </section>
+
+  <section id="monsters">
+    <h2>มอนสเตอร์</h2>
+    <ul>
+      <li>มอนปกติเดินเล่นในดินแดนของมัน มอนจะไล่ตามเมื่อเราเข้าใกล้หรือตีมัน และไม่เข้ามาในเมือง</li>
+      <li><b>บอส</b>: 1 ตัวต่อดินแดน เลือดเยอะ รวบรวมพลังแล้วทุบพื้นเป็นวงกว้าง (เห็นวงแดงก่อน ให้เดินหลบ)</li>
+      <li><b>มอนลับ ✦</b> 6 ชนิด โผล่แทนมอนปกติ 0.4% วิ่งหนีไม่ตีกลับ มีประกาศให้ทุกคนรู้ ปราบแล้วได้ของยูนิคประจำตัว</li>
+      <li>มอนทุกตัวมีโอกาสดรอป: ทอง ยา อุปกรณ์ อาหารสัตว์เลี้ยงตามธีมแมพ รูน และบอสดรอปศิลาวิวัฒน์ สเต็กมังกร</li>
+    </ul>
+  </section>
+
+  <section id="gear">
+    <h2>อุปกรณ์</h2>
+    <ul>
+      <li>5 ช่อง: <b>อาวุธ</b> (ATK) <b>เกราะ</b> (DEF) <b>หมวก</b> (HP) <b>รองเท้า</b> (SPD) <b>เครื่องราง</b> (LUK) อาวุธและหมวกที่ใส่จะเห็นบนตัวละคร</li>
+      <li>24 ขั้น (ขั้นละดินแดน) และ 6 ความหายาก: <span class="chip">ธรรมดา</span><span class="chip">ดี</span><span class="chip">หายาก</span><span class="chip">มหากาพย์</span><span class="chip">ตำนาน</span><span class="chip">ยูนิค</span></li>
+      <li><b>Option รอง</b> สุ่มติดมาตอนดรอป ธรรมดา/ดี 1 อัน · หายาก/มหากาพย์ 2 · ตำนาน 3 · ยูนิค 4 มี 17 แบบ เช่น ATK/DEF/HP/SPD/LUK +%, โอกาสคริ, ดูดเลือด, ดาเมจสกิล, ลดคูลดาวน์, ดาเมจใส่บอส, EXP, ทองดรอป, ของดรอป, ความเร็วเดิน, ฟื้น HP, หลบ, กันดาเมจ (สุ่มใหม่ไม่ได้)</li>
+      <li>ตีบวกที่ร้านตีเหล็กได้ถึง +10 ขั้นละ +8% ยิ่งสูงโอกาสสำเร็จยิ่งน้อย ล้มเหลวเสียแค่ทอง</li>
+      <li>ขายหลายชิ้นพร้อมกันได้: กระเป๋า → เลือกขายหลายชิ้น (มีปุ่มลัด ธรรมดาทั้งหมด / แย่กว่าที่ใส่อยู่)</li>
+    </ul>
+  </section>
+
+  <section id="runes">
+    <h2>รูน</h2>
+    <p>อุปกรณ์มีช่องรูน 0–3 ช่องตามความหายาก ใส่และถอดได้ฟรีในกระเป๋า (แตะ ＋ ที่ช่อง) รูนมีขั้น I–V รวมรูนเหมือนกัน 3 อันได้ขั้นถัดไป 1 อัน (ปุ่ม 💠 รูน) ใส่รูนชนิดเดียวกันครบ 3 อันได้โบนัสชุด ครบ 5 อันได้ 2 เท่า</p>
+    <div class="tbl"><table>
+      <tr><th>รูน</th><th>ผลต่อช่อง (ขั้น I → V)</th><th>โบนัสชุด</th></tr>
+      <tr><td>🔥 เพลิง</td><td>ATK +2% → +10%</td><td>สกิลแรงขึ้น 10%</td></tr>
+      <tr><td>❄️ น้ำแข็ง</td><td>DEF +2% → +10%</td><td>กันดาเมจ +5%</td></tr>
+      <tr><td>💚 ชีวิต</td><td>HP +3% → +12%</td><td>ฟื้น HP +60%</td></tr>
+      <tr><td>🌪️ วายุ</td><td>SPD +2% → +10%</td><td>ลดคูลดาวน์ 8%</td></tr>
+      <tr><td>⭐ ดารา</td><td>LUK +3% → +12%</td><td>ของดรอป +20%</td></tr>
+      <tr><td>🩸 โลหิต</td><td>ดูดเลือด 0.5% → 2%</td><td>ดาเมจใส่บอส +15%</td></tr>
+      <tr><td>⚡ อัสนี</td><td>คริ +1% → +6%</td><td>เดินเร็วขึ้น 10%</td></tr>
+      <tr><td>📜 ปราชญ์</td><td>ดาเมจสกิล +3% → +11%</td><td>EXP +15%</td></tr>
+    </table></div>
+    <p class="note">ได้จากมอน (ยิ่งเลเวลสูงยิ่งได้ขั้นสูง) บอสดรอปบ่อย มอนลับดรอปทุกครั้ง หรือซื้อถุงรูนสุ่ม 600 ทองที่ร้านป้าแมวเหมียว</p>
+  </section>
+
+  <section id="pets">
+    <h2>สัตว์เลี้ยง</h2>
+    <ul>
+      <li>รับไข่ใบแรกฟรีที่คุณยาย ใบต่อไป 800 ทอง เลี้ยงได้ 6 ตัว พาออกเดินทางได้ทีละตัว ช่วยตีมอนและได้ EXP (สูงสุด Lv 50)</li>
+      <li>แต่ละตัวมี <b>นิสัย</b> สุ่ม 8 แบบ (ขี้เล่น ขี้เกียจ ตะกละ ดุดัน ขี้อาย อยากรู้อยากเห็น ขี้อ้อน เจ้าเล่ห์) มีผลกับการตี ความหิว และความสามารถพิเศษ มีของที่ชอบ 2 อย่างและไม่ชอบ 1 อย่าง (ต้องลองให้ถึงจะรู้)</li>
+      <li><b>วิวัฒน์ 2 ครั้ง</b> (Lv 10 + ผูกพัน 40, Lv 25 + ผูกพัน 70) ใช้ศิลาวิวัฒน์ 6 ธาตุ ร่างที่ได้คาดเดาไม่ได้ ขึ้นกับนิสัย อาหารที่เคยกิน ศิลา และค่าซ่อน</li>
+      <li>ของสวมใส่ 7 แบบ ใส่แล้วเห็นบนตัวและมีผลเล็กน้อย</li>
+    </ul>
+    <h3>อารมณ์ (แบบ Seal Online)</h3>
+    <div class="tbl"><table>
+      <tr><th>อารมณ์</th><th>ผล</th><th>เกิดจาก</th></tr>
+      <tr><td>🙂 ปกติ</td><td>ตีปกติ</td><td>—</td></tr>
+      <tr><td>😊 อารมณ์ดี</td><td>ตีแรงขึ้น 15%</td><td>ของที่ชอบ ไอศกรีม ความผูกพันสูง</td></tr>
+      <tr><td>🤩 คึกคัก</td><td>ตีแรง 35% ตีเร็ว เจออาหารเพิ่ม</td><td>ลูกอม พริก สเต็กมังกร ท้อสวรรค์</td></tr>
+      <tr><td>😌 อิ่มแปล้</td><td>หิวช้าลง</td><td>ความอิ่มเกิน 95</td></tr>
+      <tr><td>😪 ง่วงนอน</td><td>ไม่ตี แต่ฟื้น HP ให้เรา</td><td>นมอุ่นๆ</td></tr>
+      <tr><td>🥺 หิว / 😭 หิวจนไม่มีแรง</td><td>ตีเบา / ไม่ตี</td><td>ความอิ่มต่ำกว่า 30 / 10</td></tr>
+      <tr><td>😤 งอน</td><td>ตีเบา บางทีไม่ยอมกิน</td><td>ของที่ไม่ชอบ</td></tr>
+      <tr><td>🤢 ท้องเสีย</td><td>ไม่ตี ไม่ค่อยยอมกิน</td><td>กินอย่างเดิม 4 ครั้งติด (แก้ด้วยนมอุ่นๆ)</td></tr>
+    </table></div>
+    <p class="note">อาหาร 16 แบบ ดรอปจากมอนตามธีมแมพ เช่น ทะเลได้ปลาและกุ้ง ภูเขาไฟได้พริกและเนื้อ ทุ่งน้ำแข็งได้ไอศกรีม บอสดรอปสเต็กมังกร มอนลับดรอปท้อสวรรค์ ไอคอนสัตว์เลี้ยงมุมซ้ายบนบอกอารมณ์และความอิ่มตลอดเวลา</p>
+  </section>
+
+  <section id="hidden">
+    <h2>ระบบแฝง</h2>
+    <p>ระบบกลุ่มนี้เกมไม่บอกเงื่อนไข ต้องค้นพบเอง ดูสิ่งที่ได้แล้วที่หน้าตัวละคร → ✨ สถานะแฝง</p>
+    <ul>
+      <li><b>ทักษะงอก</b>: 13 ทักษะงอกเองจากสิ่งที่ทำบ่อย ฝึกต่อจนถึง Lv 5 แล้วอาจวิวัฒน์เป็น 1 ใน 2 แบบ หรือแบบลับ</li>
+      <li><b>อาชีพหลัก</b> เลือกที่ Lv 15: 🗡️ นักรบ · 🛡️ ผู้พิทักษ์ · 🔮 นักเวท · 🏹 นักล่า (เปลี่ยนได้ 5,000 ทอง)</li>
+      <li><b>อาชีพแฝง</b> ตื่นเองที่ Lv 30 ตามสไตล์การเล่น และ <b>สถานะแฝง</b> ที่ติดตัวมาตั้งแต่เกิด</li>
+      <li><b>Unique Scenario</b> 10 เรื่อง แต่ละเรื่องมีเนื้อเรื่องและภารกิจ 4 ขั้น จบด้วย Unique Monster ที่สู้ตัวต่อตัว แพ้แล้วติดคำสาป (มีทั้งข้อดีและข้อเสีย) ชนะแล้วคำสาปหายและได้เกียรติยศทุกค่า +5% ถาวร</li>
+    </ul>
+    <details>
+      <summary>สปอยล์: เงื่อนไขทั้งหมด (แตะเพื่อเปิด)</summary>
+      <div>
+        <h3>ทักษะงอก (ทำสิ่งนี้บ่อยๆ)</h3>
+        <div class="tbl"><table>
+          <tr><th>ทักษะ</th><th>เกิดจาก</th><th>วิวัฒน์เป็น</th></tr>
+          <tr><td>ตาเหยี่ยว</td><td>ตีคริ 60+</td><td>เนตรพิฆาต / มือสังหารเงียบ / ✦ ดวงตาเทพสงคราม</td></tr>
+          <tr><td>ก้าวพริ้ว</td><td>หลบ 40+</td><td>เงาลวงตา / ย่างก้าววายุ / ✦ ร่างไร้ตัวตน</td></tr>
+          <tr><td>สัญชาตญาณนักล่า</td><td>ปราบมอน 300+</td><td>ราชันย์นักล่า / ผู้ล่าฝูง / ✦ เขี้ยวแห่งกาลเวลา</td></tr>
+          <tr><td>ดิ้นรนเฮือกสุดท้าย</td><td>ปราบตอน HP ต่ำกว่า 25% 8+</td><td>เลือดเดือด / ไม่ยอมตาย / ✦ อมตะชั่วขณะ</td></tr>
+          <tr><td>สมาธิร่ายเวท</td><td>ใช้สกิล 150+</td><td>จอมเวทไร้พัก / ผู้ประสานสกิล / ✦ ปราชญ์แห่งมิติ</td></tr>
+          <tr><td>ผิวเหล็ก</td><td>โดนตี 400+</td><td>ป้อมเดินได้ / ผิวหนามสะท้อน / ✦ เกราะอสูรนิรันดร์</td></tr>
+          <tr><td>นักเดินทาง</td><td>เดินทางไกล</td><td>ผู้ท่องแดน / ลมใต้ปีก / ✦ ผู้ย่นระยะ</td></tr>
+          <tr><td>ผู้ท้าชิง</td><td>ปราบบอส 5+</td><td>ผู้ล้มยักษ์ / ผู้พิชิตตำนาน / ✦ ผู้สังหารเทพ</td></tr>
+          <tr><td>ร่างกายชินยา</td><td>ดื่มยา 30+</td><td>หมอยาพเนจร / ร่างอมฤต / ✦ ผู้ดื่มน้ำอมฤต</td></tr>
+          <tr><td>มือทอง</td><td>เก็บทอง 400+</td><td>เศรษฐีโชคดี / นักล่าสมบัติ / ✦ เทพแห่งทรัพย์</td></tr>
+          <tr><td>ผู้ไม่ยอมแพ้</td><td>ล้ม 5+</td><td>ฟีนิกซ์ / วิญญาณแค้น / ✦ ผู้ข้ามความตาย</td></tr>
+          <tr><td>บุตรแห่งราตรี</td><td>ปราบมอน 18:00–06:00 100+</td><td>นักล่ายามวิกาล / เงาจันทรา / ✦ ราชันย์ราตรี</td></tr>
+          <tr><td>มือเลี้ยงสัตว์</td><td>ให้อาหาร 25+</td><td>ผู้เลี้ยงอสูร / เพื่อนแห่งสรรพสัตว์ / ✦ ผู้เป็นหนึ่งกับอสูร</td></tr>
+        </table></div>
+        <p class="note">พอถึงจำนวนแล้ว ทุกครั้งต่อจากนั้นมีโอกาส 4% ที่จะงอก ถึง Lv 5 แล้วทุกครั้งมีโอกาส 3% ที่จะวิวัฒน์ (แบบลับ ✦ 8%)</p>
+        <h3>Unique Scenario</h3>
+        <div class="tbl"><table>
+          <tr><th>เรื่อง</th><th>วิธีเริ่ม</th><th>Unique Monster · คำสาป</th></tr>
+          <tr><td>หอนแห่งราตรีกาล</td><td>ปราบมอนในป่าลึกลับตอนกลางคืน (สุ่ม)</td><td>จักรพรรดิหมาป่าราตรี · ATK/SPD +15% แต่ใส่เกราะและหมวกไม่ได้</td></tr>
+          <tr><td>หลุมศพไร้ชื่อ</td><td>ล้ม 3 ครั้ง แล้วคุยกับคุณยาย</td><td>ผู้เฝ้าสุสานนิรันดร์ · ดูดเลือด สกิลแรง แต่ HP −25%</td></tr>
+          <tr><td>เพลงของวาฬ</td><td>ให้อาหารสัตว์ 30 ครั้ง แล้วยืนนิ่งที่น้ำพุ 20 วินาที</td><td>วาฬมหาสมุทรลึก · DEF +20% ฟื้นเร็ว แต่เดินช้า</td></tr>
+          <tr><td>ค้อนที่หายไป</td><td>คุยกับลุงเม่นตอน Lv 40+ (สุ่ม)</td><td>ยักษ์เตาหลอมนิรันดร์ · ATK +20% แต่ DEF −10%</td></tr>
+          <tr><td>แมวดำของป้า</td><td>คุยกับป้าแมวเหมียวตอนกลางคืน (Lv 20+)</td><td>แมวดำพันชีวิต · หลบ +8% LUK +10% แต่ HP −20%</td></tr>
+          <tr><td>ดาวที่ตกลงมา</td><td>ตีคริครบ 500 แล้วปราบมอนในแดนสวรรค์ (สุ่ม)</td><td>ดาวตกผู้หลงทาง · คริ +8% แต่ DEF −15%</td></tr>
+          <tr><td>ขุมทรัพย์ใต้ผืนทราย</td><td>เก็บทองครบ 1,000 ครั้ง แล้วเก็บทองในทะเลทราย (สุ่ม)</td><td>หนอนทรายราชันย์ · ทอง +30% แต่เดินช้าลง (จบได้ทอง 20,000)</td></tr>
+          <tr><td>หัวใจน้ำแข็ง</td><td>ล้มในทุ่งน้ำแข็งนิรันดร์ (30%)</td><td>ราชินีหิมะนิรันดร์ · DEF +15% กันดาเมจ แต่ SPD −10%</td></tr>
+          <tr><td>เงาของตัวเอง</td><td>ปราบมอนครบ 2,000 ตัว แล้วปราบตอน HP ต่ำ (สุ่ม)</td><td>เงาสะท้อนของคุณ · ATK +10% ดูดเลือด แต่ HP −10%</td></tr>
+          <tr><td>นาฬิกาที่หยุดเดิน</td><td>Lv 100+ เดินทางในปลายสุดของกาลเวลา (สุ่ม)</td><td>ผู้หยุดกาลเวลา · คูลดาวน์ −15% แต่ EXP −20%</td></tr>
+        </table></div>
+        <p class="note">นอกจากนี้ ทุกการปราบมอนมีโอกาส 1/3000 เจอ "รอยเท้าขนาดยักษ์" แล้วมี Unique Monster สุ่มมาให้สู้ ปุ่ม ⚠️ อยู่ 20 วินาที</p>
+        <h3>อาชีพแฝงและสถานะแฝง</h3>
+        <p class="note">อาชีพแฝง 9 แบบ สุ่มถ่วงตามสิ่งที่ทำบ่อย (นักฆ่าเงา จอมเวทเร้นลับ อัศวินเหล็ก นักเดินทางไร้บ้าน พ่อค้าพเนจร ผู้เลี้ยงอสูร ผู้กลับจากความตาย นักปรุงยา นักล่าบอส) และ 2% ได้ "ผู้ถูกเลือกของโลก" · สถานะแฝง 10 แบบ มีผลตั้งแต่เกิด เปิดเผยเมื่อปราบมอนครบ 500 ตัวหรือถึง Lv 50</p>
+        <h3>ร่างจักรพรรดิ (ร่างซ่อน)</h3>
+        <p class="note">ปราบมอนลับครบทั้ง 6 ชนิดตอน Lv 20 ขึ้นไป จะกลายเป็นจักรพรรดิปุ๊กปิ๊กอัตโนมัติ ทุกค่า +30% คริ +10% ดูดเลือด ของดรอปเพิ่ม เปลี่ยนไปร่างอื่นแล้วกลับมาได้ฟรี</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="tools">
+    <h2>แผนที่ & Codex</h2>
+    <div class="cols">
+      <div class="box"><h3>🗺️ แผนที่ (M)</h3><p>แผนที่ใหญ่ของแมพที่เลือก บอกตำแหน่งตัวเรา มอน ผู้เล่นอื่น จุดวาร์ป ประตูข้ามแมพ บอส และจุดเนื้อเรื่อง ❗ ด้านล่างเป็นตารางทุกดินแดน แตะเพื่อดูแมพอื่น แมพที่ยังไม่เคยไปจะเป็นหมอก</p></div>
+      <div class="box"><h3>📖 Codex (J)</h3><p>สมุดบันทึก 5 หมวด: มอนสเตอร์ ร่าง สัตว์เลี้ยง ของยูนิค และยูนิคมอนสเตอร์ มอนบันทึกเมื่อปราบครั้งแรก เก็บครบ 25 / 50 / 75 / 100% ได้โบนัสถาวร HP +3% / ATK +3% / DEF +3% / ทุกค่า +5%</p></div>
+    </div>
+  </section>
+
+  <section id="online">
+    <h2>เล่นหลายคน</h2>
+    <ul>
+      <li>ทุกคนที่เปิดเกมพร้อมกันอยู่ในโลกเดียวกัน เห็นกันแบบเรียลไทม์ รวมทั้งร่าง สาย แขนง อาวุธ หมวก สัตว์เลี้ยง และฉายา</li>
+      <li>แชทได้ (Enter หรือ 💬) และตีมอนตัวเดียวกันได้ ใครตีมอนตัวไหนก็ได้ EXP และของดรอปของตัวเอง</li>
+      <li>ดันเจี้ยนและการสู้ Unique Monster เป็นการเล่นคนเดียว</li>
+    </ul>
+  </section>
+</div>
