@@ -153,6 +153,20 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .abtn.pot{right:170px;bottom:150px;width:50px;height:50px;background:#FFE3A1;font-size:21px}
 .abtn.pot b{position:absolute;top:2px;right:8px;font:700 12px var(--f-display)}
 .abtn:disabled{filter:grayscale(.7);opacity:.7}
+.formbtn{position:absolute;right:var(--gr);top:150px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:linear-gradient(90deg,#FFE08A,#FFB3C7,#B7D8FF);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.forms{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px}
+.fcard{border:2px solid var(--ink);border-radius:16px;background:#fff;padding:6px 8px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .08s}
+.fcard .pic{width:74px}
+.fcard b{font:700 14px/1.25 var(--f-display)}
+.fcard .arch{font:600 11px var(--f-body);color:var(--ink-soft)}
+.fcard .odds{font:700 15px var(--f-display);font-variant-numeric:tabular-nums}
+.fcard .odds small{font:600 11px var(--f-body);color:var(--ink-soft)}
+.fcard.hi{background:#FFF3B0;transform:scale(1.06);box-shadow:0 0 0 3px var(--accent)}
+.fcard.win{background:#FFF3B0;box-shadow:0 0 0 4px var(--accent),0 0 24px #FFD23F}
+.fcard.dim{opacity:.4}
+.oddbar{height:6px;width:100%;border-radius:99px;background:#EEE8F4;overflow:hidden}
+.oddbar i{display:block;height:100%;background:var(--accent)}
 .talk{position:absolute;right:var(--gr);bottom:282px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
 .joy{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);background:rgba(51,40,74,.18);pointer-events:none!important;z-index:6}
 .joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.9);border:2.5px solid var(--ink)}
@@ -246,6 +260,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
     </div>
     <div class="chatlog" id="chatlog" aria-live="polite"></div>
     <p class="joyhint" id="joyhint"></p>
+    <button class="formbtn" type="button" id="bForm" hidden>✨ เปลี่ยนร่างได้แล้ว!</button>
     <button class="talk" type="button" id="bTalk" hidden>🛒 คุยกับป้าแมวเหมียว</button>
     <div class="acts">
       <button class="abtn pot" type="button" id="bPot" aria-label="ดื่มยา">🍯<b id="potN">0</b><span class="cd" id="potCd"></span><kbd class="kb">Q</kbd></button>
@@ -363,6 +378,24 @@ const BONUS = { hp: 28, atk: 5, def: 5, spd: 5, luk: 6 };
 const GROW = { hp: 7, atk: 2, def: 1.6, spd: 1.4, luk: 1.2 };
 const POINT_VALUE = { hp: 6, atk: 1, def: 1, spd: 1, luk: 1 };
 const STAGE_NAME = ['', 'วัยเบบี้', 'วัยซ่า', 'ร่างราชา'];
+// Lv 20 transformation: every colour has one form per stat. Which one you get is random,
+// weighted by how far each of your base stats is above the usual growth for your level.
+const FORM_LV = 20, REFORM_COST = 3000;
+const FORM_ARCH = {
+  atk: { th: 'สายโจมตี', mul: { atk: 1.25 }, boss: .2, desc: 'ATK +25% · ตีบอสแรงขึ้น 20%' },
+  def: { th: 'สายป้องกัน', mul: { def: 1.3, hp: 1.1 }, block: 15, desc: 'DEF +30% · HP +10% · โอกาสกันดาเมจได้หมด 15%' },
+  spd: { th: 'สายความเร็ว', mul: { spd: 1.3 }, haste: .15, dodge: 10, desc: 'SPD +30% · ตีเร็วขึ้น 15% · หลบเก่งขึ้น 10%' },
+  hp:  { th: 'สายพลังชีวิต', mul: { hp: 1.35 }, regen: 3, desc: 'HP +35% · ฟื้น HP นอกการต่อสู้เร็วขึ้น 3 เท่า' },
+  luk: { th: 'สายโชค', mul: { luk: 1.4 }, drop: .5, gold: .3, desc: 'LUK +40% · ของดรอปบ่อยขึ้น 50% · ทอง +30%' },
+};
+const FORM_KEYS = ['atk', 'def', 'spd', 'hp', 'luk'];
+const FORM_NAMES = {
+  red:    { atk: 'อสูรเพลิง', def: 'อัศวินลาวา', spd: 'นินจาไฟ', hp: 'ยักษ์ภูเขาไฟ', luk: 'ฟีนิกซ์นำโชค' },
+  blue:   { atk: 'ฉลามคลั่ง', def: 'ป้อมปราการวารี', spd: 'นินจาสายน้ำ', hp: 'วาฬยักษ์', luk: 'นักพรตทะเลลึก' },
+  yellow: { atk: 'อสูรอัสนี', def: 'อัศวินแสง', spd: 'เทพสายฟ้าแลบ', hp: 'ยักษ์พายุ', luk: 'ดาวตกนำโชค' },
+  brown:  { atk: 'กระทิงศิลา', def: 'โกเลมหินผา', spd: 'นินจาทราย', hp: 'ภูผายักษ์', luk: 'ผู้พิทักษ์ขุมทรัพย์' },
+  green:  { atk: 'ราชสีห์ไพร', def: 'ต้นไม้เทพพิทักษ์', spd: 'ภูตลมป่า', hp: 'ต้นไม้ยักษ์', luk: 'เทพโคลเวอร์' },
+};
 
 const CONSUME = {
   potion: { name: 'ยาน้ำผึ้ง', icon: '🍯', price: 15, desc: 'ฟื้น HP 40% (อย่างน้อย 30)' },
@@ -436,13 +469,20 @@ function blobSVG(color, st = 1, o = {}) {
   else if (mood === 'hurt') { eyes = `<path d="M40 61L51 67L40 73" ${SK}/><path d="M80 61L69 67L80 73" ${SK}/>`; mouth = `<path d="M53 85Q60 78 67 85" ${SK}/>`; }
   else if (mood === 'sleep') { eyes = `<path d="M39 68Q46 73 53 68" ${SK}/><path d="M67 68Q74 73 81 68" ${SK}/>`; mouth = `<ellipse cx="60" cy="83" rx="3" ry="3.5" fill="${INK}"/>`; }
   else { eyes = `<g class="eyes"><ellipse cx="46" cy="67" rx="6" ry="8" fill="${INK}"/><ellipse cx="74" cy="67" rx="6" ry="8" fill="${INK}"/><circle cx="48.3" cy="63.5" r="2.4" fill="#fff"/><circle cx="76.3" cy="63.5" r="2.4" fill="#fff"/></g>`; mouth = `<path d="M54 80Q60 86 66 80" ${SK}/>`; }
-  const [back, front] = st >= 2 ? ACC[color]() : ['', ''];
+  const form = o.form && FORM_ARCH[o.form] ? o.form : null;
+  const [back, front] = st >= 2 && !form ? ACC[color]() : ['', ''];
+  let formArt = '', bodyT = '';
+  if (form === 'atk') formArt = `<path d="M36 38Q20 22 27 4Q35 20 47 29Z" fill="#FFF1DA" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M84 38Q100 22 93 4Q85 20 73 29Z" fill="#FFF1DA" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M37 53L53 59M83 53L67 59" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`;
+  else if (form === 'def') formArt = `<path d="M18 56Q20 18 60 16Q100 18 102 56Q82 44 60 44Q38 44 18 56Z" fill="#C9CCD8" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M60 16V44" stroke="${INK}" stroke-width="2.5"/><path d="M60 2L64 16H56Z" fill="${c[1]}" stroke="${INK}" stroke-width="2"/><circle cx="60" cy="33" r="5" fill="${c[1]}" stroke="${INK}" stroke-width="2"/>`;
+  else if (form === 'spd') formArt = `<path d="M19 52Q60 36 101 52L101 60Q60 44 19 60Z" fill="${c[2]}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M100 54Q113 50 119 60M100 57Q109 66 112 76" fill="none" stroke="${c[2]}" stroke-width="5" stroke-linecap="round"/><path d="M8 70H0M10 80H2M12 90H4" stroke="${INK}" stroke-width="2.5" stroke-linecap="round" opacity=".5"/>`;
+  else if (form === 'hp') { bodyT = ' transform="translate(60 108) scale(1.1) translate(-60 -108)"'; formArt = `<ellipse cx="60" cy="94" rx="22" ry="10" fill="#fff" opacity=".35"/><path d="M36 50L52 54M84 50L68 54" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`; }
+  else if (form === 'luk') formArt = `<ellipse cx="60" cy="10" rx="24" ry="6.5" fill="none" stroke="#FFD23F" stroke-width="5"/><ellipse cx="60" cy="10" rx="24" ry="6.5" fill="none" stroke="${INK}" stroke-width="1.5"/>` + STAR(104, 40, 6, '') + STAR(16, 36, 5, 'b');
   const sparkle = o.shiny ? STAR(104, 28, 7, '') + STAR(14, 50, 5, 'b') + STAR(100, 92, 4, 'b') : '';
   const shadow = o.noShadow ? '' : `<ellipse cx="60" cy="111" rx="34" ry="5.5" fill="rgba(51,40,74,.18)"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true"><defs><radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient></defs>`
-    + shadow + `<g class="blob-body">${back}<path d="M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z" fill="url(#${id})" stroke="${INK}" stroke-width="3"/>`
+    + shadow + `<g class="blob-body"${bodyT}>${back}<path d="M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z" fill="url(#${id})" stroke="${INK}" stroke-width="3"/>`
     + `<ellipse cx="40" cy="42" rx="11" ry="5.5" fill="#fff" opacity=".6" transform="rotate(-32 40 42)"/>`
-    + `${eyes}<ellipse cx="33" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/><ellipse cx="87" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/>${mouth}${front}${st >= 3 ? CROWN : ''}</g>${sparkle}</svg>`;
+    + `${eyes}<ellipse cx="33" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/><ellipse cx="87" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/>${mouth}${front}${st >= 3 && !form ? CROWN : ''}${formArt}</g>${sparkle}</svg>`;
 }
 const CRACKS = ['M60 34L53 45L62 51L55 62', 'M55 62L65 70L58 79', 'M26 82L37 86L32 95L44 99', 'M94 74L85 81L95 88L86 97', 'M44 99L58 79L86 97'];
 function eggSVG(n) {
@@ -454,10 +494,10 @@ function eggSVG(n) {
     + `<ellipse cx="40" cy="36" rx="9" ry="14" fill="#fff" opacity=".7" transform="rotate(24 40 36)"/>${cracks}</svg>`;
 }
 const blobImgs = new Map();
-function blobImg(color, st, shiny, mood) {
-  const k = color + st + (shiny ? 's' : '') + mood;
+function blobImg(color, st, shiny, mood, form) {
+  const k = color + st + (shiny ? 's' : '') + mood + (form || '');
   let im = blobImgs.get(k);
-  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, noShadow: true })); blobImgs.set(k, im); }
+  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, form, noShadow: true })); blobImgs.set(k, im); }
   return im;
 }
 
@@ -470,7 +510,7 @@ const SFX = {
   miss: [[880, .04], [660, .05]], heal: [[523, .07], [659, .07], [880, .12]], skill: [[440, .05, 'triangle'], [660, .05, 'triangle'], [990, .08, 'triangle']],
   coin: [[988, .05], [1319, .1]], pick: [[700, .04], [1050, .08]], kill: [[330, .05, 'square'], [660, .08]],
   lvl: [[523, .08], [659, .08], [784, .08], [1047, .08], [1319, .3]], die: [[392, .15, 'triangle'], [330, .15, 'triangle'], [262, .35, 'triangle']],
-  rare: [[784, .06], [988, .06], [1175, .06], [1568, .2]], boss: [[110, .25, 'sawtooth'], [98, .3, 'sawtooth']],
+  rare: [[784, .06], [988, .06], [1175, .06], [1568, .2]], guard: [[330, .06, 'triangle'], [440, .1, 'triangle']], boss: [[110, .25, 'sawtooth'], [98, .3, 'sawtooth']],
 };
 function sfx(name) {
   if (muted || !SFX[name]) return;
@@ -572,6 +612,7 @@ function migrate(s) {
   s.items = Object.assign({ potion: 0, ether: 0, elixir: 0 }, s.items);
   if (typeof s.sp !== 'number') s.sp = Math.max(0, s.lv - 1);
   s.skills = s.skills && typeof s.skills === 'object' ? s.skills : {};
+  if (!FORM_ARCH[s.form]) s.form = null;
   s.kills = s.kills || 0; s.bossKills = s.bossKills || 0; s.points = s.points || 0; s.gold = s.gold || 0; s.xp = s.xp || 0;
   return s;
 }
@@ -583,13 +624,21 @@ function makePlayer(color, shiny) {
 }
 const col = () => COLORS[P.color];
 function gearBonus(k) { let v = 0; for (const s of SLOTS) { const it = P.eq[s]; if (it) v += it.stats[k] || 0; } return v; }
-const st = k => P.base[k] + gearBonus(k);
+const arch = () => (P && P.form && FORM_ARCH[P.form]) || null;
+const st = k => { const a = arch(), m = a && a.mul[k] || 1; return Math.round((P.base[k] + gearBonus(k)) * m); };
+function formOdds() {
+  const w = {}; let sum = 0;
+  for (const k of FORM_KEYS) { const ref = BASE[k] + GROW[k] * (P.lv - 1); w[k] = Math.pow(Math.max(.2, P.base[k] / ref), 3); sum += w[k]; }
+  for (const k of FORM_KEYS) w[k] /= sum;
+  return w;
+}
+function formName(f) { return FORM_NAMES[P.color][f]; }
 const maxHp = () => st('hp');
 const maxMp = () => 20 + (P.lv - 1) * 3;
 const xpNeed = lv => Math.round(14 * Math.pow(lv, 1.55));
 const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
 const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
-const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste'));
+const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ((arch() && arch().haste) || 0));
 const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75));
 const mySkills = () => SKILLS[P.color];
 const skLv = sk => (P.lv >= sk.unlock ? clamp(P.skills[sk.id] || 1, 1, SKILL_MAX) : 0);
@@ -719,7 +768,8 @@ function enterWorld() {
 function hudStatic() {
   const c = col();
   $('#app').style.setProperty('--c-light', c.light); $('#app').style.setProperty('--c', c.c[1]);
-  $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, noShadow: true });
+  $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, form: P.form, noShadow: true });
+  $('#bForm').hidden = !(P.lv >= FORM_LV && !P.form);
   updateSkillBar();
 }
 let hudKey = '';
@@ -919,7 +969,7 @@ function snapshotOut() {
   return { l };
 }
 function presenceState() {
-  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
+  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_KEYS.indexOf(P.form) + 1 : 0, sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
     lv: P.lv, hp: Math.round(P.hp / maxHp() * 100), hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0,
     a: me.atkCount, dead: me.dead ? 1 : 0, hid: document.hidden ? 1 : 0, h: hitsOut.slice(), ch: me.chat || null, ct: me.chatAt || null };
   if (hosting && sim) { s.M = snapshotOut(); s.k = sim.k.slice(); s.ma = sim.ma.slice(); }
@@ -935,7 +985,7 @@ function upsertRemote(p) {
   let r = remotes.get(p.peer);
   if (!r) { r = { x, y, walk: 0, swing: 0, a: pr.a, ct: pr.ct, bubble: '', bubbleT: 0 }; remotes.set(p.peer, r); chatLine('', `${name} เข้ามาในโลก`, true); }
   r.tx = x; r.ty = y; if (Math.hypot(r.x - x, r.y - y) > T * 8) { r.x = x; r.y = y; }
-  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
+  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_KEYS[clamp(num(pr.f, 0) | 0, 0, 5) - 1] || null; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
   r.lv = clamp(num(pr.lv, 1) | 0, 1, 999); r.hp = clamp(num(pr.hp, 100), 0, 100); r.hat = clamp(num(pr.hat, 0) | 0, 0, 5); r.wp = clamp(num(pr.wp, 0) | 0, 0, 5); r.dead = !!pr.dead;
   if (pr.a !== r.a) { r.a = pr.a; r.swing = .2; }
   if (pr.ct !== r.ct) { r.ct = pr.ct; const t = clean(pr.ch).slice(0, 80); if (t) { r.bubble = t; r.bubbleT = 6; chatLine(name, t); } }
@@ -1000,6 +1050,7 @@ function attackMon(m, mult, o = {}) {
   let d = dmgCalc(st('atk') * (1 + buff('atk')), m.def, mult);
   const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0) + buff('crit'), 0, 85);
   if (crit) d = Math.round(d * 1.75);
+  if (m.boss && arch() && arch().boss) d = Math.round(d * (1 + arch().boss));
   floatAt(m.rx, m.ry - 26, crit ? d + '!' : d, crit ? '#FFD23F' : '#fff', crit ? 24 : 19);
   sfx(crit ? 'crit' : 'hit');
   if (hosting) damageMon(m, d, myPeer || 'me');
@@ -1104,8 +1155,9 @@ function usePotion(kind) {
 function receiveHit(atk, mult, spd) {
   if (!started || me.dead) return;
   const big = mult > 1;
-  const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5, 0, 35);
+  const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5 + ((arch() && arch().dodge) || 0), 0, 45);
   if (Math.random() * 100 < dodge) { floatAt(me.x, me.y - 30, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return; }
+  if (arch() && arch().block && Math.random() * 100 < arch().block) { floatAt(me.x, me.y - 30, 'กันได้!', '#C9CCD8', 16); sfx('guard'); return; }
   let d = dmgCalc(atk, st('def'), mult);
   if (me.shieldT > 0) d = Math.max(1, Math.round(d * (1 - me.shieldAmt)));
   P.hp = Math.max(0, P.hp - d); me.lastHurt = nowS(); me.hurtT = .3;
@@ -1136,12 +1188,12 @@ function reward(s, x, y) {
   P.kills++; if (s.boss) P.bossKills++;
   sfx('kill');
   const luk = st('luk');
-  dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * (1 + luk / 100) * rnd(.8, 1.2))));
+  dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * (1 + luk / 100) * (1 + ((arch() && arch().gold) || 0)) * rnd(.8, 1.2))));
   if (Math.random() * 100 < 9 + luk * .2) dropLoot('potion', x, y, 1);
   if (Math.random() * 100 < 4 + luk * .1) dropLoot('ether', x, y, 1);
   const tier = s.zi;
   if (s.boss) { dropLoot('item', x, y, makeItem(tier, 2)); dropLoot('item', x, y, makeItem(tier, 1)); if (Math.random() < .5) dropLoot('elixir', x, y, 1); }
-  else if (Math.random() * 100 < 20 + luk * .3) dropLoot('item', x, y, makeItem(tier, 0));
+  else if (Math.random() * 100 < (20 + luk * .3) * (1 + ((arch() && arch().drop) || 0))) dropLoot('item', x, y, makeItem(tier, 0));
   floatAt(x, y - 44, `+${s.xp} EXP`, '#FFE08A', 14);
   gainXp(s.xp);
   save();
@@ -1154,6 +1206,7 @@ function gainXp(x) {
     for (const k of STATS) { const g = GROW[k] * (k === col().main ? 2 : 1); P.base[k] += Math.floor(g) + (Math.random() < g % 1 ? 1 : 0); }
     P.points += 2; P.sp = (P.sp || 0) + 1;
     for (const sk of mySkills()) if (sk.unlock === P.lv) setTimeout(() => { banner(`ปลดล็อกสกิลใหม่: ${sk.name}`, `${sk.icon} ${sk.desc}`); sfx('rare'); }, 2800);
+    if (P.lv === FORM_LV && !P.form) setTimeout(() => { banner('ถึง Lv 20 แล้ว! เปลี่ยนร่างได้', 'แตะปุ่ม ✨ เปลี่ยนร่าง'); sfx('rare'); }, 3000);
     if (stageOf(P.lv) > before) evolved = stageOf(P.lv);
   }
   if (up) {
@@ -1161,7 +1214,7 @@ function gainXp(x) {
     fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 80, t: 0, dur: .7, c: '#FFD23F' });
     if (evolved) { banner(`วิวัฒนาการเป็น${STAGE_NAME[evolved]}!`, `Lv ${P.lv} · ได้แต้มสถานะเพิ่ม`); hudStatic(); }
     else banner(`เลเวลอัป! Lv ${P.lv}`, 'ได้แต้มสถานะ 🐣 และแต้มสกิล 📜');
-    updateSkillBar();
+    updateSkillBar(); $('#bForm').hidden = !(P.lv >= FORM_LV && !P.form);
   }
 }
 function pickupLoot(dt) {
@@ -1352,6 +1405,50 @@ function renderBag(el) {
     <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} × ${P.items[k]}</div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div>`;
 }
 function openChar() { openSheet('ตัวละคร', renderChar, 'char'); }
+let rolling = false, lastRoll = null;
+function openForm() { lastRoll = null; openSheet('เปลี่ยนร่าง', renderForm, 'form'); }
+function renderForm(el) {
+  const c = col(), odds = formOdds(), ready = P.lv >= FORM_LV;
+  const cards = FORM_KEYS.map(f => `<div class="fcard${P.form === f || lastRoll === f ? ' win' : ''}${lastRoll && lastRoll !== f ? ' dim' : ''}" data-f="${f}">
+      <div class="pic">${blobSVG(P.color, 3, { form: f, shiny: P.shiny, noShadow: true })}</div>
+      <b>${FORM_NAMES[P.color][f]}</b><span class="arch">${FORM_ARCH[f].th}</span>
+      <span class="odds">${Math.round(odds[f] * 100)}%<small> โอกาส</small></span><span class="oddbar"><i style="width:${odds[f] * 100}%"></i></span></div>`).join('');
+  const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${formName(P.form)}</b><div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div></div>` : '';
+  el.innerHTML = `${cur}<p style="margin:0;font-size:14px">${ready ? '' : `<b>ปลดล็อกที่ Lv ${FORM_LV}</b> · `}${c.species}เปลี่ยนร่างได้ 5 แบบ ร่างที่ได้เป็นการสุ่ม แต่ค่าสถานะไหนสูงกว่าปกติ โอกาสได้ร่างสายนั้นก็ยิ่งมาก <span class="muted">(อยากได้ร่างไหน ลองแจกแต้มสถานะให้ค่านั้นก่อน)</span></p>
+    <div class="forms" id="formCards">${cards}</div>
+    <div class="panel" style="font-size:13px">${FORM_KEYS.map(f => `<div><b>${FORM_ARCH[f].th}:</b> <span class="muted">${FORM_ARCH[f].desc}</span></div>`).join('')}</div>
+    ${!ready ? '' : P.form
+      ? `<button class="btn block" type="button" data-act="reform" ${P.gold < REFORM_COST ? 'disabled' : ''}>สุ่มร่างใหม่ (${REFORM_COST.toLocaleString()} ทอง)</button>`
+      : `<button class="btn primary block" type="button" data-act="doform" style="min-height:56px;font-size:19px">✨ เปลี่ยนร่างเลย!</button>`}`;
+}
+function rollForm(paid) {
+  if (rolling || P.lv < FORM_LV || (!paid && P.form) || (paid && (!P.form || P.gold < REFORM_COST))) return;
+  const odds = formOdds();
+  let r = Math.random(), pick = FORM_KEYS[FORM_KEYS.length - 1];
+  for (const f of FORM_KEYS) { if ((r -= odds[f]) <= 0) { pick = f; break; } }
+  if (paid) P.gold -= REFORM_COST;
+  rolling = true; lastRoll = null;
+  document.querySelectorAll('#mBody button').forEach(b => (b.disabled = true));
+  const cards = [...document.querySelectorAll('#formCards .fcard')];
+  cards.forEach(cd => cd.classList.remove('win', 'dim'));
+  const target = FORM_KEYS.indexOf(pick), steps = 18 + target + 5 * ri(0, 1);
+  let i = 0;
+  const tick = () => {
+    cards.forEach((cd, k) => cd.classList.toggle('hi', k === i % 5)); sfx('tap');
+    if (i >= steps) {
+      rolling = false; lastRoll = pick; P.form = pick; P.hp = maxHp(); P.mp = maxMp();
+      const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
+      sfx('lvl'); buzz([40, 40, 80]); save(); hudStatic(); updateHud(true);
+      banner(`เปลี่ยนร่างเป็น${formName(pick)}!`, `${FORM_ARCH[pick].th} · ${FORM_ARCH[pick].desc}`);
+      fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 120, t: 0, dur: .9, c: '#FFD23F' });
+      chatLine('', `${P.name} เปลี่ยนร่างเป็น${formName(pick)}!`, true);
+      return refreshSheet();
+    }
+    i++; setTimeout(tick, 50 + Math.pow(Math.max(0, i - steps + 10), 2) * 4);
+  };
+  tick();
+}
+$('#bForm').onclick = () => { sfx('tap'); openForm(); };
 function openSkills() { openSheet('สกิล', renderSkills, 'skills'); }
 function skillNumbers(sk, L) {
   const l = Math.max(1, L), pw = skPow(l), out = [];
@@ -1410,8 +1507,8 @@ function renderChar(el) {
   el.style.setProperty('--c', c.c[1]); el.style.setProperty('--c-light', c.light);
   const ref = { hp: Math.max(150, maxHp()), atk: 70, def: 70, spd: 70, luk: 70 };
   el.innerHTML = `
-    <div class="char-head"><div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny })}</div>
-      <div><p class="eyebrow">${c.species} · ${STAGE_NAME[s]}</p><div style="font:700 21px var(--f-display)">${esc(P.name)}</div>
+    <div class="char-head"><div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny, form: P.form })}</div>
+      <div><p class="eyebrow">${P.form ? `${formName(P.form)} · ${FORM_ARCH[P.form].th}` : `${c.species} · ${STAGE_NAME[s]}`}</p><div style="font:700 21px var(--f-display)">${esc(P.name)}</div>
         <div class="chips" style="margin-top:4px"><span class="chip">Lv ${P.lv}</span><span class="chip" style="background:${c.light}">สี${c.th}</span>${P.shiny ? '<span class="chip" style="background:#FFF3B0">✦</span>' : ''}</div>
         <p class="muted" style="margin:6px 0 0;font-size:13px">EXP ${P.xp}/${xpNeed(P.lv)} · ${P.lv < 5 ? 'วิวัฒนาการที่ Lv 5' : P.lv < 12 ? 'ร่างราชาที่ Lv 12' : 'วิวัฒนาการครบแล้ว'}</p></div></div>
     <div class="panel">
@@ -1419,6 +1516,7 @@ function renderChar(el) {
       ${STATS.map(k => { const b = gearBonus(k); return `<div class="alloc${k === c.main ? ' main' : ''}"><span>${STAT_NAME[k]}${k === c.main ? ' ★' : ''}</span><div class="bar"><i style="width:${clamp(st(k) / Math.max(ref[k], st(k)) * 100, 3, 100)}%"></i></div><span class="val">${st(k)}${b ? `<br><small>+${b}</small>` : ''}</span><button class="btn" type="button" data-alloc="${k}" ${P.points > 0 ? '' : 'disabled'} aria-label="เพิ่ม${STAT_NAME[k]}">+</button></div>`; }).join('')}
       <p class="muted" style="margin:6px 0 0;font-size:12px">ได้ 2 แต้มทุกเลเวล · 1 แต้ม = HP +${POINT_VALUE.hp} หรือค่าอื่น +1 · ★ ค่าเด่นของสี${c.th} โตเร็วเท่าตัว</p>
     </div>
+    ${P.lv >= FORM_LV ? `<button class="btn block${P.form ? '' : ' primary'}" type="button" data-act="form">${P.form ? `✨ ร่าง${formName(P.form)} · ${FORM_ARCH[P.form].desc}` : '✨ เปลี่ยนร่าง (ปลดล็อกแล้ว!)'}</button>` : `<p class="muted" style="margin:0;font-size:13px">✨ เปลี่ยนร่างได้ที่ Lv ${FORM_LV} ร่างที่ได้ขึ้นกับค่าสถานะที่เน้น</p>`}
     <button class="btn block" type="button" data-act="skills">📜 ดูและอัปสกิล (แต้มสกิล ${P.sp})</button>
     <div class="panel records"><div><b>${P.kills}</b><span>ปราบมอน</span></div><div><b>${P.bossKills}</b><span>ปราบบอส</span></div><div><b>${P.bag.length}</b><span>ของในกระเป๋า</span></div></div>
     
@@ -1459,6 +1557,8 @@ $('#mBody').addEventListener('click', e => {
   }
   if (act === 'sellcommon') { const j = P.bag.filter(i => i.r === 0), g = j.reduce((a, i) => a + itemPrice(i), 0); P.bag = P.bag.filter(i => i.r !== 0); P.gold += g; selItem = null; sfx('coin'); toast(`ขาย ${j.length} ชิ้น ได้ ${g} ทอง`); save(); return refreshSheet(); }
   if (act === 'skills') { openSkills(); return; }
+  if (act === 'form') { openForm(); return; }
+  if (act === 'doform' || act === 'reform') { rollForm(act === 'reform'); return; }
   if (act === 'reset') {
     if (b.dataset.confirm) { try { localStorage.removeItem(SAVE_KEY); } catch (err) {} closeSheet(); started = false; P = null; loot.length = 0; $('#hud').hidden = true; startEgg(); return; }
     b.dataset.confirm = '1'; b.textContent = 'แตะอีกครั้งเพื่อยืนยัน ตัวละครนี้จะหายไปถาวร'; b.style.background = '#FFD3CF';
@@ -1532,7 +1632,7 @@ function drawBubble(text, x, y) {
   ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 8);
 }
 function drawBlob(o) {
-  const size = [0, 40, 46, 52][o.st], im = blobImg(o.color, o.st, o.shiny, o.mood);
+  const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form);
   const t = o.walk, sq = o.moving ? Math.sin(t * 14) * .07 : Math.sin(nowS() * 3 + o.x) * .03;
   const lift = o.moving ? Math.abs(Math.sin(t * 14)) * 4 : 0;
   ctx.fillStyle = 'rgba(51,40,74,.2)'; ctx.beginPath(); ctx.ellipse(o.x, o.y + 2, size * .36, size * .1, 0, 0, 7); ctx.fill();
@@ -1639,7 +1739,7 @@ function update(dt) {
     // regen
     const nearFountain = Math.hypot(me.x - (TOWN.x + 1) * T, me.y - (TOWN.y + 1) * T) < 3.2 * T;
     if (nearFountain) { if (P.hp < maxHp() || P.mp < maxMp()) { P.hp = Math.min(maxHp(), P.hp + maxHp() * .25 * dt); P.mp = Math.min(maxMp(), P.mp + maxMp() * .25 * dt); } }
-    else { if (t0 - me.lastHurt > 6) P.hp = Math.min(maxHp(), P.hp + maxHp() * .015 * dt); P.mp = Math.min(maxMp(), P.mp + .7 * dt); }
+    else { if (t0 - me.lastHurt > 6) P.hp = Math.min(maxHp(), P.hp + maxHp() * .015 * ((arch() && arch().regen) || 1) * dt); P.mp = Math.min(maxMp(), P.mp + .7 * dt); }
     const z = zoneAt(me.x, me.y);
     if (z !== me.zone) { me.zone = z; if (z === 0) banner('เมืองปุ๊กปิ๊ก', 'เขตปลอดภัย · ร้านค้าและน้ำพุฟื้นพลัง'); else { const zz = ZONES[z - 1]; banner(zz.name, `แนะนำ Lv ${zz.lv}+${P.lv + 3 < zz.lv ? ' · อันตราย!' : ''}`); } }
     $('#bTalk').hidden = !nearShop();
@@ -1679,8 +1779,8 @@ function render() {
   const inView = (x, y) => x > ox - 80 && x < ox + VW + 80 && y > oy - 80 && y < oy + VH + 120;
   for (const l of loot) if (inView(l.x, l.y)) ents.push({ y: l.y - 8, d: () => drawLoot(l) });
   for (const m of monsterList()) if (inView(m.rx, m.ry)) ents.push({ y: m.ry, d: () => drawMon(m) });
-  for (const r of remotes.values()) if (inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
-  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0, self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
+  for (const r of remotes.values()) if (inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
+  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0, self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
   ents.sort((a, b) => a.y - b.y);
   for (const e of ents) e.d();
   for (const mt of me.meteors) { const k = 1 - mt.t / .6; ctx.fillStyle = `rgba(255,120,40,${.15 + .2 * k})`; ctx.strokeStyle = 'rgba(255,90,31,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mt.x, mt.y, mt.r, 0, 7); ctx.fill(); ctx.stroke(); ctx.drawImage(emojiSprite('☄️', 30), mt.x - 20 + (1 - k) * 60, mt.y - 60 - (1 - k) * 160, 40, 40); }
