@@ -124,7 +124,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .ibtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .ibtn .dot{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--hp);border:2px solid var(--paper)}
 .side{position:absolute;top:10px;right:var(--gr);display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-#mini{width:150px;height:62px;border:2px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink);background:#86C66A;display:block}
+#mini{width:150px;height:52px;border:2px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink);background:#86C66A;display:block}
 .gold{display:inline-flex;align-items:center;gap:5px;font:700 14px var(--f-display);font-variant-numeric:tabular-nums;background:var(--paper);border:2px solid var(--ink);border-radius:99px;padding:1px 10px 1px 3px}
 .online{display:inline-flex;align-items:center;gap:5px;font:600 12px var(--f-body);background:var(--paper);border:2px solid var(--ink);border-radius:99px;padding:1px 9px}
 .online i{width:8px;height:8px;border-radius:50%;background:#B7B0C4}
@@ -227,6 +227,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .sellbar b{font:700 15px var(--f-display)}
 .sellbar .warn{display:block;font:600 12px var(--f-body);color:var(--hp)}
 .slot .lv{position:absolute;bottom:1px;right:4px;font:700 9px var(--f-body)}
+.slot.r5{box-shadow:inset 0 0 0 3px #D4A017;background:linear-gradient(135deg,#FFF3B0,#FFD1E8,#C9E6FF)}
 .slot.r1{box-shadow:inset 0 0 0 3px #2FAE62}.slot.r2{box-shadow:inset 0 0 0 3px #3F86F5}.slot.r3{box-shadow:inset 0 0 0 3px #A155E8;background:#F6EEFF}.slot.r4{box-shadow:inset 0 0 0 3px #FF8A1F;background:#FFF2E2}
 .bag{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .detail{display:flex;flex-direction:column;gap:8px}
@@ -281,7 +282,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
       <button class="ibtn" type="button" id="bHelp" aria-label="วิธีเล่น">❓<kbd class="kb">H</kbd></button>
     </div>
     <div class="side">
-      <canvas id="mini" width="300" height="124" aria-label="แผนที่ย่อ"></canvas>
+      <canvas id="mini" width="300" height="104" aria-label="แผนที่ย่อ"></canvas>
       <span class="gold"><span class="coin"></span><span id="hudGold">0</span></span>
       <span class="online" id="online"><i></i><span id="onlineT">เล่นคนเดียว</span></span>
       <span class="online" id="dgInfo" hidden></span>
@@ -411,6 +412,7 @@ const STAGE_NAME = ['', 'วัยเบบี้', 'วัยซ่า', 'ร�
 // Lv 20 transformation: every colour has one form per stat. Which one you get is random,
 // weighted by how far each of your base stats is above the usual growth for your level.
 const FORM_LV = 20, REFORM_COST = 3000;
+const FORM_TIER_LV = { 3: 40, 4: 60, 5: 80 };
 const FORM_ARCH = {
   atk: { th: 'สายโจมตี', mul: { atk: 1.25 }, boss: .2, desc: 'ATK +25% · ตีบอสแรงขึ้น 20%' },
   def: { th: 'สายป้องกัน', mul: { def: 1.3, hp: 1.1 }, block: 15, desc: 'DEF +30% · HP +10% · โอกาสกันดาเมจได้หมด 15%' },
@@ -418,12 +420,14 @@ const FORM_ARCH = {
   hp:  { th: 'สายพลังชีวิต', mul: { hp: 1.35 }, regen: 3, desc: 'HP +35% · ฟื้น HP นอกการต่อสู้เร็วขึ้น 3 เท่า' },
   luk: { th: 'สายโชค', mul: { luk: 1.4 }, drop: .5, gold: .3, desc: 'LUK +40% · ของดรอปบ่อยขึ้น 50% · ทอง +30%' },
   rainbow: { th: 'ร่างลับ', secret: true, mul: { hp: 1.2, atk: 1.2, def: 1.2, spd: 1.2, luk: 1.2 }, regen: 2, desc: 'ทุกค่า +20% · ฟื้น HP เร็วขึ้น 2 เท่า' },
+  unique:  { th: 'ร่างยูนิค', hidden: true, mul: { hp: 1.3, atk: 1.3, def: 1.3, spd: 1.3, luk: 1.3 }, crit: 10, steal: .05, regen: 2, drop: .3, desc: 'ทุกค่า +30% · คริ +10% · ดูดเลือด 5% · ฟื้นเร็ว · ของดรอป +30%' },
   shadow:  { th: 'ร่างลับ', secret: true, mul: { atk: 1.35, spd: 1.15 }, crit: 15, steal: .08, boss: .15, desc: 'ATK +35% · SPD +15% · คริ +15% · ดูดเลือด 8% ทุกครั้งที่ตี' },
 };
 const FORM_KEYS = ['atk', 'def', 'spd', 'hp', 'luk'];
 const SECRET_KEYS = ['rainbow', 'shadow'], SECRET_ODDS = .005;
 const ALL_FORMS = [...FORM_KEYS, ...SECRET_KEYS];
-const SECRET_NAME = { rainbow: 'ราชันย์สายรุ้ง', shadow: 'เงาจันทรา' };
+const FORM_INDEX = [...ALL_FORMS, 'unique'];
+const SECRET_NAME = { rainbow: 'ราชันย์สายรุ้ง', shadow: 'เงาจันทรา', unique: 'จักรพรรดิปุ๊กปิ๊ก' };
 // A fifth skill that comes with the form.
 const FORM_SKILLS = {
   atk:     { id: 'fatk', name: 'ทลายล้าง', icon: '💥', unlock: 20, cost: 18, cd: 10, type: 'nova', mult: 3.2, r: 115, c: '#FF5A1F', desc: 'ปลดพลังระเบิดรอบตัว แรงมาก' },
@@ -432,14 +436,15 @@ const FORM_SKILLS = {
   hp:      { id: 'fhp', name: 'หัวใจยักษ์', icon: '💗', unlock: 20, cost: 18, cd: 14, type: 'heal', amt: .6, mult: 1.8, r: 95, c: '#FF8FB1', desc: 'ฟื้น HP ก้อนใหญ่และกระแทกรอบตัว' },
   luk:     { id: 'fluk', name: 'ฝนดาวนำโชค', icon: '🌠', unlock: 20, cost: 16, cd: 9, type: 'chain', n: 10, mult: 1.6, range: 260, crit: 50, desc: 'ดาวตกฟาดมอนรอบตัวสูงสุด 10 ตัว คริง่ายมาก' },
   rainbow: { id: 'frain', name: 'ปาฏิหาริย์สายรุ้ง', icon: '🌈', unlock: 20, cost: 22, cd: 12, type: 'nova', mult: 4, r: 170, c: '#FF8FB1', heal: .3, shield: .5, dur: 5, desc: 'คลื่นสายรุ้งวงกว้าง ฟื้น HP และได้โล่' },
+  unique:  { id: 'funique', name: 'พิพากษาจักรพรรดิ', icon: '👑', unlock: 20, cost: 25, cd: 12, type: 'nova', mult: 5, r: 190, c: '#FFD23F', heal: .4, shield: .6, dur: 6, desc: 'คลื่นพลังจักรพรรดิวงกว้างมาก ฟื้น HP และได้โล่ 60%' },
   shadow:  { id: 'fshadow', name: 'จันทราดับ', icon: '🌘', unlock: 20, cost: 22, cd: 12, type: 'meteor', mult: 5.5, r: 130, desc: 'ดวงจันทร์ดำถล่มจุดที่มอนอยู่' },
 };
 const FORM_NAMES = {
-  red:    { atk: 'อสูรเพลิง', def: 'อัศวินลาวา', spd: 'นินจาไฟ', hp: 'ยักษ์ภูเขาไฟ', luk: 'ฟีนิกซ์นำโชค' },
-  blue:   { atk: 'ฉลามคลั่ง', def: 'ป้อมปราการวารี', spd: 'นินจาสายน้ำ', hp: 'วาฬยักษ์', luk: 'นักพรตทะเลลึก' },
-  yellow: { atk: 'อสูรอัสนี', def: 'อัศวินแสง', spd: 'เทพสายฟ้าแลบ', hp: 'ยักษ์พายุ', luk: 'ดาวตกนำโชค' },
-  brown:  { atk: 'กระทิงศิลา', def: 'โกเลมหินผา', spd: 'นินจาทราย', hp: 'ภูผายักษ์', luk: 'ผู้พิทักษ์ขุมทรัพย์' },
-  green:  { atk: 'ราชสีห์ไพร', def: 'ต้นไม้เทพพิทักษ์', spd: 'ภูตลมป่า', hp: 'ต้นไม้ยักษ์', luk: 'เทพโคลเวอร์' },
+  red:    { rainbow: 'ราชันย์สุริยะ', shadow: 'อสูรเพลิงดำ', atk: 'อสูรเพลิง', def: 'อัศวินลาวา', spd: 'นินจาไฟ', hp: 'ยักษ์ภูเขาไฟ', luk: 'ฟีนิกซ์นำโชค' },
+  blue:   { rainbow: 'ราชันย์มหาสมุทร', shadow: 'เงาใต้ทะเลลึก', atk: 'ฉลามคลั่ง', def: 'ป้อมปราการวารี', spd: 'นินจาสายน้ำ', hp: 'วาฬยักษ์', luk: 'นักพรตทะเลลึก' },
+  yellow: { rainbow: 'ราชันย์สายรุ้งอัสนี', shadow: 'เงาพายุมืด', atk: 'อสูรอัสนี', def: 'อัศวินแสง', spd: 'เทพสายฟ้าแลบ', hp: 'ยักษ์พายุ', luk: 'ดาวตกนำโชค' },
+  brown:  { rainbow: 'ราชันย์ขุนเขาอัญมณี', shadow: 'เงาแผ่นดินไหว', atk: 'กระทิงศิลา', def: 'โกเลมหินผา', spd: 'นินจาทราย', hp: 'ภูผายักษ์', luk: 'ผู้พิทักษ์ขุมทรัพย์' },
+  green:  { rainbow: 'ราชันย์พฤกษา', shadow: 'เงาป่าต้องสาป', atk: 'ราชสีห์ไพร', def: 'ต้นไม้เทพพิทักษ์', spd: 'ภูตลมป่า', hp: 'ต้นไม้ยักษ์', luk: 'เทพโคลเวอร์' },
 };
 
 const CONSUME = {
@@ -471,7 +476,7 @@ const SLOT = {
 const TIERS = 10, EN_MAX = 10;
 const RAR = [
   { th: 'ธรรมดา', c: '#8F88A0', m: 1 }, { th: 'ดี', c: '#2FAE62', m: 1.25 }, { th: 'หายาก', c: '#3F86F5', m: 1.55 },
-  { th: 'มหากาพย์', c: '#A155E8', m: 1.9 }, { th: 'ตำนาน', c: '#FF8A1F', m: 2.4 },
+  { th: 'มหากาพย์', c: '#A155E8', m: 1.9 }, { th: 'ตำนาน', c: '#FF8A1F', m: 2.4 }, { th: 'ยูนิค', c: '#D4A017', m: 3 },
 ];
 const BAG_MAX = 30;
 
@@ -544,7 +549,43 @@ Object.assign(FOES, {
   kraken:     genFoe('คราเคนถ้ำ', '🦑', 16, 1.4, 1.1, 1.1, 1, 1, { lv: 16, tier: 3 }),
   darkdragon: genFoe('มังกรทมิฬ', '🐲', 33, 1.4, 1.1, 1.1, 1, 1, { lv: 33, tier: 6 }),
   eye:        genFoe('ดวงตาแห่งเหว', '👁️', 60, 1.4, 1.1, 1.1, 1, 1, { lv: 60, tier: 9 }),
+  tiger:     genFoe('เสือเทวะ', '🐯', 60, 1.1, 1.1, 1, 1.2),
+  elephant:  genFoe('ช้างเอราวัณน้อย', '🐘', 60, 1.5, 1, 1.3, .7),
+  ape:       genFoe('วานรยักษ์', '🦍', 60, 1.2, 1.2, 1, 1),
+  rhino:     genFoe('แรดเหล็ก', '🦏', 60, 1.3, 1, 1.5, .8),
+  tigerking: genFoe('พญาเสือโคร่ง', '🐅', 68, 1, 1, 1, 1, 1),
+  ufo:       genFoe('ยานเอเลี่ยน', '🛸', 70, 1, 1.2, 1.1, 1.3),
+  darkmoon:  genFoe('จันทร์ดำ', '🌚', 70, 1.1, 1.2, 1, 1.1),
+  madsun:    genFoe('ดวงอาทิตย์คลั่ง', '🌞', 70, 1, 1.3, .9, 1.2),
+  fullmoon:  genFoe('จันทร์เพ็ญ', '🌝', 70, 1.3, 1, 1.2, .9),
+  voidking:  genFoe('ราชันย์แห่งความว่างเปล่า', '👿', 78, 1.1, 1.1, 1.1, 1, 1),
 });
+// Secret monsters: rare, sparkling, run away from players, always drop their own unique item.
+function secFoe(name, e, lv) { const o = genFoe(name, e, lv, 4, .6, 1.2, 2.4, 0, { lv, sec: 1, tier: 9 }); o.xp *= 6; o.gold *= 6; return o; }
+Object.assign(FOES, {
+  moonrabbit: secFoe('✦ กระต่ายจันทรา', '🐇', 5),
+  butterfly:  secFoe('✦ ผีเสื้อจักรพรรดิ', '🦋', 12),
+  goldturtle: secFoe('✦ เต่าทองคำ', '🐢', 20),
+  peacock:    secFoe('✦ นกยูงเทวะ', '🦚', 34),
+  flamingo:   secFoe('✦ ฟลามิงโกอัญมณี', '🦩', 48),
+  whale:      secFoe('✦ วาฬดาราจักร', '🐳', 66),
+});
+const SECRETS = [
+  { key: 'moonrabbit', zones: [0, 1], uq: 'moon' }, { key: 'butterfly', zones: [2, 3], uq: 'wing' }, { key: 'goldturtle', zones: [4, 5], uq: 'shell' },
+  { key: 'peacock', zones: [6, 7], uq: 'plume' }, { key: 'flamingo', zones: [8, 9], uq: 'pink' }, { key: 'whale', zones: [10, 11], uq: 'galaxy' },
+];
+const SECRET_SPAWN = .004;
+// Unique items: fixed stats plus a special effect. Enhancing them still works.
+const UNIQUES = {
+  moon:   { name: 'รองเท้ากระต่ายจันทรา', icon: '🌙', slot: 'shoes', stats: { spd: 30, luk: 20, hp: 60 }, fx: { dodge: 8 }, desc: 'หลบการโจมตีเพิ่ม 8%' },
+  wing:   { name: 'ปีกผีเสื้อจักรพรรดิ', icon: '🦋', slot: 'charm', stats: { luk: 45, spd: 15 }, fx: { drop: .25 }, desc: 'ของดรอปบ่อยขึ้น 25%' },
+  shell:  { name: 'กระดองทองคำ', icon: '🐢', slot: 'armor', stats: { def: 80, hp: 180 }, fx: { block: 8 }, desc: 'โอกาสกันดาเมจได้หมด 8%' },
+  plume:  { name: 'มงกุฎขนนกยูง', icon: '🦚', slot: 'hat', stats: { hp: 320, atk: 15, def: 15, spd: 10, luk: 10 }, fx: { regen: .5 }, desc: 'ฟื้น HP นอกการต่อสู้เร็วขึ้น 50%' },
+  pink:   { name: 'ดาบอัญมณีสีชมพู', icon: '💗', slot: 'weapon', stats: { atk: 115, luk: 20 }, fx: { crit: 10 }, desc: 'โอกาสคริติคอล +10%' },
+  galaxy: { name: 'คทาดาราจักร', icon: '🌌', slot: 'weapon', stats: { atk: 165, luk: 40, spd: 15 }, fx: { skill: .2 }, desc: 'สกิลทุกสกิลแรงขึ้น 20%' },
+};
+const UNIQUE_KEYS = Object.keys(UNIQUES);
+function makeUnique(k) { const u = UNIQUES[k]; return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slot: u.slot, tier: 9, r: 5, uq: k, stats: { ...u.stats } }; }
 const FOE_KEYS = Object.keys(FOES);
 const ZONES = [
   { name: 'ทุ่งหญ้าสดใส', lv: 1,  foes: ['worm', 'bee', 'shroom', 'frog', 'snail'],   boss: 'wormking', g: ['#A6DB88', '#9CD27E'], road: '#E6D29E' },
@@ -557,6 +598,8 @@ const ZONES = [
   { name: 'หนองน้ำพิษ', lv: 36, spread: 5, bossOff: 6, foes: ['croc', 'mosquito', 'germ', 'bogworm'], boss: 'swampdino', g: ['#5E7A4A', '#577343'], road: '#8C8C5C' },
   { name: 'แดนสวรรค์ลอยฟ้า', lv: 44, spread: 5, bossOff: 6, foes: ['unicorn', 'fairy', 'swan', 'cherub'], boss: 'fallen', g: ['#F1E2F8', '#EAD8F4'], road: '#FFF3CF' },
   { name: 'มิติอสูร', lv: 52, spread: 5, bossOff: 6, foes: ['alien', 'pixel', 'robot', 'shade'], boss: 'eldritch', g: ['#30264A', '#2B2242'], road: '#4B3D72' },
+  { name: 'หิมพานต์ต้องมนต์', lv: 60, spread: 5, bossOff: 8, foes: ['tiger', 'elephant', 'ape', 'rhino'], boss: 'tigerking', g: ['#C9B26A', '#C1A961'], road: '#EADCA8' },
+  { name: 'สุดขอบจักรวาล', lv: 70, spread: 5, bossOff: 8, foes: ['ufo', 'darkmoon', 'madsun', 'fullmoon'], boss: 'voidking', g: ['#1D1836', '#19142F'], road: '#3D3268' },
 ];
 // Dungeons are solo arenas below the world map: three waves, then a boss, then a treasure drop.
 const DUNGEONS = [
@@ -622,9 +665,61 @@ const FORM_LOOK = {
     luk: ['', `<g fill="#5CCB6B" ${K} stroke-width="1.5"><circle cx="55" cy="9" r="5"/><circle cx="65" cy="9" r="5"/><circle cx="55" cy="19" r="5"/><circle cx="65" cy="19" r="5"/></g><path d="M62 22Q66 28 64 32" stroke="#2C8A3C" stroke-width="2" fill="none"/>`],
   },
 };
+// Each colour's two secret forms have their own palette and headpiece.
+const SECRET_LOOK = {
+  red: { rg: ['#FF4E50', '#FF7A3D', '#FFB347', '#FFD54A', '#FF8FA3', '#E0457B'], wing: '#FFD9C2',
+    rb: `<g stroke="#FFB054" stroke-width="4" stroke-linecap="round"><path d="M60 2V10M38 8L44 15M82 8L76 15M28 22L36 25M92 22L84 25"/></g><circle cx="60" cy="26" r="16" fill="#FFB054" stroke="${INK}" stroke-width="2"/>`, rf: CROWN,
+    sc: ['#B5586A', '#5A1A2A', '#220810'], se: '#FFC2B8', sf: `<path d="M60 4C68 14 74 18 72 26C71 32 66 34 60 34C53 34 48 31 48 25C48 18 55 15 60 4Z" fill="#3A0E16" stroke="#FF5A5F" stroke-width="2.5"/>`, mist: '#FF5A5F' },
+  blue: { rg: ['#3FE0D0', '#4AB3FF', '#4A7BFF', '#8C5CF0', '#62D6FF', '#B6F0FF'], wing: '#D2F0FF',
+    rb: '', rf: `<path d="M32 32Q38 14 45 27Q52 10 60 25Q68 10 75 27Q82 14 88 32Z" fill="#62B6FF" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="24" r="3.5" fill="#fff"/>`,
+    sc: ['#6A8AD0', '#1E2E63', '#0A1030'], se: '#BFE3FF', sf: `<path d="M70 2A15 15 0 1 0 86 24A11 11 0 1 1 70 2Z" fill="#BFE3FF" stroke="${INK}" stroke-width="2"/>`, mist: '#4A7BFF' },
+  yellow: { rg: ['#FF7A8A', '#FFB054', '#FFE45C', '#6FDB8A', '#62B6FF', '#B98AFF'], wing: '#FFF6C8',
+    rb: '', rf: `<path d="M34 32L40 10L50 23L60 2L70 23L80 10L86 32Z" fill="#FFE14A" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`,
+    sc: ['#C9B060', '#5E4A12', '#221A04'], se: '#FFF2A0', sf: `<path d="M57 26L52 14H60L55 0L72 17H63L67 26Z" fill="#221A04" stroke="#FFE14A" stroke-width="2.5" stroke-linejoin="round"/>`, mist: '#FFD23F' },
+  brown: { rg: ['#E2B892', '#D4A017', '#8FD6A2', '#5CC4C9', '#C98AE0', '#F2D0A4'], wing: '#F3E2CC',
+    rb: '', rf: `<path d="M42 32L47 8L54 32ZM53 32L60 0L67 32ZM66 32L73 8L78 32Z" fill="#9FE3FF" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`,
+    sc: ['#9A7A62', '#3E2A1C', '#170E08'], se: '#FFD9B0', sf: `<path d="M36 38Q20 20 26 2Q34 18 46 28ZM84 38Q100 20 94 2Q86 18 74 28Z" fill="#170E08" stroke="#E2B892" stroke-width="2"/>`, mist: '#A8744A' },
+  green: { rg: ['#B6F2B8', '#FFB3C7', '#7BE08A', '#FFF3A6', '#5CC4A0', '#FF8FB1'], wing: '#E4FBE0',
+    rb: '', rf: `<g stroke="${INK}" stroke-width="1.5"><circle cx="40" cy="30" r="6" fill="#FF8FB1"/><circle cx="52" cy="22" r="6" fill="#fff"/><circle cx="68" cy="22" r="6" fill="#FFB3C7"/><circle cx="80" cy="30" r="6" fill="#fff"/><circle cx="60" cy="18" r="7" fill="#FF8FB1"/></g><g fill="#FFE14A"><circle cx="40" cy="30" r="2"/><circle cx="60" cy="18" r="2.5"/><circle cx="80" cy="30" r="2"/></g>`,
+    sc: ['#6FA878', '#1E4A2A', '#08180C'], se: '#C8FFD2', sf: `<path d="M30 36L36 20L42 32L48 14L54 30L60 8L66 30L72 14L78 32L84 20L90 36Z" fill="#0F2A16" stroke="#7BE08A" stroke-width="2" stroke-linejoin="round"/>`, mist: '#2C8A3C' },
+};
+// Transformed bodies grow limbs by stage, styled per element: arms (stage 2, full size from 3), legs (3), tail (4).
+const K2 = (w) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round"`;
+const tube = (d, col, w) => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="${w + 4}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const LIMBS = {
+  red: {
+    arm: c => tube('M96 74Q108 70 111 60', c[1], 8) + `<circle cx="112" cy="57" r="7" fill="#FF8A2A" ${K2(2.5)}/><path d="M112 43C116 48 117 52 115 55H109C107 52 109 48 112 43Z" fill="#FFD84A" ${K2(1.5)}/>`,
+    feet: c => `<ellipse cx="44" cy="108" rx="11" ry="7" fill="${c[2]}" ${K2(2.5)}/><ellipse cx="76" cy="108" rx="11" ry="7" fill="${c[2]}" ${K2(2.5)}/>`,
+    tail: c => `<path d="M22 94Q4 96 2 82Q10 88 14 84Q6 76 10 66Q16 80 26 86Z" fill="#FF8A2A" ${K2(2)}/>` },
+  blue: {
+    arm: c => `<path d="M98 64Q119 56 117 82Q110 77 99 82Z" fill="${c[1]}" ${K2(2.5)}/><path d="M104 68Q111 67 113 75" fill="none" stroke="#fff" stroke-width="2" opacity=".6"/>`,
+    feet: c => `<path d="M32 113L44 101L56 113Q44 117 32 113ZM64 113L76 101L88 113Q76 117 64 113Z" fill="${c[1]}" ${K2(2.5)}/>`,
+    tail: c => `<path d="M24 92L6 78L9 95L3 110L24 99Z" fill="${c[1]}" ${K2(2.5)}/>` },
+  yellow: {
+    arm: c => tube('M96 72L108 66L112 57', c[1], 7) + `<path d="M108 53L111 42L114 50L119 44L117 57Z" fill="#FFE14A" ${K2(2)}/>`,
+    feet: c => `<path d="M34 112Q42 100 56 105L52 113ZM86 112Q78 100 64 105L68 113Z" fill="#FFE14A" ${K2(2.5)}/>`,
+    tail: c => tube('M24 92L13 95L17 86L5 88L11 78L1 80', '#FFE14A', 4) },
+  brown: {
+    arm: c => `<rect x="97" y="60" width="16" height="20" rx="4" transform="rotate(-20 105 70)" fill="${c[2]}" ${K2(2.5)}/><rect x="104" y="44" width="15" height="15" rx="3" transform="rotate(-10 111 52)" fill="#A09AB0" ${K2(2.5)}/>`,
+    feet: c => `<rect x="31" y="101" width="24" height="14" rx="4" fill="#5B3A22" ${K2(2.5)}/><rect x="65" y="101" width="24" height="14" rx="4" fill="#5B3A22" ${K2(2.5)}/>`,
+    tail: c => tube('M24 94Q14 96 12 100', c[2], 6) + `<circle cx="9" cy="103" r="8" fill="#A09AB0" ${K2(2.5)}/>` },
+  green: {
+    arm: c => tube('M96 74Q112 76 110 62Q108 52 116 48', '#3FAE55', 4.5) + `<path d="M116 48C106 42 104 34 110 31C118 33 119 42 116 48Z" fill="#7BE08A" ${K2(2)}/>`,
+    feet: c => `<g stroke="#6E4424" stroke-width="3.5" stroke-linecap="round"><path d="M44 102L35 115M44 102L44 117M44 102L53 115M76 102L67 115M76 102L76 117M76 102L85 115"/></g>`,
+    tail: c => tube('M24 94Q8 100 6 88Q4 78 12 76', '#3FAE55', 4) + `<path d="M12 76C4 70 4 62 10 60C16 62 17 70 12 76Z" fill="#7BE08A" ${K2(2)}/>` },
+};
+function limbArt(color, stage, c) {
+  const L = LIMBS[color], arm = L.arm(c), small = stage < 3 ? ' transform="translate(96 72) scale(.72) translate(-96 -72)"' : '';
+  let out = '';
+  if (stage >= 4) out += L.tail(c);
+  if (stage >= 3) out += L.feet(c);
+  return out + `<g${small}>${arm}</g><g transform="translate(120 0) scale(-1 1)"><g${small}>${arm}</g></g>`;
+}
+const TIER_NAME = { 2: '', 3: 'ขั้นตื่นรู้', 4: 'ขั้นตำนาน', 5: 'ขั้นเทพ' };
 function blobSVG(color, st = 1, o = {}) {
   const form = o.form && FORM_ARCH[o.form] ? o.form : null;
-  const c = form === 'shadow' ? ['#8E7BC8', '#3E3163', '#1B1330'] : COLORS[color].c, id = 'g' + (++uid), mood = o.mood || 'idle', eyeC = form === 'shadow' ? '#EBD9FF' : INK;
+  const SL = SECRET_LOOK[color], ft = o.ft || 0;
+  const c = form === 'shadow' ? SL.sc : form === 'unique' ? ['#FFF6C8', '#FFD23F', '#B98200'] : COLORS[color].c, id = 'g' + (++uid), mood = o.mood || 'idle', eyeC = form === 'shadow' ? SL.se : INK;
   let eyes, mouth;
   if (mood === 'happy') { eyes = `<path d="M39 70Q46 60 53 70" ${SK}/><path d="M67 70Q74 60 81 70" ${SK}/>`; mouth = `<path d="M52 80Q60 92 68 80Z" fill="${INK}"/>`; }
   else if (mood === 'hurt') { eyes = `<path d="M40 61L51 67L40 73" ${SK}/><path d="M80 61L69 67L80 73" ${SK}/>`; mouth = `<path d="M53 85Q60 78 67 85" ${SK}/>`; }
@@ -636,15 +731,20 @@ function blobSVG(color, st = 1, o = {}) {
   else if (form === 'def') formArt = `<path d="M18 56Q20 18 60 16Q100 18 102 56Q82 44 60 44Q38 44 18 56Z" fill="#C9CCD8" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M60 16V44" stroke="${INK}" stroke-width="2.5"/><path d="M60 2L64 16H56Z" fill="${c[1]}" stroke="${INK}" stroke-width="2"/><circle cx="60" cy="33" r="5" fill="${c[1]}" stroke="${INK}" stroke-width="2"/>`;
   else if (form === 'spd') formArt = `<path d="M19 52Q60 36 101 52L101 60Q60 44 19 60Z" fill="${c[2]}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M100 54Q113 50 119 60M100 57Q109 66 112 76" fill="none" stroke="${c[2]}" stroke-width="5" stroke-linecap="round"/><path d="M8 70H0M10 80H2M12 90H4" stroke="${INK}" stroke-width="2.5" stroke-linecap="round" opacity=".5"/>`;
   else if (form === 'hp') { bodyT = ' transform="translate(60 108) scale(1.1) translate(-60 -108)"'; formArt = `<ellipse cx="60" cy="94" rx="22" ry="10" fill="#fff" opacity=".35"/><path d="M36 50L52 54M84 50L68 54" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`; }
-  else if (form === 'rainbow') { back = `<path d="M18 66Q-4 52 2 30Q14 44 26 50Z" fill="#fff" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M102 66Q124 52 118 30Q106 44 94 50Z" fill="#fff" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`; formArt = CROWN + STAR(104, 40, 6, '') + STAR(14, 30, 5, 'b') + STAR(96, 96, 4, ''); }
-  else if (form === 'shadow') formArt = `<path d="M70 2A15 15 0 1 0 86 24A11 11 0 1 1 70 2Z" fill="#EBD9FF" stroke="${INK}" stroke-width="2"/><ellipse cx="60" cy="108" rx="44" ry="7" fill="#8C5CF0" opacity=".35"/>`;
+  else if (form === 'rainbow') { back = `<path d="M18 66Q-4 52 2 30Q14 44 26 50Z" fill="${SL.wing}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M102 66Q124 52 118 30Q106 44 94 50Z" fill="${SL.wing}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>` + SL.rb; formArt = SL.rf + STAR(104, 40, 6, '') + STAR(14, 30, 5, 'b') + STAR(96, 96, 4, ''); }
+  else if (form === 'shadow') formArt = SL.sf + `<ellipse cx="60" cy="108" rx="44" ry="7" fill="${SL.mist}" opacity=".35"/>`;
+  else if (form === 'unique') { back = `<path d="M24 58Q8 96 16 114H104Q112 96 96 58Z" fill="#D8333F" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 58Q60 70 96 58" fill="none" stroke="#fff" stroke-width="5"/>`; formArt = `<path d="M34 34L37 8L48 20L60 0L72 20L83 8L86 34Z" fill="#FFD23F" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="24" r="4" fill="#4A9DFF" stroke="${INK}" stroke-width="1.5"/><circle cx="44" cy="27" r="3" fill="#FF5A5F"/><circle cx="76" cy="27" r="3" fill="#5CCB6B"/>` + STAR(106, 40, 7, '') + STAR(12, 44, 6, 'b'); }
   else if (form === 'luk') formArt = `<ellipse cx="60" cy="10" rx="24" ry="6.5" fill="none" stroke="#FFD23F" stroke-width="5"/><ellipse cx="60" cy="10" rx="24" ry="6.5" fill="none" stroke="${INK}" stroke-width="1.5"/>` + STAR(104, 40, 6, '') + STAR(16, 36, 5, 'b');
   const lookX = form && FORM_LOOK[color] && FORM_LOOK[color][form];
   if (lookX) { back += lookX[0]; formArt += lookX[1]; }
+  if (form && ft >= 3) back = `<ellipse cx="60" cy="66" rx="54" ry="50" fill="${c[1]}" opacity=".22"/><ellipse cx="60" cy="66" rx="46" ry="42" fill="#fff" opacity=".18"/>` + back;
+  if (form && ft >= 4 && form !== 'rainbow') back = `<path d="M18 70Q0 60 3 40Q14 52 24 56ZM102 70Q120 60 117 40Q106 52 96 56Z" fill="${ft >= 5 ? '#FFE98A' : '#fff'}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>` + back;
+  if (form) back += limbArt(color, Math.max(2, ft || 2), c);
+  if (form && ft >= 5) formArt += STAR(10, 16, 6, '') + STAR(110, 16, 6, 'b') + STAR(60, 114, 5, '') + STAR(4, 96, 4, 'b');
   const sparkle = o.shiny ? STAR(104, 28, 7, '') + STAR(14, 50, 5, 'b') + STAR(100, 92, 4, 'b') : '';
   const shadow = o.noShadow ? '' : `<ellipse cx="60" cy="111" rx="34" ry="5.5" fill="rgba(51,40,74,.18)"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true"><defs>${form === 'rainbow' ? `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF7A8A"/><stop offset=".22" stop-color="#FFB054"/><stop offset=".42" stop-color="#FFE45C"/><stop offset=".62" stop-color="#6FDB8A"/><stop offset=".8" stop-color="#62B6FF"/><stop offset="1" stop-color="#B98AFF"/></linearGradient>` : `<radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient>`}</defs>`
-    + shadow + `<g class="blob-body"${bodyT}>${back}<path d="M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z" fill="url(#${id})" stroke="${INK}" stroke-width="3"/>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true"><defs>${form === 'rainbow' ? `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${SL.rg.map((cc, k) => `<stop offset="${(k / 5).toFixed(2)}" stop-color="${cc}"/>`).join('')}</linearGradient>` : `<radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient>`}</defs>`
+    + shadow + `<g class="blob-body"${bodyT}>${back}<path d="M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z" fill="url(#${id})" stroke="${form && ft >= 5 ? '#D4A017' : INK}" stroke-width="${form && ft >= 5 ? 4 : 3}"/>`
     + `<ellipse cx="40" cy="42" rx="11" ry="5.5" fill="#fff" opacity=".6" transform="rotate(-32 40 42)"/>`
     + `${eyes}<ellipse cx="33" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/><ellipse cx="87" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/>${mouth}${front}${st >= 3 && !form ? CROWN : ''}${formArt}</g>${sparkle}</svg>`;
 }
@@ -658,10 +758,10 @@ function eggSVG(n) {
     + `<ellipse cx="40" cy="36" rx="9" ry="14" fill="#fff" opacity=".7" transform="rotate(24 40 36)"/>${cracks}</svg>`;
 }
 const blobImgs = new Map();
-function blobImg(color, st, shiny, mood, form) {
-  const k = color + st + (shiny ? 's' : '') + mood + (form || '');
+function blobImg(color, st, shiny, mood, form, ft) {
+  const k = color + st + (shiny ? 's' : '') + mood + (form || '') + (ft || '');
   let im = blobImgs.get(k);
-  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, form, noShadow: true })); blobImgs.set(k, im); }
+  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, form, ft, noShadow: true })); blobImgs.set(k, im); }
   return im;
 }
 
@@ -693,9 +793,9 @@ function sfx(name) {
 function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
 
 /* ================= world generation (same seed for everyone) ================= */
-const T = 32, W = 232, HW = 96, H = 128; // rows HW..H-1 hold the dungeon arenas
+const T = 32, W = 276, HW = 96, H = 128; // rows HW..H-1 hold the dungeon arenas
 const TOWN = { x: 18, y: 48 };
-const BANDS = [9, 32, 54, 74, 94, 114, 134, 154, 174, 194];
+const BANDS = [9, 32, 54, 74, 94, 114, 134, 154, 174, 194, 214, 234];
 function hash2(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
 function vnoise(x, y, s) {
   const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
@@ -711,6 +811,8 @@ const ZONE_TILES = ZONES.map(() => []);
 const SHOP = { x: TOWN.x - 4, y: TOWN.y - 3 };
 const SMITH = { x: TOWN.x + 3, y: TOWN.y - 2 };
 const PORTAL = { x: TOWN.x - 4, y: TOWN.y + 1 };
+// Warp stones: one in town and one where the road enters each zone. Touch one to unlock it.
+const WARPS = [{ x: TOWN.x + 4, y: TOWN.y + 2, name: 'เมืองปุ๊กปิ๊ก', lv: 0 }, ...ZONES.map((z, zi) => { const x = TOWN.x + BANDS[zi] + 3; return { x, y: Math.round(roadY(x)), name: z.name, lv: z.lv }; })];
 const ARENAS = DUNGEONS.map((d, i) => ({ x0: 4 + i * 46, y0: HW + 3, w: 40, h: 26 }));
 (function genWorld() {
   for (let y = 0; y < HW; y++) for (let x = 0; x < W; x++) {
@@ -723,7 +825,7 @@ const ARENAS = DUNGEONS.map((d, i) => ({ x0: 4 + i * 46, y0: HW + 3, w: 40, h: 2
     if (Math.abs(y - roadY(x)) < 1.4 && x >= TOWN.x) ROAD[i] = 1;
   }
   for (let zi = 0; zi < ZONES.length; zi++) {
-    const d = [27, 48, 68, 88, 106, 126, 146, 166, 186, 204][zi], bx = Math.min(W - 8, TOWN.x + d), by = Math.round(roadY(bx) + (zi % 2 ? -10 : 10));
+    const d = [27, 48, 68, 88, 106, 126, 146, 166, 186, 204, 226, 246][zi], bx = Math.min(W - 8, TOWN.x + d), by = Math.round(roadY(bx) + (zi % 2 ? -10 : 10));
     BOSS_POS.push({ x: bx * T + T / 2, y: by * T + T / 2 });
   }
   const nearBoss = (x, y) => BOSS_POS.some(b => Math.hypot(x - (b.x - T / 2) / T, y - (b.y - T / 2) / T) < 4);
@@ -743,24 +845,30 @@ const ARENAS = DUNGEONS.map((d, i) => ({ x0: 4 + i * 46, y0: HW + 3, w: 40, h: 2
     else if (g === 7) o = n > .8 ? 5 : r < .1 ? 15 : r < .17 ? 26 : 0;
     else if (g === 8) o = (n < .18 || n > .82) ? 5 : r < .1 ? 16 : r < .16 ? 27 : r < .2 ? 21 : 0;
     else if (g === 9) o = n > .78 ? 17 : r < .06 ? 4 : r < .16 ? 28 : 0;
-    else o = n > .76 ? 18 : r < .05 ? 7 : r < .09 ? 4 : r < .16 ? 29 : 0;
+    else if (g === 10) o = n > .76 ? 18 : r < .05 ? 7 : r < .09 ? 4 : r < .16 ? 29 : 0;
+    else if (g === 11) o = n > .8 ? 5 : r < .06 ? 1 : r < .09 ? 7 : r < .18 ? 20 : 0;
+    else o = n > .72 ? 18 : r < .07 ? 4 : r < .17 ? 29 : 0;
     OBJ[i] = o;
   }
   // town furniture
+  // open fields: no trees, rocks, cacti, crystals, clouds or loose pillars in the world
+  const CLEAR = new Set([1, 2, 3, 4, 7, 14, 15, 16, 17]);
+  for (let i = 0; i < W * HW; i++) if (CLEAR.has(OBJ[i])) OBJ[i] = 0;
   const put = (x, y, o) => { OBJ[y * W + x] = o; };
   put(TOWN.x, TOWN.y, 8); put(TOWN.x + 1, TOWN.y, 8); put(TOWN.x, TOWN.y + 1, 8); put(TOWN.x + 1, TOWN.y + 1, 8);
   put(SHOP.x, SHOP.y, 9); put(SHOP.x + 1, SHOP.y, 9);
   put(SMITH.x, SMITH.y, 11); put(SMITH.x + 1, SMITH.y, 11);
   put(PORTAL.x, PORTAL.y, 12);
+  for (const w of WARPS) put(w.x, w.y, 30);
   // dungeon rows: solid rock with three carved arenas
-  for (let y = HW; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; GROUND[i] = 11; OBJ[i] = 13; }
+  for (let y = HW; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; GROUND[i] = ZONES.length + 1; OBJ[i] = 13; }
   ARENAS.forEach((a, di) => {
     for (let y = a.y0; y < a.y0 + a.h; y++) for (let x = a.x0; x < a.x0 + a.w; x++) {
       const i = y * W + x, lx = x - a.x0, ly = y - a.y0;
-      GROUND[i] = 11 + di;
+      GROUND[i] = ZONES.length + 1 + di;
       OBJ[i] = (lx % 9 === 4 && ly % 8 === 3 && Math.abs(lx - a.w / 2) > 4) ? 7 : 0;
     }
-    for (let y = a.y0 - 1; y <= a.y0 + a.h; y++) for (let x = a.x0 - 1; x <= a.x0 + a.w; x++) GROUND[y * W + x] = 11 + di;
+    for (let y = a.y0 - 1; y <= a.y0 + a.h; y++) for (let x = a.x0 - 1; x <= a.x0 + a.w; x++) GROUND[y * W + x] = ZONES.length + 1 + di;
   });
   for (const [hx, hy] of [[TOWN.x - 5, TOWN.y + 4], [TOWN.x + 4, TOWN.y - 5], [TOWN.x - 1, TOWN.y - 6], [TOWN.x + 5, TOWN.y + 4]]) { put(hx, hy, 10); put(hx + 1, hy, 10); }
   for (let y = 1; y < HW - 1; y++) for (let x = 1; x < W - 1; x++) {
@@ -796,6 +904,7 @@ function migrate(s) {
   for (const k of Object.keys(s.eq)) if (!SLOT[k] || !s.eq[k]) delete s.eq[k];
   s.items = Object.assign({ potion: 0, ether: 0, elixir: 0, power: 0, speed: 0, scroll: 0 }, s.items);
   s.dungeons = s.dungeons || 0;
+  s.warps = Array.isArray(s.warps) ? s.warps : [0]; s.secretKills = Array.isArray(s.secretKills) ? s.secretKills : []; s.visited = Array.isArray(s.visited) ? s.visited : []; s.titles = Array.isArray(s.titles) ? s.titles : []; if (s.form && !s.formTier) s.formTier = 2;
   if (typeof s.sp !== 'number') s.sp = Math.max(0, s.lv - 1);
   s.skills = s.skills && typeof s.skills === 'object' ? s.skills : {};
   if (!FORM_ARCH[s.form]) s.form = null;
@@ -806,13 +915,15 @@ function makePlayer(color, shiny) {
   const main = COLORS[color].main, base = {};
   for (const k of STATS) base[k] = BASE[k] + (k === 'hp' ? ri(0, 6) : ri(0, 2)) + (k === main ? BONUS[k] : 0) + (shiny ? (k === 'hp' ? 8 : 2) : 0);
   return { v: 2, name: COLORS[color].species, color, shiny, lv: 1, xp: 0, base, points: 0, gold: 20, hp: base.hp, mp: 20,
-    items: { potion: 3, ether: 1, elixir: 0, power: 0, speed: 0, scroll: 1 }, bag: [], eq: {}, dungeons: 0, sp: 0, skills: {}, kills: 0, bossKills: 0, born: Date.now() };
+    items: { potion: 3, ether: 1, elixir: 0, power: 0, speed: 0, scroll: 1 }, bag: [], eq: {}, dungeons: 0, warps: [0], secretKills: [], visited: [], titles: [], title: null, sp: 0, skills: {}, kills: 0, bossKills: 0, born: Date.now() };
 }
 const col = () => COLORS[P.color];
 const itemStat = (it, k) => Math.round((it.stats[k] || 0) * (1 + .08 * (it.en || 0)));
 function gearBonus(k) { let v = 0; for (const s of SLOTS) { const it = P.eq[s]; if (it) v += itemStat(it, k); } return v; }
 const arch = () => (P && P.form && FORM_ARCH[P.form]) || null;
-const st = k => { const a = arch(), m = a && a.mul[k] || 1; return Math.round((P.base[k] + gearBonus(k)) * m); };
+const tierF = () => [0, 0, 1, 1.5, 2, 2.6][(P && P.formTier) || 2];
+const ap = k => { const a = arch(); return a && a[k] ? a[k] * tierF() : 0; };
+const st = k => { const a = arch(), m = a && a.mul[k] ? 1 + (a.mul[k] - 1) * tierF() : 1; return Math.round((P.base[k] + gearBonus(k) + titleBonus(k)) * m); };
 function formOdds() {
   const w = {}; let sum = 0;
   for (const k of FORM_KEYS) { const ref = BASE[k] + GROW[k] * (P.lv - 1); w[k] = Math.pow(Math.max(.2, P.base[k] / ref), 3); sum += w[k]; }
@@ -821,6 +932,39 @@ function formOdds() {
   return w;
 }
 function formName(f) { return FORM_NAMES[P.color][f] || SECRET_NAME[f]; }
+function fullFormName(f = P.form, t = P.formTier || 2) { return formName(f) + (TIER_NAME[t] ? ' ' + TIER_NAME[t] : ''); }
+const canEvolve = () => !!P.form && (P.formTier || 2) < 5 && P.lv >= FORM_TIER_LV[(P.formTier || 2) + 1];
+function updateFormBtn() {
+  const b = $('#bForm'), first = P.lv >= FORM_LV && !P.form, evo = canEvolve();
+  b.hidden = !(first || evo);
+  b.textContent = evo ? `✨ วิวัฒน์เป็นร่าง ${(P.formTier || 2) + 1} ได้แล้ว!` : '✨ เปลี่ยนร่างได้แล้ว!';
+}
+function setForm(f) {
+  const old = P.form && FORM_SKILLS[P.form];
+  if (old && P.skills[old.id] > 1 && (!f || FORM_SKILLS[f].id !== old.id)) { P.sp += P.skills[old.id] - 1; delete P.skills[old.id]; }
+  P.form = f || null; P.formTier = f ? P.formTier || 2 : P.formTier;
+  if (f) P.seen = [...new Set([...(P.seen || []), f])];
+}
+function evolveForm() {
+  if (!canEvolve()) return;
+  P.formTier = (P.formTier || 2) + 1; P.hp = maxHp(); P.mp = maxMp();
+  const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
+  sfx('lvl'); buzz([40, 40, 80]); save(); hudStatic(); updateHud(true);
+  banner(`วิวัฒน์เป็น${fullFormName()}!`, `ร่าง ${P.formTier} · ความสามารถของร่างแรงขึ้น`);
+  fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 140, t: 0, dur: 1, c: '#FFD23F' });
+  chatLine('', `${P.name} วิวัฒน์เป็น${fullFormName()}!`, true);
+  refreshSheet();
+}
+// Hidden unique form: never mentioned in the game. Granted once every secret monster has been defeated (Lv 20+).
+function checkUniqueForm() {
+  if (!P || P.gotUnique || P.lv < FORM_LV || !SECRETS.every(q => (P.secretKills || []).includes(q.key))) return;
+  P.gotUnique = true; setForm('unique'); P.hp = maxHp(); P.mp = maxMp(); save();
+  setTimeout(() => {
+    const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
+    sfx('rare'); buzz([60, 40, 60, 40, 120]); banner('??? พลังที่ไม่มีใครรู้จัก ???', `คุณกลายเป็น${formName('unique')}!`);
+    me.chat = `👑 กลายเป็น${formName('unique')}!`; me.chatAt = Date.now(); me.chatT = 6; hudStatic(); updateHud(true);
+  }, 1200);
+}
 const maxHp = () => st('hp');
 const maxMp = () => 20 + (P.lv - 1) * 3;
 // Early levels stay quick; the curve steepens after ~Lv 8 (about 3.6x the old cost at Lv 20).
@@ -829,16 +973,19 @@ const xpNeed = lv => Math.round(14 * Math.pow(lv, 1.55) * (1 + Math.pow(Math.min
 const xpScale = mlv => { const d = P.lv - mlv; return d <= 3 ? 1 : Math.max(.1, 1 - .2 * (d - 3)); };
 const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
 const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
-const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ((arch() && arch().haste) || 0));
+const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ap('haste'));
 const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75));
 const mySkills = () => (P.form && FORM_SKILLS[P.form] ? [...SKILLS[P.color], FORM_SKILLS[P.form]] : SKILLS[P.color]);
 const skLv = sk => (P.lv >= sk.unlock ? clamp(P.skills[sk.id] || 1, 1, SKILL_MAX) : 0);
 const skPow = L => 1 + .15 * (L - 1);
 const skCd = (sk, L) => sk.cd * (1 - .05 * (Math.max(1, L) - 1));
 const skDur = (sk, L) => sk.dur + .5 * (Math.max(1, L) - 1);
-function itemName(it) { return SLOT[it.slot].names[it.tier] + (it.en ? ` +${it.en}` : ''); }
-function itemIcon(it) { return SLOT[it.slot].icons[it.tier]; }
-function itemPrice(it) { return Math.round((6 + it.tier * it.tier * 14 + it.tier * 10) * (1 + it.r * 0.8) * (1 + (it.en || 0) * .3)); }
+function itemName(it) { return (it.uq && UNIQUES[it.uq] ? UNIQUES[it.uq].name : SLOT[it.slot].names[it.tier]) + (it.en ? ` +${it.en}` : ''); }
+function itemIcon(it) { return it.uq && UNIQUES[it.uq] ? UNIQUES[it.uq].icon : SLOT[it.slot].icons[it.tier]; }
+const uqFx = k => { let v = 0; if (!P) return 0; for (const sl of SLOTS) { const it = P.eq[sl]; if (it && it.uq && UNIQUES[it.uq]) v += UNIQUES[it.uq].fx[k] || 0; } return v; };
+const gearCode = it => (!it ? 0 : it.uq ? 100 + UNIQUE_KEYS.indexOf(it.uq) : it.tier + 1);
+const gearIconFor = (slot, n) => (n >= 100 ? (UNIQUES[UNIQUE_KEYS[n - 100]] || {}).icon : SLOT[slot].icons[n - 1]);
+function itemPrice(it) { if (it.uq) return Math.round(5000 * (1 + (it.en || 0) * .3)); return Math.round((6 + it.tier * it.tier * 14 + it.tier * 10) * (1 + it.r * 0.8) * (1 + (it.en || 0) * .3)); }
 const enCost = it => Math.round((40 + it.tier * it.tier * 35 + it.tier * 30) * Math.pow(1.45, it.en || 0) * (1 + it.r * .3));
 const enChance = it => Math.max(25, 100 - (it.en || 0) * 8);
 function statText(stats) { return STATS.filter(k => stats[k]).map(k => `${STAT_SHORT[k]} +${stats[k]}`).join(' · '); }
@@ -962,8 +1109,8 @@ function enterWorld() {
 function hudStatic() {
   const c = col();
   $('#app').style.setProperty('--c-light', c.light); $('#app').style.setProperty('--c', c.c[1]);
-  $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, form: P.form, noShadow: true });
-  $('#bForm').hidden = !(P.lv >= FORM_LV && !P.form);
+  $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, form: P.form, ft: P.formTier, noShadow: true });
+  updateFormBtn();
   updateSkillBar();
 }
 let hudKey = '';
@@ -991,7 +1138,7 @@ const remotes = new Map();     // other players
 const hitsOut = []; let hitSeq = 0;
 const myHits = new Map();      // monster id -> time I last hit it
 const rewarded = new Set();
-const seenKills = new Set();
+const seenKills = new Set(), announced = new Set();
 let lastMaSeq = {}, lastSentKey = '', lastSentAt = 0;
 
 const SLOT_DEFS = [];
@@ -1001,12 +1148,12 @@ const statCache = new Map();
 function foeStats(t, lv) {
   const key = t * 1000 + lv; let s = statCache.get(key); if (s) return s;
   const k = FOE_KEYS[t], d = FOES[k], z = ZONES[FOE_ZONE[t]], zl = d.lv || z.lv, off = lv - zl - (d.boss && !d.lv ? (z.bossOff || 2) : 0), m = 1 + 0.06 * off;
-  s = { name: d.name, e: d.e, boss: !!d.boss, maxHp: Math.round(d.hp * m * 1.6), atk: Math.round(d.atk * m), def: Math.round(d.def * m), spd: Math.round(d.spd * m), xp: Math.round(d.xp * m), gold: Math.round(d.gold * m), zi: d.tier != null ? d.tier : FOE_ZONE[t] };
+  s = { key: k, sec: !!d.sec, name: d.name, e: d.e, boss: !!d.boss, maxHp: Math.round(d.hp * m * 1.6), atk: Math.round(d.atk * m), def: Math.round(d.def * m), spd: Math.round(d.spd * m), xp: Math.round(d.xp * m), gold: Math.round(d.gold * m), zi: d.tier != null ? d.tier : FOE_ZONE[t] };
   statCache.set(key, s); return s;
 }
 function newMon(slot, t, lv, x, y) {
   const s = foeStats(t, lv), sd = SLOT_DEFS[slot];
-  return { id: 0, slot, t, lv, x, y, rx: x, ry: y, sx: x, sy: y, hp: s.maxHp, maxHp: s.maxHp, def: s.def, spd: s.spd, atk: s.atk, boss: sd.boss, zi: sd.zi,
+  return { id: 0, sec: s.sec, slot, t, lv, x, y, rx: x, ry: y, sx: x, sy: y, hp: s.maxHp, maxHp: s.maxHp, def: s.def, spd: s.spd, atk: s.atk, boss: sd.boss, zi: sd.zi,
     cd: rnd(.4, 1.2), wx: x, wy: y, wt: 0, target: null, charge: 0, atkN: 0, dir: 1, lunge: 0, flash: 0 };
 }
 function playersForSim() {
@@ -1027,9 +1174,16 @@ function spawnSlot(slot, players) {
   const sd = SLOT_DEFS[slot], z = ZONES[sd.zi];
   const pos = sd.boss ? (players.some(p => Math.hypot(p.x - BOSS_POS[sd.zi].x, p.y - BOSS_POS[sd.zi].y) < 6 * T) ? null : BOSS_POS[sd.zi]) : randomSpawn(sd.zi, players);
   if (!pos) return;
-  const t = FOE_KEYS.indexOf(sd.boss ? z.boss : pick(z.foes)), lv = z.lv + (sd.boss ? (z.bossOff || 2) : ri(0, z.spread || 2));
+  let t = FOE_KEYS.indexOf(sd.boss ? z.boss : pick(z.foes)), lv = z.lv + (sd.boss ? (z.bossOff || 2) : ri(0, z.spread || 2));
+  const sec = !sd.boss && SECRETS.find(q => q.zones.includes(sd.zi));
+  if (sec && (Math.random() < SECRET_SPAWN || sim.forceSecret) && ![...sim.mons.values()].some(m => FOE_KEYS[m.t] === sec.key)) { t = FOE_KEYS.indexOf(sec.key); lv = FOES[sec.key].lv; sim.forceSecret = false; announceSecret(foeStats(t, lv), pos.x, pos.y); }
   const m = newMon(slot, t, lv, pos.x, pos.y); m.id = (sim.gen++) * SLOT_MOD + slot;
   sim.mons.set(m.id, m);
+}
+function announceSecret(s, x, y) {
+  const z = zoneAt(x, y);
+  chatLine('', `✦ ${s.name.replace('✦ ', '')} ปรากฏตัวที่${z >= 1 && z <= ZONES.length ? ZONES[z - 1].name : 'ใดสักแห่ง'}!`, true);
+  sfx('rare');
 }
 function becomeHost() {
   hosting = true;
@@ -1175,6 +1329,15 @@ function simTick(dt) {
   }
   for (const m of sim.mons.values()) {
     m.lunge = Math.max(0, m.lunge - dt); m.flash = Math.max(0, m.flash - dt); m.cd = Math.max(0, m.cd - dt);
+    if (m.sec) {
+      // secret monsters never fight back: they run from the nearest player
+      let near = null, nd = 6 * T;
+      for (const p of players) { const d = Math.hypot(p.x - m.x, p.y - m.y); if (d < nd) { nd = d; near = p; } }
+      const spd = (50 + m.spd * 1.2) * (near ? 1 : .4);
+      if (near) { const dx = m.x - near.x || rnd(-1, 1), dy = m.y - near.y || rnd(-1, 1), d = Math.hypot(dx, dy); const bx = m.x, by = m.y; moveBody(m, dx / d * spd * dt, dy / d * spd * dt, 11, monSolid); if (Math.hypot(m.x - bx, m.y - by) < .1) moveBody(m, rnd(-1, 1) * spd * dt, rnd(-1, 1) * spd * dt, 11, monSolid); m.dir = dx < 0 ? -1 : 1; }
+      else { if (t0 > m.wt) { m.wt = t0 + rnd(1, 3); m.wx = m.sx + rnd(-4, 4) * T; m.wy = m.sy + rnd(-4, 4) * T; } const dx = m.wx - m.x, dy = m.wy - m.y, d = Math.hypot(dx, dy); if (d > 4) moveBody(m, dx / d * spd * dt, dy / d * spd * dt, 11, monSolid); }
+      m.rx = m.x; m.ry = m.y; continue;
+    }
     const aggro = (m.boss ? 6 : 4.5) * T, leash = (m.boss ? 10 : 8) * T;
     let tp = m.target ? players.find(p => p.peer === m.target || (p.me && m.target === 'me')) : null;
     if (tp && (inTown(tp.x, tp.y) || Math.hypot(tp.x - m.sx, tp.y - m.sy) > leash)) { tp = null; }
@@ -1232,10 +1395,10 @@ function applySnapshot(pr) {
     seen.add(id);
     let v = views.get(id);
     const s = foeStats(t, lv);
-    if (!v) { v = { id, t, lv, x: num(a[3], 0), y: num(a[4], 0), rx: num(a[3], 0), ry: num(a[4], 0), dir: 1, flash: 0, lunge: 0, predHp: null, predT: 0 }; views.set(id, v); }
+    if (!v) { v = { id, t, lv, x: num(a[3], 0), y: num(a[4], 0), rx: num(a[3], 0), ry: num(a[4], 0), dir: 1, flash: 0, lunge: 0, predHp: null, predT: 0 }; views.set(id, v); if (s.sec && !announced.has(id)) { announced.add(id); announceSecret(s, v.x, v.y); } }
     const nx = num(a[3], v.x), ny = num(a[4], v.y);
     if (nx !== v.x) v.dir = nx < v.x ? -1 : 1;
-    v.x = nx; v.y = ny; v.t = t; v.lv = lv; v.maxHp = s.maxHp; v.def = s.def; v.spd = s.spd; v.boss = s.boss;
+    v.x = nx; v.y = ny; v.t = t; v.lv = lv; v.maxHp = s.maxHp; v.def = s.def; v.spd = s.spd; v.boss = s.boss; v.sec = s.sec;
     v.hp = clamp(num(a[5], 1), 0, s.maxHp);
     const fl = num(a[6], 0); v.charge = fl & 1 ? 1 : 0; if (fl & 2 && !v._l) v.lunge = .25; v._l = fl & 2;
   }
@@ -1259,8 +1422,8 @@ function snapshotOut() {
   return { l };
 }
 function presenceState() {
-  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? ALL_FORMS.indexOf(P.form) + 1 : 0, sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
-    lv: P.lv, hp: Math.round(P.hp / maxHp() * 100), hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0,
+  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_INDEX.indexOf(P.form) + 1 : 0, ft: P.form ? P.formTier || 2 : 0, tt: P.title ? TITLES.findIndex(t => t.id === P.title) + 1 : 0, sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
+    lv: P.lv, hp: Math.round(P.hp / maxHp() * 100), hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon),
     a: me.atkCount, dead: me.dead ? 1 : 0, hid: document.hidden ? 1 : 0, h: hitsOut.slice(), ch: me.chat || null, ct: me.chatAt || null };
   if (hosting && sim) { s.M = snapshotOut(); s.k = sim.k.slice(); s.ma = sim.ma.slice(); }
   else { s.M = null; s.k = null; s.ma = null; }
@@ -1275,8 +1438,8 @@ function upsertRemote(p) {
   let r = remotes.get(p.peer);
   if (!r) { r = { x, y, walk: 0, swing: 0, a: pr.a, ct: pr.ct, bubble: '', bubbleT: 0 }; remotes.set(p.peer, r); chatLine('', `${name} เข้ามาในโลก`, true); }
   r.tx = x; r.ty = y; if (Math.hypot(r.x - x, r.y - y) > T * 8) { r.x = x; r.y = y; }
-  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = ALL_FORMS[clamp(num(pr.f, 0) | 0, 0, ALL_FORMS.length) - 1] || null; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
-  r.lv = clamp(num(pr.lv, 1) | 0, 1, 999); r.hp = clamp(num(pr.hp, 100), 0, 100); r.hat = clamp(num(pr.hat, 0) | 0, 0, TIERS); r.wp = clamp(num(pr.wp, 0) | 0, 0, TIERS); r.dead = !!pr.dead;
+  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_INDEX[clamp(num(pr.f, 0) | 0, 0, FORM_INDEX.length) - 1] || null; r.ft = clamp(num(pr.ft, 0) | 0, 0, 5); r.tt = (TITLES[(num(pr.tt, 0) | 0) - 1] || {}).name || ''; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
+  r.lv = clamp(num(pr.lv, 1) | 0, 1, 999); r.hp = clamp(num(pr.hp, 100), 0, 100); const okGear = n => { n = num(n, 0) | 0; return (n >= 0 && n <= TIERS) || (n >= 100 && n < 100 + UNIQUE_KEYS.length) ? n : 0; }; r.hat = okGear(pr.hat); r.wp = okGear(pr.wp); r.dead = !!pr.dead;
   if (pr.a !== r.a) { r.a = pr.a; r.swing = .2; }
   if (pr.ct !== r.ct) { r.ct = pr.ct; const t = clean(pr.ch).slice(0, 80); if (t) { r.bubble = t; r.bubbleT = 6; chatLine(name, t); } }
 }
@@ -1338,10 +1501,10 @@ function attackMon(m, mult, o = {}) {
   const dodge = o.sure ? 0 : clamp(3 + (m.spd - st('spd')) * 1.5, 0, 30);
   if (Math.random() * 100 < dodge) { floatAt(m.rx, m.ry - 26, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return 0; }
   let d = dmgCalc(st('atk') * (1 + buff('atk')), m.def, mult);
-  const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0) + buff('crit') + ((arch() && arch().crit) || 0), 0, 85);
+  const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0) + buff('crit') + ap('crit') + uqFx('crit'), 0, 85);
   if (crit) d = Math.round(d * 1.75);
-  if (m.boss && arch() && arch().boss) d = Math.round(d * (1 + arch().boss));
-  if (arch() && arch().steal) P.hp = Math.min(maxHp(), P.hp + d * arch().steal);
+  if (m.boss && ap('boss')) d = Math.round(d * (1 + ap('boss')));
+  if (ap('steal')) P.hp = Math.min(maxHp(), P.hp + d * ap('steal'));
   floatAt(m.rx, m.ry - 26, crit ? d + '!' : d, crit ? '#FFD23F' : '#fff', crit ? 24 : 19);
   sfx(crit ? 'crit' : 'hit');
   if (DG) dDamage(m, d);
@@ -1373,7 +1536,7 @@ function castSkill(i) {
   if (!L) { toast(`${sk.name} ปลดล็อกที่ Lv ${sk.unlock}`); return; }
   if ((me.cds[sk.id] || 0) > 0) return;
   if (P.mp < sk.cost) { toast('MP ไม่พอ ดื่มน้ำค้างมานา (R) หรือรอให้ MP ฟื้น'); return; }
-  const pw = skPow(L), none = () => { toast('ไม่มีมอนอยู่ใกล้ๆ'); return false; };
+  const pw = skPow(L) * (sk.id[0] === 'f' ? 1 + .25 * ((P.formTier || 2) - 2) : 1) * (1 + uqFx('skill')), none = () => { toast('ไม่มีมอนอยู่ใกล้ๆ'); return false; };
   let dealt = 0;
   const hit = (m, o = {}) => { const d = attackMon(m, sk.mult * pw, { critBonus: sk.crit || 0, ...o }); dealt += d; return d; };
   if (sk.type === 'nova') {
@@ -1452,9 +1615,10 @@ function receiveHit(atk, mult, spd) {
   if (!started || me.dead) return;
   if (me.god) { floatAt(me.x, me.y - 30, 'อมตะ', '#FFE08A', 13); return; }
   const big = mult > 1;
-  const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5 + ((arch() && arch().dodge) || 0), 0, 45);
+  const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5 + ap('dodge') + uqFx('dodge'), 0, 50);
   if (Math.random() * 100 < dodge) { floatAt(me.x, me.y - 30, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return; }
-  if (arch() && arch().block && Math.random() * 100 < arch().block) { floatAt(me.x, me.y - 30, 'กันได้!', '#C9CCD8', 16); sfx('guard'); return; }
+  const blk = ap('block') + uqFx('block');
+  if (blk && Math.random() * 100 < blk) { floatAt(me.x, me.y - 30, 'กันได้!', '#C9CCD8', 16); sfx('guard'); return; }
   let d = dmgCalc(atk, st('def'), mult);
   if (me.shieldT > 0) d = Math.max(1, Math.round(d * (1 - me.shieldAmt)));
   P.hp = Math.max(0, P.hp - d); me.lastHurt = nowS(); me.hurtT = .3;
@@ -1484,20 +1648,24 @@ function onKill(k) {
 }
 function reward(s, x, y, mlv, tierOverride) {
   P.kills++; if (s.boss) P.bossKills++;
+  if (s.sec) {
+    const q = SECRETS.find(e => e.key === s.key);
+    if (q) { dropLoot('item', x, y, makeUnique(q.uq)); P.secretKills = [...new Set([...(P.secretKills || []), q.key])]; setTimeout(() => { banner('✦ ของยูนิค! ✦', UNIQUES[q.uq].name); sfx('rare'); }, 400); checkUniqueForm(); }
+  }
   sfx('kill');
   const luk = st('luk');
-  dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * (1 + luk / 100) * (1 + ((arch() && arch().gold) || 0)) * rnd(.8, 1.2))));
+  dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * (1 + luk / 100) * (1 + ap('gold')) * rnd(.8, 1.2))));
   if (Math.random() * 100 < 9 + luk * .2) dropLoot('potion', x, y, 1);
   if (Math.random() * 100 < 4 + luk * .1) dropLoot('ether', x, y, 1);
   const tier = tierOverride != null ? tierOverride : s.zi;
   if (s.boss) { dropLoot('item', x, y, makeItem(tier, 2)); dropLoot('item', x, y, makeItem(tier, 1)); if (Math.random() < .5) dropLoot('elixir', x, y, 1); }
-  else if (Math.random() * 100 < (20 + luk * .3) * (1 + ((arch() && arch().drop) || 0))) dropLoot('item', x, y, makeItem(tier, 0));
+  else if (Math.random() * 100 < (20 + luk * .3) * (1 + ap('drop') + uqFx('drop'))) dropLoot('item', x, y, makeItem(tier, 0));
   const xp = Math.max(1, Math.round(s.xp * xpScale(mlv)));
   floatAt(x, y - 44, `+${xp} EXP${xp < s.xp ? ' (มอนเลเวลต่ำ)' : ''}`, xp < s.xp ? '#C9C2D6' : '#FFE08A', 14);
   gainXp(xp);
   save();
 }
-const LV_CAP = 60;
+const LV_CAP = 80;
 function gainXp(x) {
   P.xp += x;
   if (P.lv >= LV_CAP) { P.xp = Math.min(P.xp, xpNeed(P.lv)); return; }
@@ -1507,6 +1675,8 @@ function gainXp(x) {
     for (const k of STATS) { const g = GROW[k] * (k === col().main ? 2 : 1); P.base[k] += Math.floor(g) + (Math.random() < g % 1 ? 1 : 0); }
     P.points += 2; P.sp = (P.sp || 0) + 1;
     for (const sk of mySkills()) if (sk.unlock === P.lv) setTimeout(() => { banner(`ปลดล็อกสกิลใหม่: ${sk.name}`, `${sk.icon} ${sk.desc}`); sfx('rare'); }, 2800);
+    if (P.form && Object.values(FORM_TIER_LV).includes(P.lv)) setTimeout(() => { banner('วิวัฒน์ร่างได้แล้ว!', 'แตะปุ่ม ✨ วิวัฒน์ร่าง'); sfx('rare'); }, 3000);
+    if (P.lv === FORM_LV) setTimeout(checkUniqueForm, 3500);
     if (P.lv === FORM_LV && !P.form) setTimeout(() => { banner('ถึง Lv 20 แล้ว! เปลี่ยนร่างได้', 'แตะปุ่ม ✨ เปลี่ยนร่าง'); sfx('rare'); }, 3000);
     if (stageOf(P.lv) > before) evolved = stageOf(P.lv);
   }
@@ -1515,7 +1685,7 @@ function gainXp(x) {
     fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 80, t: 0, dur: .7, c: '#FFD23F' });
     if (evolved) { banner(`วิวัฒนาการเป็น${STAGE_NAME[evolved]}!`, `Lv ${P.lv} · ได้แต้มสถานะเพิ่ม`); hudStatic(); }
     else banner(`เลเวลอัป! Lv ${P.lv}`, 'ได้แต้มสถานะ 🐣 และแต้มสกิล 📜');
-    updateSkillBar(); $('#bForm').hidden = !(P.lv >= FORM_LV && !P.form);
+    updateSkillBar(); updateFormBtn();
   }
 }
 function pickupLoot(dt) {
@@ -1551,7 +1721,7 @@ window.addEventListener('keydown', e => {
   if (typing() || !started || !$('#s-egg').hidden) { if (e.key === 'Escape' && !$('#chatbar').hidden) closeChat(); return; }
   const k = e.key.toLowerCase();
   setMode('desk');
-  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills')) closeSheet(); return; }
+  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills') || (k === 't' && sheetName === 'titles')) closeSheet(); return; }
   if (k === 'escape') { me.targetId = null; me.goal = null; return; }
   if (k === 'h' || k === '?') { openHelp(); return; }
   if (k === 'r') { usePotion('ether'); return; }
@@ -1561,6 +1731,7 @@ window.addEventListener('keydown', e => {
   if (k === 'e') { castSkill(0); return; }
   if (k >= '1' && k <= '5') { castSkill(+k - 1); return; }
   if (k === 'k') { openSkills(); return; }
+  if (k === 't') { openTitles(); return; }
   if (k === 'q') { usePotion(); return; }
   if (k === 'i' || k === 'b') { openBag(); return; }
   if (k === 'c') { openChar(); return; }
@@ -1659,7 +1830,7 @@ $('#bBag').onclick = () => { sfx('tap'); openBag(); };
 $('#bChar').onclick = () => { sfx('tap'); openChar(); };
 $('#bChat').onclick = () => { sfx('tap'); openChat(); };
 $('#bHelp').onclick = () => { sfx('tap'); openHelp(); };
-$('#bTalk').onclick = () => { sfx('tap'); if (DG) { if (!DG.clear) leaveDungeon('ออกจากดันเจี้ยนแล้ว (ไม่ได้รับรางวัล)'); return; } const n = nearNpc(); if (n) n.open(); };
+$('#bTalk').onclick = () => { sfx('tap'); if (DG) { if (!DG.clear) leaveDungeon('ออกจากดันเจี้ยนแล้ว (ไม่ได้รับรางวัล)'); return; } const n = nearNpc(); if (n) n.open(); else if (nearWarp() >= 0) openWarps(); };
 $('#bSkills').onclick = () => { sfx('tap'); openSkills(); };
 function openChat() { $('#chatbar').hidden = false; keys.clear(); setTimeout(() => $('#chatIn').focus(), 30); }
 function closeChat() { $('#chatbar').hidden = true; $('#chatIn').blur(); }
@@ -1696,7 +1867,7 @@ function renderBag(el) {
     const it = sel.it, cur = P.eq[it.slot];
     const cmp = !sel.eq && cur ? STATS.filter(k => itemStat(it, k) !== itemStat(cur, k)).map(k => { const d = itemStat(it, k) - itemStat(cur, k); return `<span class="${d > 0 ? 'up' : 'down'}">${STAT_SHORT[k]} ${d > 0 ? '+' : ''}${d}</span>`; }).join(' ') : '';
     detail = `<div class="panel detail">
-      <div class="top"><span class="slot big r${it.r}">${itemIcon(it)}</span><div><b style="font:700 17px var(--f-display);color:${RAR[it.r].c}">${esc(itemName(it))}</b><div class="muted" style="font-size:12px">${SLOT[it.slot].th} · ${RAR[it.r].th} · ขั้น ${it.tier + 1}${sel.eq ? ' · สวมอยู่' : ''}</div></div></div>
+      <div class="top"><span class="slot big r${it.r}">${itemIcon(it)}</span><div><b style="font:700 17px var(--f-display);color:${RAR[it.r].c}">${esc(itemName(it))}</b><div class="muted" style="font-size:12px">${SLOT[it.slot].th} · ${RAR[it.r].th}${it.uq ? '' : ` · ขั้น ${it.tier + 1}`}${sel.eq ? ' · สวมอยู่' : ''}</div>${it.uq ? `<div style="font-size:13px;color:#B8860B;font-weight:600">✦ ${UNIQUES[it.uq].desc}</div>` : ''}</div></div>
       <div class="statline">${STATS.filter(k => it.stats[k]).map(k => `<span class="chip">${STAT_SHORT[k]} +${itemStat(it, k)}</span>`).join('')}</div>
       ${cmp ? `<div style="font-size:13px">เทียบกับที่ใส่อยู่: ${cmp}</div>` : ''}
       <div class="m-btns">${sel.eq ? `<button class="btn sm" type="button" data-act="unequip">ถอดออก</button>` : `<button class="btn sm primary" type="button" data-act="equip">สวมใส่</button><button class="btn sm" type="button" data-act="sell">ขาย <span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${itemPrice(it)}</button>`}</div>
@@ -1737,8 +1908,11 @@ function renderForm(el) {
       <div class="pic">${blobSVG(P.color, 3, { form: f, shiny: P.shiny, noShadow: true })}</div>
       <b>${show ? formName(f) : '???'}</b><span class="arch">${FORM_ARCH[f].th}</span>
       <span class="odds">${odds[f] < .01 ? (odds[f] * 100).toFixed(1) : Math.round(odds[f] * 100)}%<small> โอกาส</small></span><span class="oddbar"><i style="width:${odds[f] * 100}%"></i></span></div>`; }).join('');
-  const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${formName(P.form)}</b><div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div></div>` : '';
-  el.innerHTML = `${cur}<p style="margin:0;font-size:14px">${ready ? '' : `<b>ปลดล็อกที่ Lv ${FORM_LV}</b> · `}${c.species}เปลี่ยนร่างได้ 5 แบบ และมีร่างลับอีก 2 แบบ (โอกาสแบบละ 0.5%) ร่างที่ได้เป็นการสุ่ม แต่ค่าสถานะไหนสูงกว่าปกติ โอกาสได้ร่างสายนั้นก็ยิ่งมาก <span class="muted">(อยากได้ร่างไหน ลองแจกแต้มสถานะให้ค่านั้นก่อน)</span></p>
+  const tierBox = P.form ? `<div class="panel"><b style="font-family:var(--f-display)">ขั้นของร่าง</b><div class="tiers" style="margin-top:6px">${[2, 3, 4, 5].map(t => `<span class="btn${(P.formTier || 2) === t ? ' on' : ''}" style="cursor:default">ร่าง ${t}${t > 2 ? ` · Lv ${FORM_TIER_LV[t]}` : ' · Lv 20'}</span>`).join('')}</div>
+      <p class="muted" style="margin:6px 0 0;font-size:12px">แต่ละขั้นทำให้โบนัสของร่างและสกิลร่างแรงขึ้น และหน้าตาอลังการขึ้น</p>${canEvolve() ? `<button class="btn primary block" type="button" data-act="evolve" style="margin-top:8px">✨ วิวัฒน์เป็นร่าง ${(P.formTier || 2) + 1}</button>` : ''}</div>` : '';
+  const uqCard = (P.seen || []).includes('unique') && P.form !== 'unique' ? `<button class="btn block" type="button" data-act="gounique" style="background:#FFF3B0">👑 กลับเป็น${formName('unique')} (ฟรี)</button>` : '';
+  const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${fullFormName()}</b><div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div></div>` : '';
+  el.innerHTML = `${cur}${tierBox}${uqCard}<p style="margin:0;font-size:14px">${ready ? '' : `<b>ปลดล็อกที่ Lv ${FORM_LV}</b> · `}${c.species}เปลี่ยนร่างได้ 5 แบบ และมีร่างลับอีก 2 แบบ (โอกาสแบบละ 0.5%) ร่างที่ได้เป็นการสุ่ม แต่ค่าสถานะไหนสูงกว่าปกติ โอกาสได้ร่างสายนั้นก็ยิ่งมาก <span class="muted">(อยากได้ร่างไหน ลองแจกแต้มสถานะให้ค่านั้นก่อน)</span></p>
     <div class="forms" id="formCards">${cards}</div>
     <div class="panel" style="font-size:13px">${FORM_KEYS.map(f => `<div><b>${FORM_ARCH[f].th}:</b> <span class="muted">${FORM_ARCH[f].desc} · สกิลร่าง ${FORM_SKILLS[f].icon} ${FORM_SKILLS[f].name}</span></div>`).join('')}${SECRET_KEYS.map(f => `<div><b>${known(f) ? formName(f) : 'ร่างลับ ???'}:</b> <span class="muted">${known(f) ? `${FORM_ARCH[f].desc} · สกิล ${FORM_SKILLS[f].icon} ${FORM_SKILLS[f].name}` : 'ยังไม่มีใครรู้ความสามารถ'}</span></div>`).join('')}</div>
     ${!ready ? '' : P.form
@@ -1761,7 +1935,7 @@ function rollForm(paid) {
     cards.forEach((cd, k) => cd.classList.toggle('hi', k === i % N)); sfx('tap');
     if (i >= steps) {
       const old = P.form && FORM_SKILLS[P.form]; if (old && P.skills[old.id] > 1) { P.sp += P.skills[old.id] - 1; delete P.skills[old.id]; }
-      rolling = false; lastRoll = pick; P.form = pick; P.hp = maxHp(); P.mp = maxMp();
+      rolling = false; lastRoll = pick; P.form = pick; P.formTier = P.formTier || 2; P.hp = maxHp(); P.mp = maxMp();
       P.seen = [...new Set([...(P.seen || []), pick])];
       if (FORM_ARCH[pick].secret) { setTimeout(() => { banner('✨ ร่างลับ!! ✨', `${formName(pick)} · โอกาส 0.5%`); sfx('rare'); }, 2700); me.chat = `✨ ได้ร่างลับ ${formName(pick)}!`; me.chatAt = Date.now(); me.chatT = 6; }
       const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
@@ -1777,6 +1951,44 @@ function rollForm(paid) {
 }
 $('#bForm').onclick = () => { sfx('tap'); openForm(); };
 // ---- Admin / test panel: only people who can edit this artifact (the owner and editors) see it ----
+const TITLES = [
+  { id: 'k50', name: 'นักล่ามือใหม่', cond: 'ปราบมอน 50 ตัว', v: () => [P.kills, 50], bonus: { atk: 3 } },
+  { id: 'k500', name: 'นักล่าตัวยง', cond: 'ปราบมอน 500 ตัว', v: () => [P.kills, 500], bonus: { atk: 8, spd: 3 } },
+  { id: 'k3000', name: 'ผู้พิชิตพันศึก', cond: 'ปราบมอน 3,000 ตัว', v: () => [P.kills, 3000], bonus: { atk: 18, spd: 6 } },
+  { id: 'b10', name: 'ผู้ปราบบอส', cond: 'ปราบบอส 10 ตัว', v: () => [P.bossKills, 10], bonus: { hp: 80 } },
+  { id: 'b60', name: 'ราชาแห่งบอส', cond: 'ปราบบอส 60 ตัว', v: () => [P.bossKills, 60], bonus: { hp: 200, def: 10 } },
+  { id: 'explore', name: 'นักสำรวจ', cond: 'ไปครบทุกดินแดน', v: () => [(P.visited || []).length, ZONES.length], bonus: { spd: 8 } },
+  { id: 'warp', name: 'นักเดินทางข้ามมิติ', cond: 'ค้นพบจุดวาร์ปครบ', v: () => [(P.warps || []).length, WARPS.length], bonus: { spd: 5, luk: 5 } },
+  { id: 'dg3', name: 'นักล่าสมบัติ', cond: 'ผ่านดันเจี้ยน 3 ครั้ง', v: () => [P.dungeons || 0, 3], bonus: { luk: 10 } },
+  { id: 'dg20', name: 'จอมดันเจี้ยน', cond: 'ผ่านดันเจี้ยน 20 ครั้ง', v: () => [P.dungeons || 0, 20], bonus: { atk: 6, def: 6, hp: 60, spd: 4, luk: 6 } },
+  { id: 'rich', name: 'เศรษฐีปุ๊กปิ๊ก', cond: 'มีทอง 100,000', v: () => [P.gold, 100000], bonus: { luk: 15 } },
+  { id: 'smith', name: 'ช่างตีเหล็กเทวดา', cond: 'ตีบวกของถึง +10', v: () => [P.maxEn || 0, 10], bonus: { def: 15 } },
+  { id: 'sec1', name: 'ผู้พบมอนลับ', cond: 'ปราบมอนลับ 1 ชนิด', v: () => [(P.secretKills || []).length, 1], bonus: { luk: 8 } },
+  { id: 'sec6', name: 'ตำนานผู้ล่ามอนลับ', cond: 'ปราบมอนลับครบทุกชนิด', v: () => [(P.secretKills || []).length, SECRETS.length], bonus: { atk: 10, def: 10, hp: 100, spd: 6, luk: 10 } },
+  { id: 'lv40', name: 'ผู้ตื่นรู้', cond: 'ถึง Lv 40', v: () => [P.lv, 40], bonus: { hp: 120 } },
+  { id: 'lv80', name: 'ตำนานแห่งปุ๊กปิ๊ก', cond: 'ถึง Lv 80', v: () => [P.lv, 80], bonus: { atk: 15, def: 15, hp: 200, spd: 8, luk: 15 } },
+  { id: 'lucky', name: 'ผู้ถูกเลือก', cond: 'ได้ร่างลับ', v: () => [(P.seen || []).some(f => SECRET_KEYS.includes(f)) ? 1 : 0, 1], bonus: { luk: 12, atk: 6 } },
+];
+function titleBonus(k) { const t = P && P.title && TITLES.find(x => x.id === P.title); return t ? t.bonus[k] || 0 : 0; }
+function titleName() { const t = P && P.title && TITLES.find(x => x.id === P.title); return t ? t.name : ''; }
+function checkTitles() {
+  if (!P) return;
+  for (const t of TITLES) {
+    if ((P.titles || []).includes(t.id)) continue;
+    const [a, b] = t.v(); if (a < b) continue;
+    P.titles = [...(P.titles || []), t.id];
+    if (!P.title) P.title = t.id;
+    banner(`ได้ฉายาใหม่: «${t.name}»`, statText(t.bonus) + ' · เลือกใช้ได้ที่ 🐣'); sfx('rare'); save();
+    break;
+  }
+}
+function openTitles() { openSheet('ฉายา', renderTitles, 'titles'); }
+function renderTitles(el) {
+  el.innerHTML = `<p class="muted" style="margin:0">ใส่ฉายาได้ทีละ 1 อัน ฉายาที่ใส่จะเพิ่มค่าพลังและขึ้นเหนือชื่อให้ทุกคนเห็น · ได้แล้ว ${(P.titles || []).length}/${TITLES.length}</p>
+    <div class="panel rows">${TITLES.map(t => { const got = (P.titles || []).includes(t.id), [a, b] = t.v(), on = P.title === t.id;
+      return `<div class="row"><span class="ico">${got ? '🏷️' : '🔒'}</span><div><div class="nm" style="${got ? 'color:#B8860B' : ''}">«${t.name}»</div><div class="ds">${t.cond}${got ? '' : ` · ${Math.min(a, b).toLocaleString()}/${b.toLocaleString()}`}<br>${statText(t.bonus)}</div></div>
+        ${!got ? '' : on ? `<button class="btn sm" type="button" data-title="">ถอด</button>` : `<button class="btn sm primary" type="button" data-title="${t.id}">ใช้</button>`}</div>`; }).join('')}</div>`;
+}
 let isAdmin = false;
 (async () => {
   const C = window.claude;
@@ -1790,14 +2002,19 @@ function renderAdmin(el) {
   el.innerHTML = `<div class="adm">
     <p class="muted" style="margin:0;font-size:13px">เห็นเฉพาะคนที่แก้ไข artifact นี้ได้ ผู้เล่นคนอื่นไม่เห็นปุ่มนี้</p>
     <b style="font-family:var(--f-display)">เลือกร่างเอง (ไม่ต้องสุ่ม)</b>
-    <div class="grid">${ALL_FORMS.map(f => `<button class="btn${P.form === f ? ' on' : ''}" type="button" data-adm="form" data-v="${f}"><span class="pic">${blobSVG(P.color, 3, { form: f, shiny: P.shiny, noShadow: true })}</span>${formName(f)}<span class="muted" style="font-size:10px">${FORM_ARCH[f].th}</span></button>`).join('')}
+    <div class="grid">${FORM_INDEX.map(f => `<button class="btn${P.form === f ? ' on' : ''}" type="button" data-adm="form" data-v="${f}"><span class="pic">${blobSVG(P.color, 3, { form: f, ft: P.formTier, shiny: P.shiny, noShadow: true })}</span>${formName(f)}<span class="muted" style="font-size:10px">${FORM_ARCH[f].th}</span></button>`).join('')}
       <button class="btn${P.form ? '' : ' on'}" type="button" data-adm="form" data-v=""><span class="pic">${blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, noShadow: true })}</span>ไม่มีร่าง<span class="muted" style="font-size:10px">ร่างปกติ</span></button></div>
+    <b style="font-family:var(--f-display)">ขั้นของร่าง</b>
+    <div class="row2">${[2, 3, 4, 5].map(t => `<button class="btn" type="button" data-adm="tier" data-v="${t}" style="${(P.formTier || 2) === t ? 'background:#FFF3B0' : ''}">ร่าง ${t}</button>`).join('')}</div>
+    <b style="font-family:var(--f-display)">ของลับ · ฉายา</b>
+    <div class="row2"><button class="btn" type="button" data-adm="secret">เสกมอนลับของดินแดนนี้</button><button class="btn" type="button" data-adm="uniques">ของยูนิคครบ 6 ชิ้น</button><button class="btn" type="button" data-adm="titles">ปลดล็อกฉายาทั้งหมด</button><button class="btn" type="button" data-adm="warps">ปลดล็อกจุดวาร์ปทั้งหมด</button></div>
+    <p class="muted" style="margin:0;font-size:12px">ร่างยูนิค (ลับ ไม่บอกผู้เล่น): ได้อัตโนมัติเมื่อปราบมอนลับครบทั้ง 6 ชนิดและ Lv 20 ขึ้นไป</p>
     <b style="font-family:var(--f-display)">เปลี่ยนสี</b>
     <div class="row2">${COLOR_KEYS.map(k => `<button class="btn" type="button" data-adm="color" data-v="${k}" style="${P.color === k ? `background:${COLORS[k].light}` : ''}">${COLORS[k].species}</button>`).join('')}</div>
     <b style="font-family:var(--f-display)">ตัวละคร · Lv ${P.lv}</b>
     <div class="row2">
       <button class="btn" type="button" data-adm="lv" data-v="1">+1 เลเวล</button><button class="btn" type="button" data-adm="lv" data-v="10">+10 เลเวล</button>
-      <button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button>
+      <button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
       <button class="btn" type="button" data-adm="gold">ทอง +10,000</button><button class="btn" type="button" data-adm="heal">เติม HP/MP + รีเซ็ตคูลดาวน์</button>
       <button class="btn" type="button" data-adm="god" style="${me.god ? 'background:#FFF3B0' : ''}">อมตะ: ${me.god ? 'เปิด' : 'ปิด'}</button>
       <button class="btn" type="button" data-adm="gear">ของตำนานขั้นสูงสุดครบชุด</button><button class="btn" type="button" data-adm="items">ยาทุกชนิด ×10</button>
@@ -1808,12 +2025,20 @@ function renderAdmin(el) {
 }
 function adminAct(act, v) {
   if (!isAdmin) return;
-  if (act === 'form') {
-    const f = v || null; const old = P.form && FORM_SKILLS[P.form];
-    if (old && P.skills[old.id] > 1 && old.id !== (f && FORM_SKILLS[f].id)) { P.sp += P.skills[old.id] - 1; delete P.skills[old.id]; }
-    P.form = f; if (f) P.seen = [...new Set([...(P.seen || []), f])];
-    toast(f ? `เปลี่ยนเป็น${formName(f)}แล้ว` : 'กลับเป็นร่างปกติ');
-  } else if (act === 'color') { P.color = v; toast(`เปลี่ยนเป็น${COLORS[v].species}`); }
+  if (act === 'form') { setForm(v || null); toast(v ? `เปลี่ยนเป็น${formName(v)}แล้ว` : 'กลับเป็นร่างปกติ'); }
+  else if (act === 'tier') { P.formTier = +v; toast(`ตั้งเป็นร่าง ${v}`); }
+  else if (act === 'uniques') { for (const k of UNIQUE_KEYS) if (P.bag.length < BAG_MAX) P.bag.push(makeUnique(k)); toast('ใส่ของยูนิคไว้ในกระเป๋าแล้ว'); }
+  else if (act === 'titles') { P.titles = TITLES.map(t => t.id); if (!P.title) P.title = TITLES[0].id; }
+  else if (act === 'warps') { P.warps = WARPS.map((_, i) => i); }
+  else if (act === 'secret') {
+    const z = zoneAt(me.x, me.y) - 1, q = SECRETS.find(e => e.zones.includes(z));
+    if (!q || DG || !hosting || !sim) { toast(q ? 'ต้องเป็นเครื่องที่คุมมอนอยู่ (ลองตอนเล่นคนเดียว)' : 'ต้องอยู่ในดินแดน ไม่ใช่ในเมือง'); return; }
+    const slot = SLOT_DEFS.findIndex(d => d.zi === z && !d.boss);
+    for (const m of [...sim.mons.values()]) if (m.slot === slot) sim.mons.delete(m.id);
+    const t = FOE_KEYS.indexOf(q.key), m = newMon(slot, t, FOES[q.key].lv, me.x + 3 * T, me.y); m.id = (sim.gen++) * SLOT_MOD + slot; sim.mons.set(m.id, m);
+    announceSecret(foeStats(t, FOES[q.key].lv), m.x, m.y); closeSheet(); return;
+  }
+  else if (act === 'color') { P.color = v; toast(`เปลี่ยนเป็น${COLORS[v].species}`); }
   else if (act === 'lv' || act === 'lvto') {
     const target = clamp(act === 'lv' ? P.lv + +v : +v, 1, LV_CAP);
     let need = -P.xp; for (let l = P.lv; l < target; l++) need += xpNeed(l);
@@ -1869,6 +2094,7 @@ function openHelp() {
       <span><kbd>คลิกขวา</kbd></span><span>ใช้สกิลที่ 1 · <kbd>Shift</kbd>+คลิก ตีตรงที่ยืน</span>
       <span><kbd>1</kbd>–<kbd>5</kbd></span><span>ใช้สกิล (E = สกิลที่ 1 · 5 = สกิลร่างหลังเปลี่ยนร่าง)</span>
       <span><kbd>K</kbd></span><span>หน้าสกิล อัปเลเวลสกิล</span>
+      <span><kbd>T</kbd></span><span>ฉายา</span>
       <span><kbd>Q</kbd> <kbd>R</kbd></span><span>ดื่มยา HP / ยา MP</span>
       <span><kbd>I</kbd> <kbd>C</kbd></span><span>กระเป๋า / ตัวละคร</span>
       <span><kbd>Enter</kbd></span><span>แชท</span>
@@ -1882,7 +2108,7 @@ function openHelp() {
       <span><kbd>ปุ่มรอบ ⚔️</kbd></span><span>สกิล 4 ช่อง (ปลดล็อกที่ Lv 1, 3, 7, 12)</span>
       <span><kbd>🍯</kbd></span><span>ดื่มยา</span></div></div>
     <button class="btn sm block" type="button" data-act="mute">${muted ? '🔇 เสียงปิดอยู่ · แตะเพื่อเปิด' : '🔊 เสียงเปิดอยู่ · แตะเพื่อปิด'}</button>
-    <p class="muted" style="margin:0;font-size:13px">ในเมืองมีร้านยา (ป้าแมวเหมียว) ร้านตีเหล็ก (ลุงเม่น ซื้อของ/ตีบวก) และประตูดันเจี้ยน แตะหรือคลิกเพื่อเดินไปคุย · ยืนใกล้น้ำพุเพื่อฟื้นพลัง · วงแดงรอบบอสคือท่าทุบพื้น ให้เดินออกก่อน</p>`;
+    <p class="muted" style="margin:0;font-size:13px">ในเมืองมีร้านยา (ป้าแมวเหมียว) ร้านตีเหล็ก (ลุงเม่น ซื้อของ/ตีบวก) ประตูดันเจี้ยน และหินวาร์ป 🔮 (แตะหินวาร์ปในแต่ละดินแดนเพื่อปลดล็อกการวาร์ป) แตะหรือคลิกเพื่อเดินไปคุย · ยืนใกล้น้ำพุเพื่อฟื้นพลัง · วงแดงรอบบอสคือท่าทุบพื้น ให้เดินออกก่อน</p>`;
   }, 'help');
 }
 function renderChar(el) {
@@ -1890,8 +2116,8 @@ function renderChar(el) {
   el.style.setProperty('--c', c.c[1]); el.style.setProperty('--c-light', c.light);
   const ref = { hp: Math.max(150, maxHp()), atk: 70, def: 70, spd: 70, luk: 70 };
   el.innerHTML = `
-    <div class="char-head"><div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny, form: P.form })}</div>
-      <div><p class="eyebrow">${P.form ? `${formName(P.form)} · ${FORM_ARCH[P.form].th}` : `${c.species} · ${STAGE_NAME[s]}`}</p><div style="font:700 21px var(--f-display)">${esc(P.name)}</div>
+    <div class="char-head"><div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny, form: P.form, ft: P.formTier })}</div>
+      <div><p class="eyebrow">${P.form ? `${fullFormName()} · ${FORM_ARCH[P.form].th}` : `${c.species} · ${STAGE_NAME[s]}`}</p><div style="font:700 21px var(--f-display)">${esc(P.name)}</div>
         <div class="chips" style="margin-top:4px"><span class="chip">Lv ${P.lv}</span><span class="chip" style="background:${c.light}">สี${c.th}</span>${P.shiny ? '<span class="chip" style="background:#FFF3B0">✦</span>' : ''}</div>
         <p class="muted" style="margin:6px 0 0;font-size:13px">EXP ${P.xp}/${xpNeed(P.lv)} · ${P.lv < 5 ? 'วิวัฒนาการที่ Lv 5' : P.lv < 12 ? 'ร่างราชาที่ Lv 12' : 'วิวัฒนาการครบแล้ว'}</p></div></div>
     <div class="panel">
@@ -1899,7 +2125,8 @@ function renderChar(el) {
       ${STATS.map(k => { const b = gearBonus(k); return `<div class="alloc${k === c.main ? ' main' : ''}"><span>${STAT_NAME[k]}${k === c.main ? ' ★' : ''}</span><div class="bar"><i style="width:${clamp(st(k) / Math.max(ref[k], st(k)) * 100, 3, 100)}%"></i></div><span class="val">${st(k)}${b ? `<br><small>+${b}</small>` : ''}</span><button class="btn" type="button" data-alloc="${k}" ${P.points > 0 ? '' : 'disabled'} aria-label="เพิ่ม${STAT_NAME[k]}">+</button></div>`; }).join('')}
       <p class="muted" style="margin:6px 0 0;font-size:12px">ได้ 2 แต้มทุกเลเวล · 1 แต้ม = HP +${POINT_VALUE.hp} หรือค่าอื่น +1 · ★ ค่าเด่นของสี${c.th} โตเร็วเท่าตัว</p>
     </div>
-    ${P.lv >= FORM_LV ? `<button class="btn block${P.form ? '' : ' primary'}" type="button" data-act="form">${P.form ? `✨ ร่าง${formName(P.form)} · ${FORM_ARCH[P.form].desc}` : '✨ เปลี่ยนร่าง (ปลดล็อกแล้ว!)'}</button>` : `<p class="muted" style="margin:0;font-size:13px">✨ เปลี่ยนร่างได้ที่ Lv ${FORM_LV} ร่างที่ได้ขึ้นกับค่าสถานะที่เน้น</p>`}
+    ${P.lv >= FORM_LV ? `<button class="btn block${P.form ? '' : ' primary'}" type="button" data-act="form">${P.form ? `✨ ${fullFormName()} · ${FORM_ARCH[P.form].desc}${canEvolve() ? ' · วิวัฒน์ได้!' : ''}` : '✨ เปลี่ยนร่าง (ปลดล็อกแล้ว!)'}</button>` : `<p class="muted" style="margin:0;font-size:13px">✨ เปลี่ยนร่างได้ที่ Lv ${FORM_LV} ร่างที่ได้ขึ้นกับค่าสถานะที่เน้น</p>`}
+    <button class="btn block" type="button" data-act="titles">🏷️ ฉายา: ${titleName() ? `«${titleName()}»` : 'ยังไม่ได้ใส่'} · ได้แล้ว ${(P.titles || []).length}/${TITLES.length}</button>
     <button class="btn block" type="button" data-act="skills">📜 ดูและอัปสกิล (แต้มสกิล ${P.sp})</button>
     <div class="panel records"><div><b>${P.kills}</b><span>ปราบมอน</span></div><div><b>${P.bossKills}</b><span>ปราบบอส</span></div><div><b>${P.dungeons || 0}</b><span>ผ่านดันเจี้ยน</span></div></div>
     
@@ -1910,6 +2137,22 @@ const NPCS = [
   { id: 'smith', x: (SMITH.x + 1) * T, y: (SMITH.y + 1.4) * T, obj: 11, label: '⚒️ ร้านตีเหล็กลุงเม่น', open: () => openSmith() },
   { id: 'portal', x: (PORTAL.x + .5) * T, y: (PORTAL.y + 1.5) * T, obj: 12, label: '🌀 ประตูดันเจี้ยน', open: () => openPortal() },
 ];
+function nearWarp() { if (DG) return -1; return WARPS.findIndex(w => Math.hypot(me.x - (w.x + .5) * T, me.y - (w.y + .7) * T) < 1.4 * T); }
+function openWarps() {
+  const here = nearWarp();
+  openSheet('จุดวาร์ป', el => {
+    el.innerHTML = `<p class="muted" style="margin:0">แตะหินวาร์ปในแต่ละดินแดนเพื่อปลดล็อก แล้ววาร์ปไปมาได้จากหินวาร์ปก้อนไหนก็ได้</p>
+      <div class="panel rows">${WARPS.map((w, i) => { const on = (P.warps || []).includes(i); return `<div class="row"><span class="ico">${on ? '🔮' : '🔒'}</span><div><div class="nm">${w.name}</div><div class="ds">${w.lv ? `แนะนำ Lv ${w.lv}+` : 'เขตปลอดภัย'}${on ? '' : ' · ยังไม่ค้นพบ'}</div></div>
+        ${i === here ? '<span class="chip">อยู่ที่นี่</span>' : `<button class="btn sm${on ? ' primary' : ''}" type="button" data-warp="${i}" ${on ? '' : 'disabled'}>วาร์ป</button>`}</div>`; }).join('')}</div>`;
+  }, 'warps');
+}
+function warpTo(i) {
+  const w = WARPS[i]; if (!w || !(P.warps || []).includes(i) || nearWarp() < 0) return;
+  fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 60, t: 0, dur: .4, c: '#B98AFF' });
+  me.x = (w.x + .5) * T; me.y = (w.y + 1.6) * T; me.goal = null; me.targetId = null;
+  fx.push({ type: 'ring', x: me.x, y: me.y, r0: 60, r1: 10, t: 0, dur: .5, c: '#B98AFF' });
+  closeSheet(); sfx('skill'); save();
+}
 function nearNpc() { if (DG) return null; return NPCS.find(n => Math.hypot(me.x - n.x, me.y - n.y) < 2.4 * T) || null; }
 function nearShop() { const n = nearNpc(); return !!n && n.id === 'shop'; }
 function openShop() { openSheet('ร้านป้าแมวเหมียว', renderShop); }
@@ -1946,7 +2189,9 @@ $('#mBody').addEventListener('click', e => {
   }
   if (b.dataset.act === 'mute') { muted = !muted; savePrefs(); if (!muted) sfx('tap'); return refreshSheet(); }
   if (b.dataset.adm) { adminAct(b.dataset.adm, b.dataset.v); return; }
+  if (b.dataset.title != null && sheetName === 'titles') { const hpFrac = P.hp / maxHp(); P.title = b.dataset.title || null; P.hp = Math.round(hpFrac * maxHp()); sfx('tap'); save(); updateHud(true); return refreshSheet(); }
   if (b.dataset.dg) { enterDungeon(+b.dataset.dg); return; }
+  if (b.dataset.warp) { warpTo(+b.dataset.warp); return; }
   if (b.dataset.stier) { smithTier = +b.dataset.stier; sfx('tap'); return refreshSheet(); }
   if (b.dataset.sbuy) {
     const cost = smithPrice(smithTier); if (P.gold < cost || P.bag.length >= BAG_MAX) return;
@@ -1957,7 +2202,7 @@ $('#mBody').addEventListener('click', e => {
     const it = P.eq[b.dataset.en]; if (!it || (it.en || 0) >= EN_MAX) return;
     const cost = enCost(it); if (P.gold < cost) return;
     const hpFrac = P.hp / maxHp(); P.gold -= cost;
-    if (Math.random() * 100 < enChance(it)) { it.en = (it.en || 0) + 1; sfx('lvl'); toast(`ตีบวกสำเร็จ! ${itemName(it)}`); }
+    if (Math.random() * 100 < enChance(it)) { it.en = (it.en || 0) + 1; P.maxEn = Math.max(P.maxEn || 0, it.en); sfx('lvl'); toast(`ตีบวกสำเร็จ! ${itemName(it)}`); }
     else { sfx('miss'); toast('ตีบวกไม่สำเร็จ ลองใหม่อีกครั้งนะ'); }
     P.hp = Math.min(maxHp(), Math.max(1, Math.round(hpFrac * maxHp()))); save(); updateHud(true); return refreshSheet();
   }
@@ -2000,6 +2245,9 @@ $('#mBody').addEventListener('click', e => {
   if (act === 'skills') { openSkills(); return; }
   if (act === 'form') { openForm(); return; }
   if (act === 'doform' || act === 'reform') { rollForm(act === 'reform'); return; }
+  if (act === 'evolve') { evolveForm(); return; }
+  if (act === 'gounique') { setForm('unique'); save(); hudStatic(); updateHud(true); banner(`กลับเป็น${formName('unique')}`, ''); return refreshSheet(); }
+  if (act === 'titles') { openTitles(); return; }
   if (act === 'reset') {
     if (b.dataset.confirm) { try { localStorage.removeItem(SAVE_KEY); } catch (err) {} closeSheet(); started = false; P = null; loot.length = 0; $('#hud').hidden = true; startEgg(); return; }
     b.dataset.confirm = '1'; b.textContent = 'แตะอีกครั้งเพื่อยืนยัน ตัวละครนี้จะหายไปถาวร'; b.style.background = '#FFD3CF';
@@ -2066,6 +2314,7 @@ function drawGround(x0, y0, x1, y1) {
     else if (o === 22) { ctx.fillStyle = 'rgba(210,190,255,.7)'; ctx.fillRect(x * T + 8 + h * 14, y * T + 10, 3, 6); }
     else if (o === 23) { ctx.fillStyle = 'rgba(60,30,25,.4)'; ctx.fillRect(x * T + 6, y * T + 14 + h * 8, 14, 2); }
     else if (o === 24) { ctx.fillStyle = 'rgba(20,10,40,.35)'; ctx.fillRect(x * T + 8, y * T + 8, 12, 12); }
+    else if (o === 30) { const cx = x * T + T / 2, cy = y * T + T / 2, on = P && (P.warps || []).includes(WARPS.findIndex(w => w.x === x && w.y === y)); ctx.fillStyle = on ? 'rgba(185,138,255,.45)' : 'rgba(120,110,140,.35)'; ctx.strokeStyle = on ? '#B98AFF' : '#8E88A0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(cx, cy + 6, 15, 7, 0, 0, 7); ctx.fill(); ctx.stroke(); const fy = cy - 14 + Math.sin(tt * 2.5 + x) * 3; ctx.fillStyle = on ? '#C9A6FF' : '#B9B2CC'; ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, fy - 12); ctx.lineTo(cx + 7, fy); ctx.lineTo(cx, fy + 12); ctx.lineTo(cx - 7, fy); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     else if (o === 18) { ctx.fillStyle = `rgba(230,150,255,${.3 + .3 * Math.sin(tt * 2.5 + x + y)})`; ctx.beginPath(); ctx.arc(x * T + 10 + h * 12, y * T + 12 + h * 8, 4, 0, 7); ctx.fill(); }
     else if (o === 25) { ctx.strokeStyle = 'rgba(160,120,60,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x * T + 16, y * T + 24, 10, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
     else if (o === 26) { ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(x * T + 8 + h * 14, y * T + 8 + h * 10, 3, 3); ctx.fillRect(x * T + 20 - h * 8, y * T + 20, 2, 2); }
@@ -2087,7 +2336,7 @@ function drawBubble(text, x, y) {
   ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 8);
 }
 function drawBlob(o) {
-  const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form);
+  const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form, o.ft);
   const t = o.walk, sq = o.moving ? Math.sin(t * 14) * .07 : Math.sin(nowS() * 3 + o.x) * .03;
   const lift = o.moving ? Math.abs(Math.sin(t * 14)) * 4 : 0;
   ctx.fillStyle = 'rgba(51,40,74,.2)'; ctx.beginPath(); ctx.ellipse(o.x, o.y + 2, size * .36, size * .1, 0, 0, 7); ctx.fill();
@@ -2097,13 +2346,14 @@ function drawBlob(o) {
   if (o.hurt) ctx.filter = 'brightness(1.8)';
   if (im.complete && im.naturalWidth) ctx.drawImage(im, -size * .65, -size * 1.18, size * 1.3, size * 1.3);
   ctx.filter = 'none';
-  if (o.wp) { const e = emojiSprite(SLOT.weapon.icons[o.wp - 1], 20); ctx.save(); ctx.translate(size * .45, -size * .35); ctx.rotate(o.swing > 0 ? 1.2 : .35); ctx.drawImage(e, -13, -13, 26, 26); ctx.restore(); }
-  if (o.hat) { const e = emojiSprite(SLOT.hat.icons[o.hat - 1], 22); ctx.drawImage(e, -15, -size * 1.12 - 14, 30, 30); }
+  if (o.wp) { const e = emojiSprite(gearIconFor('weapon', o.wp), 20); ctx.save(); ctx.translate(size * .45, -size * .35); ctx.rotate(o.swing > 0 ? 1.2 : .35); ctx.drawImage(e, -13, -13, 26, 26); ctx.restore(); }
+  if (o.hat) { const e = emojiSprite(gearIconFor('hat', o.hat), 22); ctx.drawImage(e, -15, -size * 1.12 - 14, 30, 30); }
   ctx.restore();
   const top = o.y - size * 1.05 - (o.hat ? 14 : 0) - lift;
   drawName(`${o.name} Lv${o.lv}`, o.x, top - 4, o.self ? '#FFE08A' : '#fff');
+  if (o.title) drawName(`«${o.title}»`, o.x, top - 17, '#FFD23F', '700 10px "IBM Plex Sans Thai",system-ui,sans-serif');
   if (o.hpPct < 100) { ctx.fillStyle = INK; ctx.fillRect(o.x - 18, top, 36, 5); ctx.fillStyle = '#FF5C6C'; ctx.fillRect(o.x - 17, top + 1, 34 * o.hpPct / 100, 3); }
-  if (o.bubble) drawBubble(o.bubble, o.x, top - 16);
+  if (o.bubble) drawBubble(o.bubble, o.x, top - (o.title ? 30 : 16));
 }
 function drawMon(m) {
   const s = foeStats(m.t, m.lv), size = s.boss ? 60 : 38, hp = m.predHp != null && nowS() - m.predT < .8 ? Math.min(m.hp, m.predHp) : m.hp;
@@ -2115,6 +2365,7 @@ function drawMon(m) {
   ctx.drawImage(emojiSprite(s.e, 40), -size * .65, -size * .65, size * 1.3, size * 1.3);
   ctx.filter = 'none'; ctx.restore();
   const top = m.ry - size - 4;
+  if (s.sec) { const tt = nowS(); for (let k = 0; k < 3; k++) { const a = tt * 2 + k * 2.1; ctx.drawImage(emojiSprite('✨', 14), m.rx + Math.cos(a) * 26 - 9, m.ry - size * .5 + Math.sin(a) * 18 - 9, 18, 18); } drawName(`${s.name} Lv${m.lv}`, m.rx, top - 6, '#FFE08A', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif'); }
   if (s.boss) { ctx.drawImage(emojiSprite('👑', 20), m.rx - 13, top - 22, 26, 26); drawName(`${s.name} Lv${m.lv}`, m.rx, top - 22, xpScale(m.lv) < 1 ? '#C9C2D6' : '#FFB0B8', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif'); }
   if (hp < m.maxHp || s.boss) { const w = s.boss ? 60 : 34; ctx.fillStyle = INK; ctx.fillRect(m.rx - w / 2 - 1, top - 1, w + 2, 6); ctx.fillStyle = '#FF5C6C'; ctx.fillRect(m.rx - w / 2, top, w * clamp(hp / m.maxHp, 0, 1), 4); }
   else if (Math.hypot(m.rx - me.x, m.ry - me.y) < 150) drawName(`Lv${m.lv}`, m.rx, top + 4, xpScale(m.lv) < 1 ? '#B8B0C8' : m.lv >= P.lv + 3 ? '#FF9AA6' : '#fff', '600 10px "IBM Plex Sans Thai",system-ui,sans-serif');
@@ -2122,14 +2373,14 @@ function drawMon(m) {
 const LOOT_ICON = { gold: '🪙', potion: '🍯', ether: '💧', elixir: '✨' };
 function drawLoot(l) {
   const bob = Math.sin(nowS() * 4 + l.t) * 2 - l.z;
-  if (l.kind === 'item') { const c = RAR[l.val.r].c; ctx.fillStyle = c + '55'; ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(l.x, l.y + 2, 14, 5, 0, 0, 7); ctx.fill(); ctx.stroke(); if (l.val.r >= 2) { ctx.fillStyle = c + '30'; ctx.fillRect(l.x - 3, l.y - 60, 6, 60); } }
+  if (l.kind === 'item') { const c = RAR[l.val.r].c; ctx.fillStyle = c + '55'; ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(l.x, l.y + 2, 14, 5, 0, 0, 7); ctx.fill(); ctx.stroke(); if (l.val.r >= 2) { if (l.val.r === 5) { ctx.fillStyle = `hsla(${(nowS() * 120) % 360},90%,70%,.35)`; ctx.fillRect(l.x - 5, l.y - 90, 10, 90); } ctx.fillStyle = c + '30'; ctx.fillRect(l.x - 3, l.y - 60, 6, 60); } }
   const e = l.kind === 'item' ? itemIcon(l.val) : LOOT_ICON[l.kind];
   ctx.drawImage(emojiSprite(e, 22), l.x - 13, l.y - 26 + bob, 26, 26);
 }
 function drawMinimap() {
   if (!drawMinimap.base) {
     const c = document.createElement('canvas'); c.width = W; c.height = HW; const g = c.getContext('2d'), img = g.createImageData(W, HW);
-    const pal = ['#EAD7A8', '#9FD884', '#4F9A63', '#6C679A', '#A05A45', '#4A3F66', '#E6CB88', '#E2F0F7', '#5E7A4A', '#F1E2F8', '#30264A'];
+    const pal = ['#EAD7A8', '#9FD884', '#4F9A63', '#6C679A', '#A05A45', '#4A3F66', '#E6CB88', '#E2F0F7', '#5E7A4A', '#F1E2F8', '#30264A', '#C9B26A', '#1B1633'];
     for (let i = 0; i < W * HW; i++) {
       let hex = pal[GROUND[i]]; const o = OBJ[i];
       if (o === 5) hex = '#5DB6F0'; else if (o === 6) hex = '#FF7A2A'; else if (o === 18) hex = '#6B2FD0'; else if (ROAD[i]) hex = '#E9DDB6'; else if (BLOCK.has(o)) hex = '#3A3152';
@@ -2148,12 +2399,13 @@ function drawMinimap() {
   }
   const sx = mw / (W * T), sy = mh / (HW * T);
   mctx.imageSmoothingEnabled = false; mctx.drawImage(drawMinimap.base, 0, 0, mw, mh);
-  for (const m of monsterList()) if (m.boss || foeStats(m.t, m.lv).boss) { mctx.font = '16px sans-serif'; mctx.textAlign = 'center'; mctx.fillText('💀', m.rx * sx, m.ry * sy + 5); }
+  for (const m of monsterList()) { const fs = foeStats(m.t, m.lv); if (fs.boss || fs.sec) { mctx.font = '16px sans-serif'; mctx.textAlign = 'center'; mctx.fillText(fs.sec ? '🌟' : '💀', m.rx * sx, m.ry * sy + 5); } }
+  for (const wi of (P.warps || [])) { const w = WARPS[wi]; if (!w) continue; mctx.fillStyle = '#B98AFF'; mctx.strokeStyle = '#fff'; mctx.lineWidth = 1.5; mctx.beginPath(); mctx.moveTo((w.x + .5) * T * sx, (w.y - .2) * T * sy); mctx.lineTo((w.x + .9) * T * sx, (w.y + .5) * T * sy); mctx.lineTo((w.x + .5) * T * sx, (w.y + 1.2) * T * sy); mctx.lineTo((w.x + .1) * T * sx, (w.y + .5) * T * sy); mctx.closePath(); mctx.fill(); mctx.stroke(); }
   for (const r of remotes.values()) { if (inDungeonRows(r.ty)) continue; mctx.fillStyle = COLORS[r.c].c[1]; mctx.strokeStyle = '#fff'; mctx.lineWidth = 2; mctx.beginPath(); mctx.arc(r.x * sx, r.y * sy, 4.5, 0, 7); mctx.fill(); mctx.stroke(); }
   mctx.fillStyle = '#fff'; mctx.strokeStyle = INK; mctx.lineWidth = 2.5; mctx.beginPath(); mctx.arc(me.x * sx, me.y * sy, 5.5, 0, 7); mctx.fill(); mctx.stroke();
 }
 
-let lastT = performance.now(), miniT = 0, saveT = 0;
+let lastT = performance.now(), miniT = 0, saveT = 0, titleT = 2;
 function frame(tms) {
   requestAnimationFrame(frame);
   const dt = Math.min(.05, (tms - lastT) / 1000); lastT = tms;
@@ -2161,6 +2413,7 @@ function frame(tms) {
   update(dt); render();
   miniT -= dt; if (miniT <= 0) { miniT = .25; drawMinimap(); updateHud(); const di = $('#dgInfo'); di.hidden = !DG; if (DG) di.textContent = DG.clear ? 'ผ่านดันเจี้ยนแล้ว!' : DG.bossUp ? `บอส · ${DG.d.name}` : `คลื่น ${DG.wave}/${DG.d.waves.length} · เหลือ ${DG.mons.size}`; }
   saveT -= dt; if (saveT <= 0) { saveT = 5; save(); }
+  titleT -= dt; if (titleT <= 0) { titleT = 1; checkTitles(); }
 }
 function update(dt) {
   const t0 = nowS();
@@ -2204,10 +2457,12 @@ function update(dt) {
     // regen
     const nearFountain = Math.hypot(me.x - (TOWN.x + 1) * T, me.y - (TOWN.y + 1) * T) < 3.2 * T;
     if (nearFountain) { if (P.hp < maxHp() || P.mp < maxMp()) { P.hp = Math.min(maxHp(), P.hp + maxHp() * .25 * dt); P.mp = Math.min(maxMp(), P.mp + maxMp() * .25 * dt); } }
-    else { if (t0 - me.lastHurt > 6) P.hp = Math.min(maxHp(), P.hp + maxHp() * .015 * ((arch() && arch().regen) || 1) * dt); P.mp = Math.min(maxMp(), P.mp + .7 * dt); }
+    else { if (t0 - me.lastHurt > 6) P.hp = Math.min(maxHp(), P.hp + maxHp() * .015 * (1 + (arch() && arch().regen ? (arch().regen - 1) * tierF() : 0) + uqFx('regen')) * dt); P.mp = Math.min(maxMp(), P.mp + .7 * dt); }
     const z = zoneAt(me.x, me.y);
-    if (z !== me.zone && z <= ZONES.length) { me.zone = z; if (z === 0) banner('เมืองปุ๊กปิ๊ก', 'เขตปลอดภัย · ร้านค้าและน้ำพุฟื้นพลัง'); else { const zz = ZONES[z - 1]; banner(zz.name, `แนะนำ Lv ${zz.lv}+${P.lv + 3 < zz.lv ? ' · อันตราย!' : ''}`); } }
-    const npcNow = nearNpc(), talk = $('#bTalk'), want = DG ? (DG.clear ? '' : '🚪 ออกจากดันเจี้ยน') : npcNow ? npcNow.label : '';
+    if (z !== me.zone && z <= ZONES.length) { me.zone = z; if (z >= 1 && !(P.visited || []).includes(z - 1)) P.visited = [...(P.visited || []), z - 1]; if (z === 0) banner('เมืองปุ๊กปิ๊ก', 'เขตปลอดภัย · ร้านค้าและน้ำพุฟื้นพลัง'); else { const zz = ZONES[z - 1]; banner(zz.name, `แนะนำ Lv ${zz.lv}+${P.lv + 3 < zz.lv ? ' · อันตราย!' : ''}`); } }
+    const wi = nearWarp();
+    if (wi >= 0 && !(P.warps || []).includes(wi)) { P.warps = [...(P.warps || []), wi]; banner('ค้นพบจุดวาร์ป!', WARPS[wi].name); sfx('rare'); save(); }
+    const npcNow = nearNpc(), talk = $('#bTalk'), want = DG ? (DG.clear ? '' : '🚪 ออกจากดันเจี้ยน') : npcNow ? npcNow.label : wi >= 0 ? '🔮 จุดวาร์ป' : '';
     talk.hidden = !want; if (want && talk.textContent !== want) talk.textContent = want;
   }
   if (DG) dungeonTick(dt);
@@ -2248,8 +2503,8 @@ function render() {
   if (DG && DG.portal) { const pt = DG.portal; ents.push({ y: pt.y, d: () => { const tt = nowS(); for (let k = 0; k < 3; k++) { ctx.strokeStyle = ['#C9A6FF', '#8C5CF0', '#FFD1FF'][k]; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(pt.x, pt.y - 14, 22 - k * 6, 26 - k * 7, 0, tt * (2 + k) + k, tt * (2 + k) + k + 4.5); ctx.stroke(); } drawName('วงวาร์ปกลับเมือง', pt.x, pt.y - 46, '#E9D5FF'); } }); }
   for (const l of loot) if (inView(l.x, l.y)) ents.push({ y: l.y - 8, d: () => drawLoot(l) });
   for (const m of monsterList()) if (inView(m.rx, m.ry)) ents.push({ y: m.ry, d: () => drawMon(m) });
-  for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
-  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0, self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
+  for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, ft: r.ft, title: r.tt, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
+  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, ft: P.formTier, title: titleName(), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon), self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
   ents.sort((a, b) => a.y - b.y);
   for (const e of ents) e.d();
   for (const mt of me.meteors) { const k = 1 - mt.t / .6; ctx.fillStyle = `rgba(255,120,40,${.15 + .2 * k})`; ctx.strokeStyle = 'rgba(255,90,31,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mt.x, mt.y, mt.r, 0, 7); ctx.fill(); ctx.stroke(); ctx.drawImage(emojiSprite('☄️', 30), mt.x - 20 + (1 - k) * 60, mt.y - 60 - (1 - k) * 160, 40, 40); }
