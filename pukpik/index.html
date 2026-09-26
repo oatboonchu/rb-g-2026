@@ -148,9 +148,9 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .chatlog p.sys{color:#E6F3FF;font-weight:500}
 .acts{position:absolute;right:var(--gr);bottom:18px;width:250px;height:250px;pointer-events:none!important}
 .acts>*{pointer-events:auto}
-.abtn{position:absolute;border-radius:50%;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;overflow:hidden;touch-action:none}
+.abtn{position:absolute;border-radius:50%;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;overflow:visible;touch-action:none}
 .abtn:active,.abtn.held{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
-.abtn .cd{position:absolute;inset:0;background:conic-gradient(rgba(51,40,74,.55) var(--p,0%),transparent 0);pointer-events:none}
+.abtn .cd{position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(51,40,74,.55) var(--p,0%),transparent 0);pointer-events:none}
 .abtn small{position:absolute;bottom:4px;left:0;right:0;text-align:center;font:700 10px var(--f-body);color:var(--ink)}
 .abtn.atk{right:0;bottom:0;width:92px;height:92px;background:#FFC2AE;font-size:36px}
 .abtn.skl{width:54px;height:54px;background:var(--c-light,#FFE08A);font-size:24px}
@@ -203,7 +203,9 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.9);border:2.5px solid var(--ink)}
 .kb{display:none;position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font:700 10px/1 var(--f-body);color:var(--paper);background:var(--ink);border-radius:6px;padding:3px 5px;white-space:nowrap;pointer-events:none}
 .desk .kb{display:block}
-.desk .abtn .kb{bottom:auto;top:-10px}
+.desk .abtn .kb{bottom:auto;top:-14px;font-size:11px;padding:3px 6px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+/* hotkey tags sit outside the round buttons, beside each one, so they never cover the icon */
+.desk .abtn.skl.s0 .kb,.desk .abtn.skl.s1 .kb,.desk .abtn.skl.s2 .kb,.desk .abtn.pot .kb{top:50%;left:auto;right:calc(100% + 5px);transform:translateY(-50%)}
 .desk .abtn small{display:none}
 .desk .abtn.atk{width:80px;height:80px;font-size:32px}
 
