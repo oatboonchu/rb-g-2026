@@ -186,6 +186,8 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .adm .row2 .btn{min-height:34px;font-size:12.5px;padding:4px 10px;box-shadow:0 2px 0 var(--ink)}
 .oddbar{height:6px;width:100%;border-radius:99px;background:#EEE8F4;overflow:hidden}
 .oddbar i{display:block;height:100%;background:var(--accent)}
+.talk.enc{bottom:330px;background:#FF6B6B;color:#fff;animation:rise .2s ease, pulse 1s infinite alternate}
+@keyframes pulse{to{transform:scale(1.06)}}
 .talk{position:absolute;right:var(--gr);bottom:282px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
 .joy{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);background:rgba(51,40,74,.18);pointer-events:none!important;z-index:6}
 .joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.9);border:2.5px solid var(--ink)}
@@ -298,6 +300,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
     <p class="joyhint" id="joyhint"></p>
     <button class="formbtn" type="button" id="bForm" hidden>✨ เปลี่ยนร่างได้แล้ว!</button>
     <button class="talk" type="button" id="bTalk" hidden>🛒 คุยกับป้าแมวเหมียว</button>
+    <button class="talk enc" type="button" id="bEnc" hidden>⚠️ เข้าสู้ Unique Monster</button>
     <div class="acts">
       <button class="abtn pot" type="button" id="bPot" aria-label="ดื่มยา">🍯<b id="potN">0</b><span class="cd" id="potCd"></span><kbd class="kb">Q</kbd></button>
       <button class="abtn skl s0" type="button" id="bS0" data-sk="0" aria-label="สกิล 1"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">1</kbd></button>
@@ -1074,11 +1077,162 @@ function gearFx() {
     for (const sl of SLOTS) { const it = P.eq[sl]; if (!it) continue;
       for (const x of it.opts || []) o[x.k] = (o[x.k] || 0) + x.v;
       for (const id of it.sock || []) { const q = runeOf(id); if (q) o[q.r.k] = (o[q.r.k] || 0) + q.r.v[q.g - 1]; } }
+    const hf = hiddenFx(); for (const k in hf) o[k] = (o[k] || 0) + hf[k];
     const n = runeCounts(); for (const t in n) if (n[t] >= 3) { const [k, v] = RUNES[t].set; o[k] = (o[k] || 0) + v * (n[t] >= 5 ? 2 : 1); }
   }
   gearFxCache = o; gearFxAt = t; return o;
 }
 const gearDirty = () => { gearFxCache = null; };
+// ---------------- Hidden systems (Shangri-La Frontier style) ----------------
+// Nothing here is explained up front: skills sprout from how you play, jobs and latent status are rolled,
+// and unique scenarios start from hidden conditions.
+const isNight = () => { const h = new Date().getHours(); return h >= 18 || h < 6; };
+// Sprouting skills: each watches one action. Past a hidden count, every further action has a small chance to sprout it.
+// They level from use (1-5); at 5 they may evolve into one of two forms, or rarely a secret third.
+const TRAITS = {
+  crit:   { th: 'ตาเหยี่ยว', icon: '🦅', on: 'ตีคริ', need: 60, per: { crit: 1 }, evo: [['เนตรพิฆาต', { crit: 6, skill: .1 }], ['มือสังหารเงียบ', { crit: 5, dodge: 4 }], ['ดวงตาเทพสงคราม', { crit: 10, atkP: .1 }]] },
+  dodge:  { th: 'ก้าวพริ้ว', icon: '💨', on: 'หลบการโจมตี', need: 40, per: { dodge: .8 }, evo: [['เงาลวงตา', { dodge: 6, steal: .02 }], ['ย่างก้าววายุ', { dodge: 4, move: .08 }], ['ร่างไร้ตัวตน', { dodge: 10 }]] },
+  kill:   { th: 'สัญชาตญาณนักล่า', icon: '🐺', on: 'ปราบมอน', need: 300, per: { atkP: .01 }, evo: [['ราชันย์นักล่า', { atkP: .08, crit: 3 }], ['ผู้ล่าฝูง', { atkP: .05, xp: .1 }], ['เขี้ยวแห่งกาลเวลา', { atkP: .12, boss: .1 }]] },
+  clutch: { th: 'ดิ้นรนเฮือกสุดท้าย', icon: '🔥', on: 'ปราบมอนตอน HP ต่ำ', need: 8, per: { steal: .004 }, evo: [['เลือดเดือด', { steal: .03, atkP: .05 }], ['ไม่ยอมตาย', { regen: .6, hpP: .06 }], ['อมตะชั่วขณะ', { steal: .04, regen: 1 }]] },
+  skill:  { th: 'สมาธิร่ายเวท', icon: '🔮', on: 'ใช้สกิล', need: 150, per: { cdr: .01 }, evo: [['จอมเวทไร้พัก', { cdr: .1 }], ['ผู้ประสานสกิล', { skill: .12 }], ['ปราชญ์แห่งมิติ', { cdr: .08, skill: .12 }]] },
+  hurt:   { th: 'ผิวเหล็ก', icon: '🪨', on: 'โดนตี', need: 400, per: { defP: .01 }, evo: [['ป้อมเดินได้', { defP: .1, block: 3 }], ['ผิวหนามสะท้อน', { defP: .05, atkP: .05 }], ['เกราะอสูรนิรันดร์', { defP: .15, hpP: .08 }]] },
+  walk:   { th: 'นักเดินทาง', icon: '👣', on: 'เดินทาง', need: 150, per: { move: .01 }, evo: [['ผู้ท่องแดน', { move: .06, xp: .08 }], ['ลมใต้ปีก', { move: .08, spdP: .06 }], ['ผู้ย่นระยะ', { move: .12, cdr: .05 }]] },
+  boss:   { th: 'ผู้ท้าชิง', icon: '⚔️', on: 'ปราบบอส', need: 5, per: { boss: .02 }, evo: [['ผู้ล้มยักษ์', { boss: .15 }], ['ผู้พิชิตตำนาน', { boss: .1, drop: .1 }], ['ผู้สังหารเทพ', { boss: .25 }]] },
+  potion: { th: 'ร่างกายชินยา', icon: '🍯', on: 'ดื่มยา', need: 30, per: { regen: .08 }, evo: [['หมอยาพเนจร', { regen: .5, hpP: .05 }], ['ร่างอมฤต', { hpP: .1 }], ['ผู้ดื่มน้ำอมฤต', { hpP: .12, regen: .6 }]] },
+  gold:   { th: 'มือทอง', icon: '🪙', on: 'เก็บทอง', need: 400, per: { gold: .02 }, evo: [['เศรษฐีโชคดี', { gold: .15, drop: .05 }], ['นักล่าสมบัติ', { drop: .12 }], ['เทพแห่งทรัพย์', { gold: .25, drop: .1, lukP: .05 }]] },
+  death:  { th: 'ผู้ไม่ยอมแพ้', icon: '💀', on: 'ล้มแล้วลุก', need: 5, per: { hpP: .01 }, evo: [['ฟีนิกซ์', { regen: .8, hpP: .06 }], ['วิญญาณแค้น', { atkP: .08 }], ['ผู้ข้ามความตาย', { hpP: .1, atkP: .08 }]] },
+  night:  { th: 'บุตรแห่งราตรี', icon: '🌙', on: 'ปราบมอนยามค่ำคืน', need: 100, per: { lukP: .015 }, evo: [['นักล่ายามวิกาล', { crit: 5, lukP: .05 }], ['เงาจันทรา', { dodge: 5, lukP: .05 }], ['ราชันย์ราตรี', { lukP: .1, crit: 6 }]] },
+  feed:   { th: 'มือเลี้ยงสัตว์', icon: '🍖', on: 'ให้อาหารสัตว์เลี้ยง', need: 25, per: { regen: .05, xp: .01 }, evo: [['ผู้เลี้ยงอสูร', { atkP: .05, regen: .4 }], ['เพื่อนแห่งสรรพสัตว์', { xp: .1, drop: .05 }], ['ผู้เป็นหนึ่งกับอสูร', { atkP: .08, xp: .1 }]] },
+};
+const TRAIT_KEYS = Object.keys(TRAITS), TRAIT_LV = [0, 0, 30, 80, 160, 300];
+const traitLv = x => { let l = 1; for (let k = 2; k <= 5; k++) if (x.xp >= TRAIT_LV[k]) l = k; return l; };
+const traitName = k => { const t = TRAITS[k], x = P.traits[k]; return x && x.evo != null ? t.evo[x.evo][0] : t.th; };
+function traitFx(k) { const t = TRAITS[k], x = P.traits[k]; if (!x) return {}; if (x.evo != null) return t.evo[x.evo][1]; const l = traitLv(x), o = {}; for (const q in t.per) o[q] = t.per[q] * l; return o; }
+function fmtFx(o) { return Object.entries(o).map(([k, v]) => OPTS[k] ? fmtOpt(k, v) : '').filter(Boolean).join(' · '); }
+// Main jobs (chosen at Lv 15), hidden sub-jobs (rolled at Lv 30 from how you have played) and latent status (rolled at birth, hidden).
+const JOBS = {
+  warrior:  { th: 'นักรบ', icon: '🗡️', fx: { atkP: .08, hpP: .05 }, desc: 'ตีแรงและทนขึ้น' },
+  guardian: { th: 'ผู้พิทักษ์', icon: '🛡️', fx: { defP: .1, block: 3 }, desc: 'ป้องกันสูง กันดาเมจได้' },
+  mage:     { th: 'นักเวท', icon: '🔮', fx: { skill: .12, cdr: .05 }, desc: 'สกิลแรงและใช้บ่อยขึ้น' },
+  hunter:   { th: 'นักล่า', icon: '🏹', fx: { crit: 5, spdP: .06 }, desc: 'คริง่ายและว่องไว' },
+};
+const SUBJOBS = {
+  shadow:   { th: 'นักฆ่าเงา', from: 'crit', fx: { crit: 6, dodge: 3 } },
+  arcane:   { th: 'จอมเวทเร้นลับ', from: 'skill', fx: { skill: .1, cdr: .06 } },
+  ironknight: { th: 'อัศวินเหล็ก', from: 'hurt', fx: { defP: .1, hpP: .06 } },
+  wanderer: { th: 'นักเดินทางไร้บ้าน', from: 'walk', fx: { move: .08, xp: .08 } },
+  merchant: { th: 'พ่อค้าพเนจร', from: 'gold', fx: { gold: .2, drop: .08 } },
+  tamer:    { th: 'ผู้เลี้ยงอสูร', from: 'feed', fx: { atkP: .05, regen: .4 } },
+  revenant: { th: 'ผู้กลับจากความตาย', from: 'death', fx: { hpP: .1, steal: .02 } },
+  alchemist:{ th: 'นักปรุงยา', from: 'potion', fx: { regen: .6, hpP: .05 } },
+  slayer:   { th: 'นักล่าบอส', from: 'boss', fx: { boss: .15, atkP: .04 } },
+  chosen:   { th: 'ผู้ถูกเลือกของโลก', from: null, fx: { atkP: .06, defP: .06, hpP: .06, crit: 4, xp: .1 } },
+};
+const LATENT = {
+  star:   { th: 'ดวงดาวนำทาง', fx: { lukP: .08, drop: .05 } }, dragon: { th: 'เลือดมังกร', fx: { hpP: .08, regen: .3 } },
+  lion:   { th: 'หัวใจสิงห์', fx: { atkP: .06, crit: 2 } },     jade:   { th: 'ผิวหยก', fx: { defP: .07 } },
+  wind:   { th: 'เท้าลม', fx: { spdP: .06, move: .05 } },       genius: { th: 'อัจฉริยะ', fx: { xp: .12 } },
+  cursed: { th: 'ดวงซวยแต่แกร่ง', fx: { lukP: -.08, atkP: .1, defP: .05 } }, sage: { th: 'จิตปราชญ์', fx: { cdr: .05, skill: .06 } },
+  gold:   { th: 'เกิดมารวย', fx: { gold: .2 } },                 void:   { th: 'ผู้แตะความว่างเปล่า', fx: { crit: 4, steal: .02, dodge: 2 } },
+};
+// Unique monsters: fought alone in a sealed arena. Losing to one can brand you with its curse (a mix of strength and a price);
+// beating it lifts the curse and leaves a permanent mark of honour.
+Object.assign(FOES, {
+  nightwolf: genFoe('จักรพรรดิหมาป่าราตรี', '🐺', 30, 3, 1.4, 1.2, 1.4, 1, { lv: 30, tier: 9, uniq: 1 }),
+  tombguard: genFoe('ผู้เฝ้าสุสานนิรันดร์', '💀', 30, 3.4, 1.3, 1.5, .9, 1, { lv: 30, tier: 9, uniq: 1 }),
+  deepwhale: genFoe('วาฬมหาสมุทรลึก', '🐋', 30, 4, 1.2, 1.3, .9, 1, { lv: 30, tier: 9, uniq: 1 }),
+});
+const UNIQUE_MON = {
+  nightwolf: { th: 'จักรพรรดิหมาป่าราตรี', curse: 'ตราราตรี', cfx: { atkP: .15, spdP: .15, crit: 5 }, noSlot: ['armor', 'hat'], cdesc: 'ATK/SPD +15% คริ +5% แต่ใส่เกราะและหมวกไม่ได้', honor: 'ผู้ล้มจักรพรรดิราตรี' },
+  tombguard: { th: 'ผู้เฝ้าสุสานนิรันดร์', curse: 'ตราสุสาน', cfx: { hpP: -.25, steal: .05, skill: .15 }, noSlot: [], cdesc: 'HP −25% แต่ดูดเลือด 5% สกิลแรงขึ้น 15%', honor: 'ผู้ปลุกสุสาน' },
+  deepwhale: { th: 'วาฬมหาสมุทรลึก', curse: 'ตรามหาสมุทร', cfx: { move: -.15, defP: .2, regen: .8 }, noSlot: [], cdesc: 'เดินช้าลง 15% แต่ DEF +20% ฟื้น HP เร็ว', honor: 'ผู้ฟังเพลงวาฬ' },
+};
+// Unique scenarios: started by hidden conditions, then a vague hint leads to where the unique monster waits.
+const SCENARIOS = {
+  wolf:  { th: 'หอนแห่งราตรีกาล', mon: 'nightwolf', hint: 'เสียงหอนดังมาจากส่วนลึกของป่าลึกลับ… ตรงที่บอสของป่าเคยยืนอยู่', spot: () => BOSS_POS[1] },
+  tomb:  { th: 'หลุมศพไร้ชื่อ', mon: 'tombguard', hint: 'คุณยายเล่าถึงหลุมศพเก่าที่ปลายสุดฝั่งตะวันตกของถ้ำคริสตัล', spot: () => TOMB_SPOT },
+  whale: { th: 'เพลงของวาฬ', mon: 'deepwhale', hint: 'ได้ยินเพลงแผ่วๆ มาจากแหล่งน้ำในทุ่งหญ้าสดใส', spot: () => WATER_SPOT },
+};
+let WATER_SPOT = null;
+function hiddenFx() {
+  const o = {}, add = f => { for (const k in f) o[k] = (o[k] || 0) + f[k]; };
+  if (!P) return o;
+  for (const k in P.traits || {}) if (TRAITS[k]) add(traitFx(k));
+  if (JOBS[P.job]) add(JOBS[P.job].fx);
+  if (SUBJOBS[P.subjob]) add(SUBJOBS[P.subjob].fx);
+  if (P.latent && LATENT[P.latent.k]) add(LATENT[P.latent.k].fx);
+  for (const c of P.curses || []) if (UNIQUE_MON[c]) add(UNIQUE_MON[c].cfx);
+  for (const w of P.uwins || []) add({ atkP: .05, defP: .05, hpP: .05 });
+  return o;
+}
+function rollLatent() { return { k: pick(Object.keys(LATENT)), shown: false }; }
+function rollSubjob() {
+  if (Math.random() < .02) return 'chosen';
+  const keys = Object.keys(SUBJOBS).filter(k => SUBJOBS[k].from), a = P.act || {};
+  const w = keys.map(k => 1 + (a[SUBJOBS[k].from] || 0) / (TRAITS[SUBJOBS[k].from].need || 50)), sum = w.reduce((x, y) => x + y, 0);
+  let r = Math.random() * sum; for (let i = 0; i < keys.length; i++) if ((r -= w[i]) <= 0) return keys[i]; return keys[0];
+}
+// Every counted action goes through here: counts, trait sprouting, levelling, evolution and scenario triggers.
+function act(k, n = 1) {
+  if (!P || !started) return;
+  P.act = P.act || {}; P.act[k] = (P.act[k] || 0) + n;
+  const t = TRAITS[k]; if (!t) return;
+  P.traits = P.traits || {};
+  const x = P.traits[k];
+  if (!x) { if (P.act[k] >= t.need && Math.random() < .04) { P.traits[k] = { xp: 0 }; gearDirty(); sfx('rare'); banner(`ทักษะงอก! ${t.icon} ${t.th}`, fmtFx(traitFx(k))); chatLine('', `${P.name} ได้ทักษะใหม่ «${t.th}»`, true); save(); } return; }
+  if (x.evo != null) return;
+  const l0 = traitLv(x); x.xp += n; const l1 = traitLv(x);
+  if (l1 > l0) { gearDirty(); floatAt(me.x, me.y - 56, `${t.th} Lv ${l1}`, '#C9B8FF', 15); }
+  if (l1 >= 5 && Math.random() < .03) {
+    const r = Math.random(); x.evo = r < .08 ? 2 : r < .54 ? 0 : 1; gearDirty(); sfx('lvl'); buzz([40, 40, 100]);
+    banner(`${x.evo === 2 ? '✦ วิวัฒน์ลับ! ✦ ' : 'ทักษะวิวัฒน์! '}${t.th} → ${t.evo[x.evo][0]}`, fmtFx(t.evo[x.evo][1]));
+    chatLine('', `${P.name}: «${t.th}» วิวัฒน์เป็น «${t.evo[x.evo][0]}»`, true); save();
+  }
+}
+function startScenario(key) {
+  P.scen = P.scen || {}; if (P.scen[key]) return;
+  P.scen[key] = 1; const sc = SCENARIOS[key];
+  setTimeout(() => { sfx('boss'); banner(`Unique Scenario เริ่มต้น!`, `「${sc.th}」`); chatLine('', `📜 ${sc.hint}`, true); }, 600);
+  save();
+}
+function checkScenarios(ev) {
+  if (!P) return;
+  const sc = P.scen || {};
+  if (ev === 'kill' && !sc.wolf && isNight() && zoneAt(me.x, me.y) === 2 && Math.random() < .005) startScenario('wolf');
+  if (ev === 'grandma' && !sc.tomb && (P.act.death || 0) >= 3) { startScenario('tomb'); return true; }
+  if (ev === 'fountain' && !sc.whale && (P.act.feed || 0) >= 30) startScenario('whale');
+  if (ev === 'kill' && Math.random() < 1 / 3000) { const k = pick(Object.keys(UNIQUE_MON)); setTimeout(() => { banner('รอยเท้าขนาดยักษ์…', `มีบางอย่างกำลังตามคุณอยู่ · ${UNIQUE_MON[k].th}`); offerEncounter(k); }, 800); }
+}
+let encounterOffer = null;
+function offerEncounter(k) { encounterOffer = { k, until: nowS() + 20 }; toast('แตะปุ่ม ⚠️ เพื่อเข้าสู้ ภายใน 20 วินาที'); updateEncBtn(); }
+function updateEncBtn() { const b = $('#bEnc'); if (b) b.hidden = !(encounterOffer && encounterOffer.until > nowS() && !DG); }
+function enterEncounter(k) {
+  const u = UNIQUE_MON[k]; if (!u || DG || me.dead) return;
+  const lv = Math.max(FOES[k].lv, P.lv + 8);
+  DG = { d: { name: u.th, waves: [], pool: [], boss: k, bossLv: lv, tier: clamp(Math.floor(lv / 8.5), 0, TIERS - 1), fee: 0, uniq: k, colors: DUNGEONS[0].colors, wall: DUNGEONS[0].wall }, i: 0, a: ARENAS[0], mons: new Map(), gen: 1, wave: 0, bossUp: false, clear: false, next: nowS() + 2, portal: null };
+  const a = ARENAS[0]; me.x = (a.x0 + 3) * T; me.y = (a.y0 + a.h / 2) * T; me.goal = null; me.targetId = null; me.zone = -1; loot.length = 0; encounterOffer = null; updateEncBtn();
+  closeSheet(); sfx('boss'); save(); banner('⚠ Unique Monster ⚠', `${u.th} · Lv ${lv}`);
+}
+function uniqueWin(k) {
+  const u = UNIQUE_MON[k];
+  P.curses = (P.curses || []).filter(c => c !== k);
+  if (!(P.uwins || []).includes(k)) P.uwins = [...(P.uwins || []), k];
+  gearDirty(); sfx('rare'); buzz([60, 40, 60, 40, 150]);
+  setTimeout(() => banner(`ปราบ Unique Monster!`, `ได้เกียรติ «${u.honor}» · ทุกค่า +5% ถาวร`), 500);
+  chatLine('', `🏆 ${P.name} ปราบ ${u.th} สำเร็จ!`, true);
+  for (const sc in SCENARIOS) if (SCENARIOS[sc].mon === k && P.scen && P.scen[sc]) P.scen[sc] = 2;
+  const cx = (DG.a.x0 + DG.a.w / 2) * T, cy = (DG.a.y0 + DG.a.h / 2) * T;
+  for (let i = 0; i < 2; i++) dropLoot('item', cx, cy, makeItem(DG.d.tier, 4)); dropLoot('rune', cx, cy, pick(RUNE_KEYS) + 5);
+}
+function applyCurse(k) {
+  const u = UNIQUE_MON[k]; if (!u || (P.curses || []).includes(k)) return;
+  P.curses = [...(P.curses || []), k];
+  for (const sl of u.noSlot) if (P.eq[sl]) { if (P.bag.length < BAG_MAX) P.bag.push(P.eq[sl]); delete P.eq[sl]; }
+  gearDirty();
+  setTimeout(() => banner(`ถูกประทับ «${u.curse}»`, u.cdesc), 3600);
+}
+const cursedSlot = sl => (P.curses || []).some(c => UNIQUE_MON[c] && UNIQUE_MON[c].noSlot.includes(sl));
+
 
 // ---------------- Pets ----------------
 // Personalities bias which foods a pet likes, how it fights, and which forms it leans toward when it evolves.
@@ -1544,6 +1698,9 @@ const ARENAS = DUNGEONS.map((d, i) => ({ x0: 4 + i * 46, y0: HW + 3, w: 40, h: 2
     if (g >= 1 && g <= ZONES.length && !BLOCK.has(OBJ[i]) && Math.hypot(x - TOWN.x, y - TOWN.y) > BANDS[0] + 3) ZONE_TILES[g - 1].push(i);
   }
 })();
+// Hidden scenario spots: a water tile in the first field, and the west-most edge of the crystal cave.
+{ let best = null; for (const i of ZONE_TILES[0]) { const x = i % W, y = Math.floor(i / W); if (OBJ[i + 1] === 5 || OBJ[i - 1] === 5) { best = { x: x * T + T / 2, y: y * T + T / 2 }; break; } } WATER_SPOT = best || BOSS_POS[0]; }
+const TOMB_SPOT = (() => { let b = null; for (const i of ZONE_TILES[2]) { const x = i % W; if (!b || x < b.tx) b = { tx: x, x: x * T + T / 2, y: Math.floor(i / W) * T + T / 2 }; } return b; })();
 const tileAt = (px, py) => { const x = Math.floor(px / T), y = Math.floor(py / T); return (x < 0 || y < 0 || x >= W || y >= H) ? -1 : y * W + x; };
 const solid = (px, py) => { const i = tileAt(px, py); return i < 0 || BLOCK.has(OBJ[i]); };
 const monSolid = (px, py) => { const i = tileAt(px, py); return i < 0 || BLOCK.has(OBJ[i]) || GROUND[i] === 0; };
@@ -1579,6 +1736,8 @@ function migrate(s) {
   s.pets = Array.isArray(s.pets) ? s.pets.filter(pt => pt && PET_FORMS[pt.sp] && PET_PERS[pt.pers]) : [];
   s.petItems = Object.assign({ food: {}, stone: {}, acc: [], eggs: 0 }, s.petItems || {});
   s.runes = s.runes && typeof s.runes === 'object' ? s.runes : {};
+  s.act = s.act && typeof s.act === 'object' ? s.act : {}; s.traits = s.traits && typeof s.traits === 'object' ? s.traits : {}; s.scen = s.scen && typeof s.scen === 'object' ? s.scen : {};
+  s.curses = Array.isArray(s.curses) ? s.curses : []; s.uwins = Array.isArray(s.uwins) ? s.uwins : []; if (!s.latent || !LATENT[s.latent.k]) s.latent = rollLatent();
   for (const it of [...(s.bag || []), ...Object.values(s.eq || {})]) if (it && !Array.isArray(it.opts)) { if (it.uq) { it.opts = [rollOpt(9), rollOpt(9)]; it.sock = [null, null, null]; } else rollOpts(it); }
   s.kills = s.kills || 0; s.bossKills = s.bossKills || 0; s.points = s.points || 0; s.gold = s.gold || 0; s.xp = s.xp || 0;
   return s;
@@ -1774,6 +1933,7 @@ async function hatch() {
 let started = false;
 function enterWorld() {
   if (P && (!P.runes || typeof P.runes !== 'object')) P.runes = {};
+  if (P) { P.act = P.act || {}; P.traits = P.traits || {}; P.scen = P.scen || {}; P.curses = P.curses || []; P.uwins = P.uwins || []; if (!P.latent) P.latent = rollLatent(); if (P.lv >= 30 && !P.subjob) P.subjob = rollSubjob(); }
   if (P && P.form && (P.formTier || 2) >= 3 && !BRANCH[P.formBranch]) { P.formBranch = rollBranch(); setTimeout(() => banner(`ร่างของคุณแตกสาย: ${BRANCH[P.formBranch].th}`, fullFormName()), 1500); }
   if (P && P.form && (P.formTier || 2) >= 4 && cleanSub(P.formBranch, P.formSub).length < (P.formTier || 2) - 3) { fillPath(); setTimeout(() => banner(`ร่างของคุณแตกแขนง: ${branchOn().last.th}`, fullFormName()), 300); }
   $('#s-egg').hidden = true; $('#hud').hidden = false;
@@ -1991,7 +2151,7 @@ function dDamage(m, dmg) {
   reward(s, m.x, m.y, m.lv, DG.d.tier);
   if (DG.mons.size === 0 && !m.boss && DG.wave < DG.d.waves.length) banner(`คลื่น ${DG.wave + 1}/${DG.d.waves.length}`, 'เตรียมตัว!');
   if (m.boss) {
-    DG.clear = true; P.dungeons = (P.dungeons || 0) + 1;
+    DG.clear = true; if (DG.d.uniq) uniqueWin(DG.d.uniq); else P.dungeons = (P.dungeons || 0) + 1;
     const cx = (DG.a.x0 + DG.a.w / 2) * T, cy = (DG.a.y0 + DG.a.h / 2) * T;
     for (let k = 0; k < 3; k++) dropLoot('item', cx, cy, makeItem(DG.d.tier, 2));
     dropLoot('gold', cx, cy, Math.round(DG.d.fee * 1.5)); dropLoot('elixir', cx, cy, 1); dropLoot('stone', cx, cy, pick(Object.keys(PET_STONES)));
@@ -2229,7 +2389,7 @@ function attackMon(m, mult, o = {}) {
   if (Math.random() * 100 < dodge) { floatAt(m.rx, m.ry - 26, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return 0; }
   let d = dmgCalc(st('atk') * (1 + buff('atk')), m.def, mult, P.lv, m.lv);
   const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0) + buff('crit') + ap('crit') + uqFx('crit') + ((branchOn() || {}).crit || 0), 0, 85);
-  if (crit) d = Math.round(d * 1.75);
+  if (crit) { d = Math.round(d * 1.75); act('crit'); }
   if (m.boss && ap('boss') + uqFx('boss')) d = Math.round(d * (1 + ap('boss') + uqFx('boss')));
   const stl = ap('steal') + uqFx('steal') + ((branchOn() || {}).steal || 0); if (stl) P.hp = Math.min(maxHp(), P.hp + d * stl);
   floatAt(m.rx, m.ry - 26, crit ? d + '!' : d, crit ? '#FFD23F' : '#fff', crit ? 24 : 19);
@@ -2263,6 +2423,7 @@ function castSkill(i) {
   if (!L) { toast(`${sk.name} ปลดล็อกที่ Lv ${sk.unlock}`); return; }
   if ((me.cds[sk.id] || 0) > 0) return;
   if (P.mp < sk.cost) { toast('MP ไม่พอ ดื่มน้ำค้างมานา (R) หรือรอให้ MP ฟื้น'); return; }
+  act('skill');
   const pw = skPow(L) * (sk.id[0] === 'f' ? 1 + .25 * ((P.formTier || 2) - 2) : 1) * (1 + uqFx('skill')), none = () => { toast('ไม่มีมอนอยู่ใกล้ๆ'); return false; };
   let dealt = 0;
   const hit = (m, o = {}) => { const d = attackMon(m, sk.mult * pw, { critBonus: sk.crit || 0, ...o }); dealt += d; return d; };
@@ -2333,7 +2494,7 @@ function usePotion(kind) {
   kind = kind || 'potion';
   if (!started || me.dead) return;
   if (!(P.items[kind] > 0)) { toast(`ไม่มี${CONSUME[kind].name}แล้ว ซื้อได้ที่ร้านป้าแมวเหมียวในเมือง`); return; }
-  if (kind === 'potion') { if (me.potCd > 0) return; if (P.hp >= maxHp()) { toast('HP เต็มอยู่แล้ว'); return; } healMe(Math.max(30, Math.round(maxHp() * .4))); me.potCd = 1; }
+  if (kind === 'potion') { if (me.potCd > 0) return; if (P.hp >= maxHp()) { toast('HP เต็มอยู่แล้ว'); return; } act('potion'); healMe(Math.max(30, Math.round(maxHp() * .4))); me.potCd = 1; }
   else if (kind === 'ether') { if (P.mp >= maxMp()) { toast('MP เต็มอยู่แล้ว'); return; } P.mp = Math.min(maxMp(), P.mp + 15); floatAt(me.x, me.y - 30, '+15 MP', '#9CC2FF', 16); sfx('heal'); }
   else if (kind === 'power') { me.buffs.atk = { amt: Math.max(.2, buff('atk')), until: nowS() + 60 }; floatAt(me.x, me.y - 30, 'ATK +20%', '#FFB38A', 16); sfx('skill'); }
   else if (kind === 'speed') { me.buffs.haste = { amt: Math.max(.25, buff('haste')), until: nowS() + 60 }; floatAt(me.x, me.y - 30, 'เร็วขึ้น!', '#FFE08A', 16); sfx('skill'); }
@@ -2346,19 +2507,20 @@ function receiveHit(atk, mult, spd, mlv) {
   if (me.god) { floatAt(me.x, me.y - 30, 'อมตะ', '#FFE08A', 13); return; }
   const big = mult > 1;
   const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5 + ap('dodge') + uqFx('dodge'), 0, 50);
-  if (Math.random() * 100 < dodge) { floatAt(me.x, me.y - 30, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return; }
+  if (Math.random() * 100 < dodge) { floatAt(me.x, me.y - 30, 'หลบ!', '#E4DDEF', 15); sfx('miss'); act('dodge'); return; }
   const blk = ap('block') + uqFx('block');
   if (blk && Math.random() * 100 < blk) { floatAt(me.x, me.y - 30, 'กันได้!', '#C9CCD8', 16); sfx('guard'); return; }
   let d = dmgCalc(atk, st('def'), mult, mlv || P.lv, P.lv);
   if (me.shieldT > 0) d = Math.max(1, Math.round(d * (1 - me.shieldAmt)));
-  P.hp = Math.max(0, P.hp - d); me.lastHurt = nowS(); me.hurtT = .3;
+  P.hp = Math.max(0, P.hp - d); me.lastHurt = nowS(); me.hurtT = .3; act('hurt');
   floatAt(me.x, me.y - 30, d, big ? '#FFD23F' : '#FF8391', big ? 24 : 18);
   sfx('hurt'); buzz(big ? 70 : 25);
   if (P.hp <= 0) die();
 }
 function die() {
   me.dead = true; me.deadT = 3.5; sfx('die'); buzz([60, 60, 120]);
-  const lost = Math.floor(P.gold * .1); P.gold -= lost;
+  const lost = Math.floor(P.gold * .1); P.gold -= lost; act('death');
+  if (DG && DG.d.uniq) applyCurse(DG.d.uniq);
   $('#dead').hidden = false; $('#deadT').textContent = lost ? `ทองหล่นหาย ${lost} เหรียญ · กำลังพากลับเมือง` : 'กำลังพากลับเมือง';
   save();
 }
@@ -2378,6 +2540,8 @@ function onKill(k) {
 }
 function reward(s, x, y, mlv, tierOverride) {
   P.kills++; if (s.boss) P.bossKills++;
+  act('kill'); if (s.boss) act('boss'); if (P.hp < maxHp() * .25) act('clutch'); if (isNight()) act('night'); if (!DG) checkScenarios('kill');
+  if (P.latent && !P.latent.shown && (P.kills >= 500 || P.lv >= 50)) { P.latent.shown = true; setTimeout(() => banner('สถานะแฝงตื่นขึ้น!', `«${LATENT[P.latent.k].th}» ${fmtFx(LATENT[P.latent.k].fx)}`), 900); }
   if (s.sec) {
     const q = SECRETS.find(e => e.key === s.key);
     if (q) { dropLoot('item', x, y, makeUnique(q.uq)); P.secretKills = [...new Set([...(P.secretKills || []), q.key])]; setTimeout(() => { banner('✦ ของยูนิค! ✦', UNIQUES[q.uq].name); sfx('rare'); }, 400); checkUniqueForm(); }
@@ -2419,6 +2583,8 @@ function gainXp(x) {
     if (P.lv === FORM_LV) setTimeout(checkUniqueForm, 3500);
     if (P.lv === FORM_LV && !P.form) setTimeout(() => { banner('ถึง Lv 20 แล้ว! เปลี่ยนร่างได้', 'แตะปุ่ม ✨ เปลี่ยนร่าง'); sfx('rare'); }, 3000);
     if (stageOf(P.lv) > before) evolved = stageOf(P.lv);
+    if (P.lv === 15 && !P.job) setTimeout(() => { banner('เลือกอาชีพได้แล้ว!', 'เปิดหน้าตัวละคร → ✨ สถานะแฝง'); sfx('rare'); }, 3200);
+    if (P.lv >= 30 && !P.subjob) { P.subjob = rollSubjob(); gearDirty(); setTimeout(() => { banner(`อาชีพแฝงตื่นขึ้น: «${SUBJOBS[P.subjob].th}»`, fmtFx(SUBJOBS[P.subjob].fx)); sfx('rare'); }, 3600); }
   }
   if (up) {
     P.hp = maxHp(); P.mp = maxMp(); sfx('lvl');
@@ -2441,7 +2607,7 @@ function pickupLoot(dt) {
     const d = Math.hypot(l.x - me.x, l.y - me.y);
     if (d < 70 && l.kind === 'gold') { l.x += (me.x - l.x) * Math.min(1, dt * 8); l.y += (me.y - l.y) * Math.min(1, dt * 8); }
     if (d > 26) continue;
-    if (l.kind === 'gold') { P.gold += l.val; floatAt(me.x, me.y - 40, `+${l.val} ทอง`, '#FFD877', 14); sfx('coin'); }
+    if (l.kind === 'gold') { act('gold'); P.gold += l.val; floatAt(me.x, me.y - 40, `+${l.val} ทอง`, '#FFD877', 14); sfx('coin'); }
     else if (l.kind === 'item') {
       if (P.bag.length >= BAG_MAX) { if (!l.warned) { toast('กระเป๋าเต็ม! ขายของใน 🎒 ก่อน'); l.warned = 1; } continue; }
       P.bag.push(l.val); const it = l.val;
@@ -2575,6 +2741,7 @@ $('#bBag').onclick = () => { sfx('tap'); openBag(); };
 $('#bChar').onclick = () => { sfx('tap'); openChar(); };
 $('#bChat').onclick = () => { sfx('tap'); openChat(); };
 $('#bHelp').onclick = () => { sfx('tap'); openHelp(); };
+$('#bEnc').onclick = () => { if (encounterOffer) enterEncounter(encounterOffer.k); };
 $('#bTalk').onclick = () => { sfx('tap'); if (DG) { if (!DG.clear) leaveDungeon('ออกจากดันเจี้ยนแล้ว (ไม่ได้รับรางวัล)'); return; } const n = nearNpc(); if (n) n.open(); else if (nearWarp() >= 0) openWarps(); };
 $('#bSkills').onclick = () => { sfx('tap'); openSkills(); };
 $('#bPet').onclick = () => { sfx('tap'); openPets(); };
@@ -2771,7 +2938,7 @@ function renderAdmin(el) {
     <b style="font-family:var(--f-display)">ตัวละคร · Lv ${P.lv}</b>
     <div class="row2">
       <button class="btn" type="button" data-adm="lv" data-v="1">+1 เลเวล</button><button class="btn" type="button" data-adm="lv" data-v="10">+10 เลเวล</button>
-      <button class="btn" type="button" data-adm="runes">รับรูนทุกแบบ ×3</button><button class="btn" type="button" data-adm="gear">รับของตำนาน 5 ชิ้น</button><button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
+      <button class="btn" type="button" data-adm="traits">ปลุกทักษะแฝงทั้งหมด</button><button class="btn" type="button" data-adm="scen">เริ่ม Scenario ทั้งหมด</button><button class="btn" type="button" data-adm="enc">สู้ยูนิคมอน (สุ่ม)</button><button class="btn" type="button" data-adm="runes">รับรูนทุกแบบ ×3</button><button class="btn" type="button" data-adm="gear">รับของตำนาน 5 ชิ้น</button><button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
       <button class="btn" type="button" data-adm="gold">ทอง +10,000</button><button class="btn" type="button" data-adm="heal">เติม HP/MP + รีเซ็ตคูลดาวน์</button>
       <button class="btn" type="button" data-adm="god" style="${me.god ? 'background:#FFF3B0' : ''}">อมตะ: ${me.god ? 'เปิด' : 'ปิด'}</button>
       <button class="btn" type="button" data-adm="gear">ของตำนานขั้นสูงสุดครบชุด</button><button class="btn" type="button" data-adm="items">ยาทุกชนิด ×10</button>
@@ -2800,6 +2967,9 @@ function adminAct(act, v) {
     announceSecret(foeStats(t, FOES[q.key].lv), m.x, m.y); closeSheet(); return;
   }
   else if (act === 'color') { P.color = v; toast(`เปลี่ยนเป็น${COLORS[v].species}`); }
+  else if (act === 'traits') { for (const k of TRAIT_KEYS) P.traits[k] = { xp: 300, evo: Math.random() < .5 ? null : ri(0, 2) }; P.latent.shown = true; if (!P.subjob) P.subjob = rollSubjob(); gearDirty(); toast('ปลุกทักษะแฝงทั้งหมดแล้ว'); }
+  else if (act === 'scen') { for (const k in SCENARIOS) startScenario(k); }
+  else if (act === 'enc') { closeSheet(); enterEncounter(pick(Object.keys(UNIQUE_MON))); return; }
   else if (act === 'runes') { for (const t of RUNE_KEYS) for (let g = 1; g <= 5; g++) addRune(t + g, 3); toast('ได้รูนทุกแบบ ขั้นละ 3 อัน'); }
   else if (act === 'gear') { for (const sl of SLOTS) if (P.bag.length < BAG_MAX) P.bag.push(makeItem(Math.min(9, Math.floor(P.lv / 8)), 4, sl)); toast('ได้ของตำนาน 5 ชิ้น'); }
   else if (act === 'lv' || act === 'lvto') {
@@ -2856,7 +3026,7 @@ function renderPets(el) {
 function feedPet(pt, k) {
   if (!(P.petItems.food[k] > 0)) return;
   if (pt.hunger >= 95) { petMsg = `${PET_FORMS[pt.sp].name} อิ่มแล้ว ไม่ยอมกิน`; return; }
-  P.petItems.food[k]--; pt.fed[k] = (pt.fed[k] || 0) + 1;
+  P.petItems.food[k]--; pt.fed[k] = (pt.fed[k] || 0) + 1; act('feed');
   const like = pt.likes.includes(k), hate = pt.dislikes.includes(k), per = petPers(pt);
   if ((like || hate) && !pt.known.includes(k)) pt.known.push(k);
   pt.hunger = Math.min(100, pt.hunger + (like ? 35 : 25));
@@ -2901,7 +3071,7 @@ function hatchPetEgg() {
   petMsg = `🥚💥 ฟักออกมาเป็น <b>${PET_FORMS[pt.sp].name}</b> ${PET_FORMS[pt.sp].e} นิสัย${petPers(pt).th}!`;
   sfx('hatch'); banner(`ได้${PET_FORMS[pt.sp].name}!`, `นิสัย${petPers(pt).th} ${petPers(pt).emo}`);
 }
-function openPetShop() { openSheet('ร้านสัตว์เลี้ยงคุณยาย', renderPetShop, 'petshop'); }
+function openPetShop() { openSheet('ร้านสัตว์เลี้ยงคุณยาย', renderPetShop, 'petshop'); if (checkScenarios('grandma')) toast('คุณยายมองหน้าคุณนิ่งๆ แล้วเริ่มเล่าเรื่องเก่า…'); }
 function renderPetShop(el) {
   const free = !P.petFree;
   const row = (icon, name, desc, price, attrs) => `<div class="row"><span class="ico">${icon}</span><div><div class="nm">${name}</div><div class="ds">${desc}</div></div><button class="btn sm" type="button" ${attrs} ${P.gold < price ? 'disabled' : ''}>${price ? `<span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${price.toLocaleString()}` : 'รับฟรี'}</button></div>`;
@@ -2984,6 +3154,7 @@ function renderChar(el) {
       <p class="muted" style="margin:6px 0 0;font-size:12px">ได้ 2 แต้มทุกเลเวล · 1 แต้ม = HP +${POINT_VALUE.hp} หรือค่าอื่น +1 · ★ ค่าเด่นของสี${c.th} โตเร็วเท่าตัว</p>
     </div>
     ${P.lv >= FORM_LV ? `<button class="btn block${P.form ? '' : ' primary'}" type="button" data-act="form">${P.form ? `✨ ${fullFormName()} · ${FORM_ARCH[P.form].desc}${canEvolve() ? ' · วิวัฒน์ได้!' : ''}` : '✨ เปลี่ยนร่าง (ปลดล็อกแล้ว!)'}</button>` : `<p class="muted" style="margin:0;font-size:13px">✨ เปลี่ยนร่างได้ที่ Lv ${FORM_LV} ร่างที่ได้ขึ้นกับค่าสถานะที่เน้น</p>`}
+    <button class="btn block" type="button" data-act="hidden" style="background:#EFE6FF">✨ สถานะแฝง · อาชีพ ${JOBS[P.job] ? JOBS[P.job].icon + JOBS[P.job].th : '-'} · ทักษะ ${Object.keys(P.traits || {}).length}${(P.curses || []).length ? ' · ☠️ ติดคำสาป' : ''}</button>
     <button class="btn block" type="button" data-act="titles">🏷️ ฉายา: ${titleName() ? `«${titleName()}»` : 'ยังไม่ได้ใส่'} · ได้แล้ว ${(P.titles || []).length}/${TITLES.length}</button>
     <button class="btn block" type="button" data-act="skills">📜 ดูและอัปสกิล (แต้มสกิล ${P.sp})</button>
     <div class="panel records"><div><b>${P.kills}</b><span>ปราบมอน</span></div><div><b>${P.bossKills}</b><span>ปราบบอส</span></div><div><b>${P.dungeons || 0}</b><span>ผ่านดันเจี้ยน</span></div></div>
@@ -3020,6 +3191,19 @@ function renderRunes(el) {
   el.innerHTML = `<p style="margin:0;font-size:14px">ใส่รูนในช่องของอุปกรณ์ (เปิดของใน 🎒 แล้วแตะ ＋) · รวมรูนชนิดเดียวกันขั้นเดียวกัน 3 อัน = ขั้นถัดไป 1 อัน · ใส่รูนชนิดเดียวกัน 3 อันขึ้นไป ได้โบนัสชุด (5 อันได้ 2 เท่า)</p>
     <div class="panel rows">${owned.length ? owned.map(([id, c]) => { const q = runeOf(id); return `<div class="row"><span class="ico">${q.r.icon}</span><div><div class="nm" style="color:${q.r.c}">${runeName(id)} × ${c}</div><div class="ds">${runeDesc(id)}</div></div>${q.g < 5 ? `<button class="btn sm" type="button" data-fuse="${id}" ${c >= 3 ? '' : 'disabled'}>รวม 3→${ROMAN[q.g + 1]}</button>` : ''}</div>`; }).join('') : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีรูน มอนทุกตัวมีโอกาสดรอป บอสดรอปบ่อย มอนลับดรอปทุกครั้ง</p>'}</div>
     <div class="panel" style="font-size:13px"><b>โบนัสชุดรูน</b>${RUNE_KEYS.map(t => `<div class="${(n[t] || 0) >= 3 ? '' : 'muted'}">${RUNES[t].icon} ${RUNES[t].th} (${n[t] || 0}/3): ${runeSetDesc(t)}${(n[t] || 0) >= 5 ? ' ×2' : ''}${(n[t] || 0) >= 3 ? ' ✓' : ''}</div>`).join('')}</div>`;
+}
+function openHidden() { openSheet('สถานะแฝง', renderHidden); }
+function renderHidden(el) {
+  const tr = TRAIT_KEYS.filter(k => P.traits[k]), unk = TRAIT_KEYS.length - tr.length;
+  const job = JOBS[P.job];
+  el.innerHTML = `<div class="panel"><b>อาชีพหลัก</b>${job ? `<div>${job.icon} <b>${job.th}</b> <span class="muted">${fmtFx(job.fx)}</span></div>` : P.lv >= 15 ? `<p class="muted" style="margin:4px 0">เลือกได้ 1 อาชีพ (เปลี่ยนภายหลังได้ 5,000 ทอง)</p>` : `<p class="muted" style="margin:4px 0">ปลดล็อกที่ Lv 15</p>`}
+      ${P.lv >= 15 ? `<div class="row2" style="margin-top:6px">${Object.entries(JOBS).map(([k, j]) => `<button class="btn sm" type="button" data-job="${k}" ${P.job === k ? 'disabled' : ''}>${j.icon} ${j.th}<br><small class="muted">${j.desc}</small></button>`).join('')}</div>` : ''}</div>
+    <div class="panel"><b>อาชีพแฝง</b> <div>${SUBJOBS[P.subjob] ? `🎭 <b>${SUBJOBS[P.subjob].th}</b> <span class="muted">${fmtFx(SUBJOBS[P.subjob].fx)}</span>` : '<span class="muted">??? · จะตื่นขึ้นเองตามสไตล์การเล่นของคุณ</span>'}</div></div>
+    <div class="panel"><b>สถานะแฝง</b> <div>${P.latent && P.latent.shown ? `🧬 <b>${LATENT[P.latent.k].th}</b> <span class="muted">${fmtFx(LATENT[P.latent.k].fx)}</span>` : '<span class="muted">??? · มีบางอย่างซ่อนอยู่ในตัวคุณ</span>'}</div></div>
+    <div class="panel rows"><b>ทักษะแฝง</b>${tr.map(k => { const t = TRAITS[k], x = P.traits[k], l = traitLv(x); return `<div class="row"><span class="ico">${t.icon}</span><div><div class="nm" style="${x.evo === 2 ? 'color:#B8860B' : x.evo != null ? 'color:#7B4FD8' : ''}">${traitName(k)}${x.evo == null ? ` Lv ${l}` : ' (วิวัฒน์แล้ว)'}</div><div class="ds">${fmtFx(traitFx(k))}${x.evo == null ? ` · ${l < 5 ? `ฝึกต่อด้วยการ${t.on} ${x.xp}/${TRAIT_LV[l + 1]}` : 'ใกล้วิวัฒน์… ทำต่อไป'}` : ''}</div></div></div>`; }).join('')}
+      <p class="muted" style="margin:6px 0 0;font-size:12px">ยังมีทักษะที่ยังไม่ค้นพบอีก ${unk} อย่าง · ทักษะจะงอกเองจากสิ่งที่คุณทำบ่อยๆ</p></div>
+    <div class="panel rows"><b>Unique Scenario</b>${Object.entries(SCENARIOS).filter(([k]) => P.scen[k]).map(([k, sc]) => `<div class="row"><span class="ico">📜</span><div><div class="nm">「${sc.th}」${P.scen[k] === 2 ? ' ✓' : ''}</div><div class="ds">${P.scen[k] === 2 ? 'สำเร็จแล้ว' : sc.hint}</div></div></div>`).join('') || '<p class="muted" style="margin:4px 0;font-size:13px">ยังไม่พบ… บางเงื่อนไขซ่อนอยู่ในเวลา สถานที่ หรือคำพูดของใครบางคน</p>'}</div>
+    ${(P.curses || []).length || (P.uwins || []).length ? `<div class="panel rows"><b>คำสาปและเกียรติยศ</b>${(P.curses || []).map(c => `<div class="row"><span class="ico">☠️</span><div><div class="nm" style="color:#C0223A">${UNIQUE_MON[c].curse}</div><div class="ds">${UNIQUE_MON[c].cdesc} · ปราบ${UNIQUE_MON[c].th}เพื่อลบคำสาป</div></div></div>`).join('')}${(P.uwins || []).map(c => `<div class="row"><span class="ico">🏆</span><div><div class="nm" style="color:#B8860B">«${UNIQUE_MON[c].honor}»</div><div class="ds">ทุกค่า +5% ถาวร</div></div></div>`).join('')}</div>` : ''}`;
 }
 function openShop() { openSheet('ร้านป้าแมวเหมียว', renderShop); }
 let smithTier = -1;
@@ -3126,9 +3310,11 @@ $('#mBody').addEventListener('click', e => {
     else { const i = +b.dataset.unsock, id = it.sock[i]; if (!id) return; it.sock[i] = null; addRune(id); sfx('tap'); toast(`ถอด${runeName(id)}คืนถุงแล้ว`); }
     gearDirty(); P.hp = Math.min(P.hp, maxHp()); save(); hudStatic(); return refreshSheet();
   }
+  if (b.dataset.job) { const k = b.dataset.job; if (!JOBS[k] || P.lv < 15) return; if (P.job) { if (P.gold < 5000) { toast('ต้องใช้ 5,000 ทอง'); return; } P.gold -= 5000; } P.job = k; gearDirty(); sfx('lvl'); banner(`อาชีพ: ${JOBS[k].th}`, fmtFx(JOBS[k].fx)); save(); hudStatic(); return refreshSheet(); }
   if (b.dataset.fuse) { const id = b.dataset.fuse, q = runeOf(id); if (!q || q.g >= 5 || (P.runes[id] || 0) < 3) return; addRune(id, -3); const nid = q.t + (q.g + 1); addRune(nid); sfx('lvl'); banner('รวมรูนสำเร็จ!', runeName(nid)); save(); return refreshSheet(); }
   const act = b.dataset.act;
   if (act === 'runes') { openRunes(); return; }
+  if (act === 'hidden') { openHidden(); return; }
   if (act === 'runebag') { if (P.gold < 600) return; P.gold -= 600; const id = pick(RUNE_KEYS) + (Math.random() < .15 ? 2 : 1); addRune(id); sfx('rare'); toast(`ได้${runeName(id)}!`); save(); return refreshSheet(); }
   if (act === 'reroll') {
     const f = selItem && findItem(selItem); if (!f) return; const it = f.it, cost = rerollCost(it); if (P.gold < cost) return;
@@ -3138,6 +3324,7 @@ $('#mBody').addEventListener('click', e => {
   if (act === 'equip' || act === 'unequip' || act === 'sell') {
     const f = selItem && findItem(selItem); if (!f) return;
     const it = f.it, hpFrac = P.hp / maxHp();
+    if (act === 'equip' && cursedSlot(it.slot)) { toast('คำสาปทำให้ใส่ช่องนี้ไม่ได้'); return; }
     if (act === 'equip') { const old = P.eq[it.slot]; P.bag = P.bag.filter(i => i !== it); if (old) P.bag.push(old); P.eq[it.slot] = it; sfx('pick'); toast(`สวม ${itemName(it)} แล้ว`); }
     else if (act === 'unequip') { if (P.bag.length >= BAG_MAX) { toast('กระเป๋าเต็ม'); return; } delete P.eq[it.slot]; P.bag.push(it); selItem = null; sfx('tap'); }
     else { P.bag = P.bag.filter(i => i !== it); P.gold += itemPrice(it); selItem = null; sfx('coin'); toast(`ขายได้ ${itemPrice(it)} ทอง`); }
@@ -3372,8 +3559,12 @@ function update(dt) {
     if (me.moving) { const k = Math.min(1, m) * moveSpeed() * dt / m; moveBody(me, dx * k, dy * k, 12, solid); if (Math.abs(dx) > .1) me.dir = dx < 0 ? -1 : 1; me.walk += dt; }
     if ((me.goal || me.targetId != null) && me.moving && Math.hypot(me.x - px, me.y - py) < .2) { me.stuck = (me.stuck || 0) + dt; if (me.stuck > .5) { const tm = me.targetId != null && getMon(me.targetId); if (!tm || Math.hypot(tm.rx - me.x, tm.ry - me.y) >= 60) { me.goal = null; me.targetId = null; } me.stuck = 0; } } else me.stuck = 0;
     if (atkHeld) doAttack(me.targetId != null ? getMon(me.targetId) : null);
+    if (me.moving) { me.walked = (me.walked || 0) + Math.hypot(me.x - px, me.y - py); if (me.walked > 20 * T) { me.walked = 0; act('walk'); } }
     // regen
     const nearFountain = Math.hypot(me.x - (TOWN.x + 1) * T, me.y - (TOWN.y + 1) * T) < 3.2 * T;
+    if (nearFountain && !me.moving) { me.still = (me.still || 0) + dt; if (me.still > 20) { me.still = 0; checkScenarios('fountain'); } } else me.still = 0;
+    if (!DG && P.scen) for (const k in SCENARIOS) { if (P.scen[k] !== 1) continue; const sp = SCENARIOS[k].spot(); if (sp && Math.hypot(me.x - sp.x, me.y - sp.y) < 2.5 * T && !encounterOffer) { banner(`「${SCENARIOS[k].th}」`, 'มีบางอย่างรออยู่ที่นี่…'); offerEncounter(SCENARIOS[k].mon); } }
+    if (encounterOffer && encounterOffer.until < t0) { encounterOffer = null; updateEncBtn(); }
     if (nearFountain) { if (P.hp < maxHp() || P.mp < maxMp()) { P.hp = Math.min(maxHp(), P.hp + maxHp() * .25 * dt); P.mp = Math.min(maxMp(), P.mp + maxMp() * .25 * dt); } }
     else { if (t0 - me.lastHurt > 6) P.hp = Math.min(maxHp(), P.hp + maxHp() * .015 * (1 + (arch() && arch().regen ? (arch().regen - 1) * tierF() : 0) + uqFx('regen')) * dt); P.mp = Math.min(maxMp(), P.mp + .7 * dt); }
     const z = zoneAt(me.x, me.y);
