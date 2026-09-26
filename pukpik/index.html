@@ -489,7 +489,7 @@ function branchOdds() {
   return { a: w.a / sum * (1 - BRANCH_UNIQUE), b: w.b / sum * (1 - BRANCH_UNIQUE), c: w.c / sum * (1 - BRANCH_UNIQUE), u: BRANCH_UNIQUE };
 }
 function rollBranch() { const o = branchOdds(); let r = Math.random(); for (const k of BRANCH_KEYS) if ((r -= o[k]) <= 0) return k; return 'a'; }
-const branchOn = () => P && P.form && (P.formTier || 2) >= 3 && BRANCH[P.formBranch] ? BRANCH[P.formBranch] : null;
+const branchOn = () => P && P.form ? pathFx(P.formBranch, P.formSub, P.formTier || 2) : null;
 function branchArt(fb, c) {
   const S = (w) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round"`;
   if (fb === 'a') return [`<path d="M40 27L44 11L51 24ZM69 24L76 11L80 27Z" fill="#8A6A52" ${S(2)}/>`, `<path d="M25 72L38 68M25 79L38 75M95 72L82 68M95 79L82 75" stroke="#E0303B" stroke-width="3.5" stroke-linecap="round"/>`];
@@ -498,7 +498,142 @@ function branchArt(fb, c) {
   if (fb === 'u') return [`<ellipse cx="60" cy="64" rx="57" ry="54" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="64" rx="52" ry="49" fill="none" stroke="#9FE3FF" stroke-width="3"/>`, `<path d="M60 0L67 8L60 17L53 8Z" fill="#E0F4FF" ${S(2)}/>` + STAR(14, 30, 5, '') + STAR(106, 30, 5, 'b')];
   return ['', ''];
 }
-function formSkillFor(color, form, t, fb) {
+// Each line splits again at form 4 and form 5: 3 sub-lines per node (key = line letter + digit per tier).
+// n(th, ep, skEp, w, fx, art): w = stats that raise the odds; fx = effects; art = [shape, colour].
+const n = (th, ep, skEp, w, fx, art) => Object.assign({ th, ep, skEp, w, art }, fx);
+const SUB = {
+  a: [n('สายโลกันตร์', 'ผู้ผลาญโลกันตร์', 'แห่งโลกันตร์', ['atk'], { mul: { atk: 1.12 }, skMult: 1.2 }, ['flames', '#FF5A1F']),
+      n('สายกระหายเลือด', 'ผู้กระหายเลือด', 'แห่งโลหิต', ['hp', 'atk'], { mul: { atk: 1.06, hp: 1.08 }, steal: .03, heal: .1 }, ['spikes', '#B0102A']),
+      n('สายมือสังหาร', 'มือสังหารเงา', 'แห่งเงาสังหาร', ['spd', 'luk'], { mul: { spd: 1.08 }, crit: 8, cdMul: .85 }, ['blades', '#8B5CF6'])],
+  a0: [n('จอมมารอัคคี', 'จอมมารอัคคีนรก', 'เพลิงนรกันต์', ['atk'], { mul: { atk: 1.12 }, skMult: 1.25 }, ['wings', '#FF7A1A']),
+       n('ผู้ทำลายดวงดาว', 'ผู้ทำลายดวงดาว', 'ถล่มดารา', ['luk'], { mul: { atk: 1.08, luk: 1.08 }, skMult: 1.15, rMul: 1.25 }, ['orbs', '#FFD23F']),
+       n('ภูผาเพลิง', 'ภูผาเพลิงนิรันดร์', 'ภูเขาไฟระเบิด', ['def', 'hp'], { mul: { atk: 1.08, def: 1.1 }, skShield: .3 }, ['crystal', '#FF9A3C'])],
+  a1: [n('ราชันย์แวมไพร์', 'ราชันย์แวมไพร์', 'ดูดวิญญาณ', ['hp'], { mul: { hp: 1.1 }, steal: .05 }, ['wings', '#3B1E2E']),
+       n('อสูรคลั่ง', 'อสูรคลั่งไร้สติ', 'คลั่งเลือด', ['atk'], { mul: { atk: 1.15 }, crit: 5 }, ['horns', '#E0303B']),
+       n('ผู้ปลุกวิญญาณ', 'ผู้ปลุกวิญญาณ', 'คืนชีพ', ['def', 'luk'], { mul: { hp: 1.15 }, heal: .2 }, ['halo', '#7BE08A'])],
+  a2: [n('เงาไร้รอย', 'เงาไร้รอย', 'เงาไร้รอย', ['spd'], { mul: { spd: 1.12 }, cdMul: .8 }, ['tail', '#4FD1FF']),
+       n('นักฆ่าจันทรา', 'นักฆ่าจันทรา', 'จันทร์สังหาร', ['luk'], { mul: { luk: 1.08 }, crit: 10 }, ['moon', '#C9B8FF']),
+       n('พิษพันธนาการ', 'จ้าวพิษพันธนาการ', 'พิษพันสาย', ['atk', 'hp'], { mul: { luk: 1.12 }, nAdd: 3, steal: .02 }, ['orbs', '#6FD34F'])],
+  b: [n('สายป้อมเหล็ก', 'ป้อมเหล็กไร้พ่าย', 'แห่งป้อมเหล็ก', ['def'], { mul: { def: 1.12 }, skShield: .5 }, ['crystal', '#AEB6C8']),
+      n('สายพฤกษาชีวิต', 'ผู้พิทักษ์ชีวิต', 'แห่งชีวิต', ['hp'], { mul: { hp: 1.12 }, heal: .15 }, ['leaves', '#5BC24A']),
+      n('สายหนามสะท้อน', 'หนามพิทักษ์', 'แห่งหนามเหล็ก', ['atk', 'def'], { mul: { atk: 1.06, def: 1.06 }, skMult: 1.15 }, ['spikes', '#8A93A8'])],
+  b0: [n('กำแพงสวรรค์', 'กำแพงสวรรค์', 'ปราการสวรรค์', ['def'], { mul: { def: 1.15 }, skShield: .6 }, ['wings', '#F4F1E6']),
+       n('ยักษ์เหล็กกล้า', 'ยักษ์เหล็กกล้า', 'หมัดเหล็กยักษ์', ['atk'], { mul: { def: 1.08, atk: 1.08 }, skMult: 1.2 }, ['horns', '#6E7891']),
+       n('ผู้เฝ้าประตูมิติ', 'ผู้เฝ้าประตูมิติ', 'ประตูมิติ', ['spd', 'luk'], { mul: { def: 1.08, spd: 1.1 }, cdMul: .85 }, ['aura', '#9D7BFF'])],
+  b1: [n('ต้นไม้โลก', 'แห่งต้นไม้โลก', 'รากต้นไม้โลก', ['hp'], { mul: { hp: 1.2 }, heal: .15 }, ['halo', '#9BE36B']),
+       n('ผู้ประทานพร', 'ผู้ประทานพร', 'พรสวรรค์', ['luk'], { mul: { hp: 1.08, luk: 1.12 }, heal: .1, bonusBuff: true }, ['orbs', '#FFB3C7']),
+       n('ใจศิลา', 'ใจศิลาอมตะ', 'ศิลาอมตะ', ['def'], { mul: { hp: 1.1, def: 1.1 }, skShield: .35 }, ['crystal', '#7FD6C2'])],
+  b2: [n('จอมหนามนรก', 'จอมหนามนรก', 'หนามนรก', ['atk'], { mul: { atk: 1.1 }, skMult: 1.2, nAdd: 2 }, ['flames', '#8A1FFF']),
+       n('กระจกสะท้อน', 'ผู้สะท้อนกระจกเงา', 'กระจกเงา', ['def', 'luk'], { mul: { def: 1.12, luk: 1.08 }, skShield: .4 }, ['moon', '#BFEFFF']),
+       n('มังกรเกราะ', 'มังกรเกราะทมิฬ', 'มังกรทมิฬ', ['hp', 'spd'], { mul: { atk: 1.08, def: 1.08, hp: 1.08 } }, ['tail', '#2E4A3A'])],
+  c: [n('สายสายฟ้า', 'จ้าวสายฟ้า', 'แห่งอัสนี', ['spd'], { mul: { spd: 1.12 }, cdMul: .85 }, ['bolts', '#FFE14D']),
+      n('สายโชคลาภ', 'ผู้เป็นที่รักของโชค', 'แห่งโชคชะตา', ['luk'], { mul: { luk: 1.15 }, crit: 6 }, ['orbs', '#FFD23F']),
+      n('สายลมหมุน', 'จ้าวลมหมุน', 'แห่งพายุหมุน', ['spd', 'hp'], { mul: { spd: 1.06, hp: 1.08 }, rMul: 1.2 }, ['aura', '#9FE3FF'])],
+  c0: [n('อัสนีบาต', 'อัสนีบาตพันสาย', 'อัสนีพันสาย', ['atk'], { mul: { spd: 1.1 }, skMult: 1.1, nAdd: 3 }, ['wings', '#FFF07A']),
+       n('ผู้เร็วกว่าแสง', 'ผู้เร็วกว่าแสง', 'เร็วกว่าแสง', ['spd'], { mul: { spd: 1.15 }, cdMul: .75 }, ['tail', '#FFFFFF']),
+       n('พายุฟ้าคำราม', 'พายุฟ้าคำราม', 'ฟ้าคำราม', ['def', 'hp'], { mul: { atk: 1.1 }, skMult: 1.2 }, ['horns', '#4A6BFF'])],
+  c1: [n('ดาวนำโชค', 'ดาวนำโชคนิรันดร์', 'ดาวนำโชค', ['luk'], { mul: { luk: 1.15 }, crit: 8 }, ['halo', '#FFE98A']),
+       n('ผู้กำหนดลูกเต๋า', 'ผู้กำหนดลูกเต๋า', 'ลูกเต๋าพิพากษา', ['atk'], { crit: 5, skMult: 1.25 }, ['crystal', '#FF8FB1']),
+       n('เจ้าแห่งเหรียญทอง', 'เจ้าแห่งเหรียญทอง', 'ฝนเหรียญทอง', ['hp', 'def'], { mul: { luk: 1.1, hp: 1.1 }, heal: .12 }, ['coins', '#FFC21A'])],
+  c2: [n('ตาพายุ', 'ตาพายุสงบนิ่ง', 'ตาพายุ', ['def', 'hp'], { mul: { def: 1.12 }, skShield: .35 }, ['halo', '#CFEFFF']),
+       n('ทอร์นาโดคลั่ง', 'ทอร์นาโดคลั่ง', 'ทอร์นาโด', ['atk'], { skMult: 1.1, rMul: 1.3 }, ['flames', '#7FD8E8']),
+       n('ปีกวายุ', 'ปีกวายุเหินฟ้า', 'วายุเหินฟ้า', ['spd', 'luk'], { mul: { spd: 1.15, luk: 1.05 }, cdMul: .85 }, ['wings', '#BDF2FF'])],
+  u: [n('สายตะวันอมตะ', 'ตะวันอมตะ', 'แห่งตะวันนิรันดร์', ['atk'], { mul: { atk: 1.1 }, skMult: 1.2 }, ['halo', '#FFB02E']),
+      n('สายจันทราอมตะ', 'จันทราอมตะ', 'แห่งจันทร์นิรันดร์', ['def', 'hp'], { mul: { def: 1.1, hp: 1.1 }, heal: .15, skShield: .4 }, ['moon', '#E8EEFF']),
+      n('สายดาราอมตะ', 'ดาราอมตะ', 'แห่งดารานิรันดร์', ['spd', 'luk'], { mul: { spd: 1.1, luk: 1.1 }, crit: 5, cdMul: .85 }, ['orbs', '#B8A6FF'])],
+  u0: [n('สุริยะพันแสง', 'สุริยะพันแสง', 'สุริยะพันแสง', ['atk'], { mul: { atk: 1.12 }, rMul: 1.25 }, ['flames', '#FFD23F']),
+       n('ฟีนิกซ์นิรันดร์', 'ฟีนิกซ์นิรันดร์', 'เปลวฟีนิกซ์', ['hp'], { mul: { hp: 1.1 }, heal: .25 }, ['wings', '#FF7A3C']),
+       n('ผู้หลอมดวงอาทิตย์', 'ผู้หลอมดวงอาทิตย์', 'หลอมตะวัน', ['def', 'spd'], { skMult: 1.3 }, ['crystal', '#FFB02E'])],
+  u1: [n('จันทร์เงินพิทักษ์', 'จันทร์เงินพิทักษ์', 'จันทร์เงิน', ['def'], { mul: { def: 1.12 }, skShield: .6 }, ['wings', '#DDE4F5']),
+       n('ผู้ครองราตรี', 'ผู้ครองราตรี', 'ราตรีกาล', ['atk', 'spd'], { mul: { atk: 1.1 }, steal: .05 }, ['aura', '#3A2A6E']),
+       n('จันทราเยียวยา', 'จันทราเยียวยา', 'แสงจันทร์เยียวยา', ['hp', 'luk'], { mul: { hp: 1.12 }, heal: .25 }, ['leaves', '#B8F0E0'])],
+  u2: [n('ดาวหางนิรันดร์', 'ดาวหางนิรันดร์', 'ดาวหาง', ['spd'], { nAdd: 4, cdMul: .85 }, ['tail', '#9FE3FF']),
+       n('ผู้ทอจักรวาล', 'ผู้ทอจักรวาล', 'ทอจักรวาล', ['def', 'hp'], { mul: { hp: 1.06, atk: 1.06, def: 1.06, spd: 1.06, luk: 1.06 } }, ['aura', '#FF8FE8']),
+       n('ดาวเหนือนำทาง', 'ดาวเหนือนำทาง', 'ดาวเหนือ', ['luk', 'atk'], { mul: { luk: 1.15 }, crit: 10 }, ['coins', '#FFFFFF'])],
+};
+const cleanSub = (fb, sub) => { sub = String(sub || '').replace(/[^0-2]/g, '').slice(0, 2); return BRANCH[fb] ? sub : ''; };
+// The chain of nodes a character has reached: [line, form-4 sub-line, form-5 sub-line].
+function pathNodes(fb, sub, t) {
+  if (!(t >= 3) || !BRANCH[fb]) return [];
+  sub = cleanSub(fb, sub); const out = [BRANCH[fb]];
+  if (t >= 4 && sub.length >= 1) out.push(SUB[fb][+sub[0]]);
+  if (t >= 5 && sub.length >= 2) out.push(SUB[fb + sub[0]][+sub[1]]);
+  return out;
+}
+function pathFx(fb, sub, t) {
+  const ns = pathNodes(fb, sub, t); if (!ns.length) return null;
+  const o = { mul: {}, crit: 0, steal: 0, skMult: 1, skShield: 0, cdMul: 1, rMul: 1, nAdd: 0, heal: 0, unique: false, bonusBuff: false, nodes: ns, last: ns[ns.length - 1] };
+  for (const x of ns) {
+    for (const k in x.mul || {}) o.mul[k] = (o.mul[k] || 1) * x.mul[k];
+    o.crit += x.crit || 0; o.steal += x.steal || 0; o.skMult *= x.skMult || 1; o.skShield = Math.max(o.skShield, x.skShield || 0);
+    o.cdMul *= x.cdMul || 1; o.rMul *= x.rMul || 1; o.nAdd += x.nAdd || 0; o.heal = Math.max(o.heal, x.heal || 0);
+    if (x.skFast) { o.cdMul *= .85; o.rMul *= 1.15; o.nAdd += 2; }
+    if (x.unique) o.unique = true; if (x.bonusBuff) o.bonusBuff = true;
+  }
+  o.th = ns.map(x => x.th).join(' › '); o.desc = fxDesc(o.last);
+  return o;
+}
+function fxDesc(x) {
+  if (x.desc) return x.desc;
+  const L = { atk: 'ATK', def: 'DEF', hp: 'HP', spd: 'SPD', luk: 'LUK' }, out = [];
+  const m = x.mul || {}, ks = Object.keys(m);
+  if (ks.length === 5) out.push(`ทุกค่า +${Math.round((m.atk - 1) * 100)}%`); else for (const k of ks) out.push(`${L[k]} +${Math.round((m[k] - 1) * 100)}%`);
+  if (x.crit) out.push(`คริ +${x.crit}%`); if (x.steal) out.push(`ดูดเลือด ${Math.round(x.steal * 100)}%`);
+  if (x.skMult) out.push(`สกิลร่างแรงขึ้น ${Math.round((x.skMult - 1) * 100)}%`); if (x.skShield) out.push(`สกิลร่างให้โล่ ${Math.round(x.skShield * 100)}%`);
+  if (x.heal) out.push(`สกิลร่างฟื้น HP ${Math.round(x.heal * 100)}%`); if (x.cdMul) out.push(`คูลดาวน์สกิลร่าง −${Math.round((1 - x.cdMul) * 100)}%`);
+  if (x.rMul) out.push(`วงสกิลกว้างขึ้น ${Math.round((x.rMul - 1) * 100)}%`); if (x.nAdd) out.push(`ยิงเพิ่ม ${x.nAdd} ลูก`); if (x.bonusBuff) out.push('ได้บัฟ ATK');
+  return out.join(' · ');
+}
+// Which sub-line the next evolution leads to: stats named in each option's w raise its odds (cubed, like forms).
+function subOdds(fb, sub) {
+  const opts = SUB[fb + cleanSub(fb, sub)]; if (!opts) return null;
+  const ref = k => BASE[k] + GROW[k] * (P.lv - 1), r = k => Math.max(.2, P.base[k] / ref(k));
+  const w = opts.map(x => Math.pow(x.w.reduce((a, k) => a + r(k), 0) / x.w.length, 3)), sum = w.reduce((a, b) => a + b, 0);
+  return w.map(v => v / sum);
+}
+function rollSub(fb, sub) { const o = subOdds(fb, sub); if (!o) return ''; let r = Math.random(); for (let i = 0; i < o.length; i++) if ((r -= o[i]) <= 0) return String(i); return '0'; }
+// Makes sure the saved path is as long as the form tier needs (older saves, admin jumps).
+function fillPath() {
+  const t = P.formTier || 2; if (!P.form || t < 3) return;
+  if (!BRANCH[P.formBranch]) P.formBranch = rollBranch();
+  P.formSub = cleanSub(P.formBranch, P.formSub);
+  while (P.formSub.length < t - 3) P.formSub += rollSub(P.formBranch, P.formSub);
+  P.formSub = P.formSub.slice(0, t - 3);
+}
+function subArt(shape, col) {
+  const S = (w) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round"`, F = `fill="${col}" ${S(2)}`;
+  switch (shape) {
+    case 'flames': return [`<path d="M16 64Q2 44 14 24Q16 38 24 40Q22 26 32 18Q34 36 30 50Z" ${F}/><path d="M104 64Q118 44 106 24Q104 38 96 40Q98 26 88 18Q86 36 90 50Z" ${F}/>`, ''];
+    case 'spikes': return [`<path d="M20 48L4 40L16 58L0 66L18 74L4 86L24 88Z" ${F}/><path d="M100 48L116 40L104 58L120 66L102 74L116 86L96 88Z" ${F}/>`, ''];
+    case 'blades': return [`<path d="M6 12L14 6L112 104L104 112Z" ${F}/><path d="M114 12L106 6L8 104L16 112Z" ${F}/>`, ''];
+    case 'crystal': return ['', `<path d="M14 62L20 38L30 60L22 68Z" ${F}/><path d="M106 62L100 38L90 60L98 68Z" ${F}/><path d="M20 38L22 68M100 38L98 68" stroke="#fff" stroke-width="1.5" opacity=".7"/>`];
+    case 'halo': return [`<ellipse cx="60" cy="5" rx="20" ry="5" fill="none" stroke="${INK}" stroke-width="7"/><ellipse cx="60" cy="5" rx="20" ry="5" fill="none" stroke="${col}" stroke-width="4"/>`, ''];
+    case 'wings': return [`<path d="M28 50Q-8 16 1 72Q10 62 16 70Q18 60 26 64Z" ${F}/><path d="M92 50Q128 16 119 72Q110 62 104 70Q102 60 94 64Z" ${F}/>`, ''];
+    case 'orbs': return ['', `<circle cx="8" cy="30" r="6" ${F}/><circle cx="112" cy="30" r="6" ${F}/><circle cx="6" cy="96" r="4.5" ${F}/><circle cx="114" cy="96" r="4.5" ${F}/>`];
+    case 'tail': return [`<path d="M88 104Q122 110 118 76Q114 60 104 70Q114 82 106 92Q98 98 88 94Z" ${F}/>`, ''];
+    case 'moon': return ['', `<path d="M100 4A14 14 0 1 0 116 28A11 11 0 1 1 100 4Z" ${F}/>`];
+    case 'horns': return [`<path d="M36 34Q20 14 26 2Q34 16 46 26ZM84 34Q100 14 94 2Q86 16 74 26Z" ${F}/>`, ''];
+    case 'leaves': return [`<path d="M22 50Q0 44 4 22Q22 28 26 46Z" ${F}/><path d="M98 50Q120 44 116 22Q98 28 94 46Z" ${F}/>`, `<path d="M8 26L24 46M112 26L96 46" stroke="${INK}" stroke-width="1.5"/>`];
+    case 'aura': return [`<ellipse cx="60" cy="64" rx="56" ry="53" fill="${col}" opacity=".28"/><ellipse cx="60" cy="64" rx="56" ry="53" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="7 6"/>`, ''];
+    case 'bolts': return ['', `<path d="M10 20L20 20L14 32L22 32L8 52L12 36L4 36Z" ${F}/><path d="M110 20L100 20L106 32L98 32L112 52L108 36L116 36Z" ${F}/>`];
+    case 'coins': return ['', `<circle cx="10" cy="40" r="7" ${F}/><circle cx="110" cy="40" r="7" ${F}/><circle cx="14" cy="18" r="5" ${F}/><path d="M8 40H12M108 40H112" stroke="${INK}" stroke-width="1.5"/>`];
+  }
+  return ['', ''];
+}
+// Art for the whole path: the line's art at form 3, then each sub-line adds its own piece; form 5 also gets a glow in its colour.
+function pathArt(fb, sub, t, c) {
+  let back = '', front = '';
+  const [bb, bf] = branchArt(fb, c); back += bb; front += bf;
+  pathNodes(fb, sub, t).slice(1).forEach((x, i) => { const [pb, pf] = subArt(x.art[0], x.art[1]); back = pb + back; front += pf; if (i === 1) back = `<ellipse cx="60" cy="64" rx="59" ry="56" fill="none" stroke="${x.art[1]}" stroke-width="4" opacity=".75"/>` + back; });
+  return [back, front];
+}
+// At form 3 and 4: the 3 sub-lines the next evolution can split into, with odds.
+function subCards() {
+  const t = P.formTier || 2, sub = cleanSub(P.formBranch, P.formSub); if (t < 3 || t >= 5 || sub.length !== t - 3) return '';
+  const opts = SUB[P.formBranch + sub], o = subOdds(P.formBranch, sub);
+  return `<p style="margin:8px 0 4px;font-size:13px"><b>ตอนขึ้นร่าง ${t + 1} จะแตกแขนงเป็น 1 ใน 3 ทาง</b> <span class="muted">โอกาสขึ้นกับค่าสถานะ</span></p><div class="forms">${opts.map((x, i) => `<div class="fcard"><div class="pic">${blobSVG(P.color, 3, { form: P.form, ft: t + 1, fb: P.formBranch, fs: sub + i, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div><b>${fullFormName(P.form, t + 1, P.formBranch, sub + i)}</b><span class="arch">${x.th}</span><span class="odds">${Math.round(o[i] * 100)}%<small> โอกาส</small></span><span class="muted" style="font-size:11px">${fxDesc(x)}</span></div>`).join('')}</div>`;
+}
+function formSkillFor(color, form, t, fb, sub) {
   t = t || 2;
   const base = (COLOR_FORM_SKILLS[color] || {})[form] || FORM_SKILLS[form]; if (!base) return null;
   const k = t - 2, sk = Object.assign({}, base, { id: `f_${color}_${form}`, name: SKILL_STAGE_NAME[t](base.name), cd: base.cd * (1 - .08 * k) });
@@ -507,13 +642,19 @@ function formSkillFor(color, form, t, fb) {
   if (sk.n) sk.n += k;
   if (sk.dist) sk.dist = Math.round(sk.dist * (1 + .1 * k));
   if (t >= 5) sk.bonusBuff = true;
-  const br = t >= 3 && BRANCH[fb];
-  if (br) {
-    sk.name += br.skEp;
-    if (br.skMult && sk.mult) sk.mult *= br.skMult;
-    if (br.skShield) { sk.shield = Math.max(sk.shield || 0, br.skShield); sk.dur = sk.dur || 4; if (sk.type !== 'nova' && sk.type !== 'shield') sk.shieldAfter = br.skShield; }
-    if (br.skFast) { sk.cd *= .85; if (sk.r) sk.r = Math.round(sk.r * 1.15); if (sk.n) sk.n += 2; if (sk.range) sk.range = Math.round(sk.range * 1.15); }
-    if (br.unique) sk.bonusBuff = true;
+  const fx = pathFx(fb, sub, t);
+  if (fx) {
+    const last = fx.last;
+    if (t >= 4 && fx.nodes.length === t - 2) sk.name = (t === 4 ? 'อัคร' : 'เทพ') + base.name + last.skEp; else sk.name += fx.nodes[0].skEp;
+    if (sk.mult) sk.mult *= fx.skMult;
+    if (fx.skShield) { sk.shield = Math.max(sk.shield || 0, fx.skShield); sk.dur = sk.dur || 4; if (sk.type !== 'nova' && sk.type !== 'shield') sk.shieldAfter = fx.skShield; }
+    sk.cd *= fx.cdMul;
+    if (sk.r) sk.r = Math.round(sk.r * fx.rMul);
+    if (sk.range) sk.range = Math.round(sk.range * fx.rMul);
+    if (sk.n) sk.n += fx.nAdd;
+    if (fx.heal) sk.healAfter = fx.heal;
+    if (fx.steal) sk.steal = (sk.steal || 0) + fx.steal;
+    if (fx.unique || fx.bonusBuff) sk.bonusBuff = true;
   }
   return sk;
 }
@@ -963,7 +1104,7 @@ function blobSVG(color, st = 1, o = {}) {
   const lookX = form && FORM_LOOK[color] && FORM_LOOK[color][form];
   if (lookX) { back += lookX[0]; formArt += lookX[1]; }
   if (form && ft >= 3) { const [tb, tf] = formTierArt(form, ft, c, SL); back = tb + back; formArt += tf; }
-  if (form && ft >= 3 && o.fb) { const [bb, bf] = branchArt(o.fb, c); back = bb + back; formArt += bf; }
+  if (form && ft >= 3 && o.fb) { const [bb, bf] = pathArt(o.fb, o.fs, ft, c); back = bb + back; formArt += bf; }
   // rank art, cumulative: 1 arms+feet, 2 element limbs, 3 pauldrons+belt, 4 cape+medal, 5 aura+wings+tail, 6 war banner, 7 gold hero
   if (rk >= 6) back = `<path d="M104 112V2" stroke="${INK}" stroke-width="4"/><path d="M104 4H119L114 12L119 20H104Z" fill="${c[1]}" ${K2(2)}/>` + back;
   if (rk >= 5) back = `<ellipse cx="60" cy="66" rx="54" ry="50" fill="${c[1]}" opacity=".22"/><ellipse cx="60" cy="66" rx="46" ry="42" fill="#fff" opacity=".18"/>` + (form !== 'rainbow' ? `<path d="M18 70Q0 60 3 40Q14 52 24 56ZM102 70Q120 60 117 40Q106 52 96 56Z" fill="${rk >= 7 ? '#FFE98A' : '#fff'}" ${K2(2.5)}/>` : '') + back;
@@ -990,10 +1131,10 @@ function eggSVG(n) {
     + `<ellipse cx="40" cy="36" rx="9" ry="14" fill="#fff" opacity=".7" transform="rotate(24 40 36)"/>${cracks}</svg>`;
 }
 const blobImgs = new Map();
-function blobImg(color, st, shiny, mood, form, ft, rk, fb) {
-  const k = color + st + (shiny ? 's' : '') + mood + (form || '') + (ft || '') + 'r' + (rk || 0) + (fb || '');
+function blobImg(color, st, shiny, mood, form, ft, rk, fb, fs) {
+  const k = color + st + (shiny ? 's' : '') + mood + (form || '') + (ft || '') + 'r' + (rk || 0) + (fb || '') + (fs || '');
   let im = blobImgs.get(k);
-  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, form, ft, rk, fb, noShadow: true })); blobImgs.set(k, im); }
+  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, form, ft, rk, fb, fs, noShadow: true })); blobImgs.set(k, im); }
   return im;
 }
 
@@ -1188,7 +1329,7 @@ function formOdds() {
   return w;
 }
 function formName(f) { return FORM_NAMES[P.color][f] || SECRET_NAME[f]; }
-function fullFormName(f = P.form, t = P.formTier || 2, fb = P.formBranch) { return stageFormName(formName(f), t) + (t >= 3 && BRANCH[fb] ? BRANCH[fb].ep : ''); }
+function fullFormName(f = P.form, t = P.formTier || 2, fb = P.formBranch, sub = P.formSub) { const ns = pathNodes(fb, sub, t); return stageFormName(formName(f), t) + (ns.length ? ns[ns.length - 1].ep : ''); }
 const canEvolve = () => !!P.form && (P.formTier || 2) < 5 && P.lv >= FORM_TIER_LV[(P.formTier || 2) + 1];
 function updateFormBtn() {
   const b = $('#bForm'), first = P.lv >= FORM_LV && !P.form, evo = canEvolve();
@@ -1203,12 +1344,12 @@ function setForm(f) {
 }
 function evolveForm() {
   if (!canEvolve()) return;
-  if ((P.formTier || 2) === 2 || !BRANCH[P.formBranch]) P.formBranch = rollBranch();
-  P.formTier = (P.formTier || 2) + 1; P.hp = maxHp(); P.mp = maxMp();
+  if ((P.formTier || 2) === 2 || !BRANCH[P.formBranch]) { P.formBranch = rollBranch(); P.formSub = ''; }
+  P.formTier = (P.formTier || 2) + 1; fillPath(); P.hp = maxHp(); P.mp = maxMp();
   if (P.formTier === 3 && P.formBranch === 'u') setTimeout(() => { banner('✦ ร่างยูนิค!! ✦', `${fullFormName()} · โอกาส 1%`); sfx('rare'); me.chat = `✦ วิวัฒน์เป็นร่างยูนิค ${fullFormName()}!`; me.chatAt = Date.now(); me.chatT = 6; }, 2800);
   const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
   sfx('lvl'); buzz([40, 40, 80]); save(); hudStatic(); updateHud(true);
-  banner(`วิวัฒน์เป็น${fullFormName()}!`, `${branchOn() ? branchOn().th + ' · ' : ''}สกิลร่าง: ${formSkillFor(P.color, P.form, P.formTier, P.formBranch).name}`);
+  banner(`วิวัฒน์เป็น${fullFormName()}!`, `${branchOn() ? branchOn().last.th + ' · ' : ''}สกิลร่าง: ${formSkillFor(P.color, P.form, P.formTier, P.formBranch, P.formSub).name}`);
   fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 140, t: 0, dur: 1, c: '#FFD23F' });
   chatLine('', `${P.name} วิวัฒน์เป็น${fullFormName()}!`, true);
   refreshSheet();
@@ -1233,7 +1374,7 @@ const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
 const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
 const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ap('haste'));
 const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75));
-const mySkills = () => { const fs = P.form && formSkillFor(P.color, P.form, P.formTier, P.formBranch); return fs ? [...SKILLS[P.color], fs] : SKILLS[P.color]; };
+const mySkills = () => { const fs = P.form && formSkillFor(P.color, P.form, P.formTier, P.formBranch, P.formSub); return fs ? [...SKILLS[P.color], fs] : SKILLS[P.color]; };
 const skLv = sk => (P.lv >= sk.unlock ? clamp(P.skills[sk.id] || 1, 1, SKILL_MAX) : 0);
 const skPow = L => 1 + .15 * (L - 1);
 const skCd = (sk, L) => sk.cd * (1 - .05 * (Math.max(1, L) - 1));
@@ -1357,6 +1498,7 @@ async function hatch() {
 let started = false;
 function enterWorld() {
   if (P && P.form && (P.formTier || 2) >= 3 && !BRANCH[P.formBranch]) { P.formBranch = rollBranch(); setTimeout(() => banner(`ร่างของคุณแตกสาย: ${BRANCH[P.formBranch].th}`, fullFormName()), 1500); }
+  if (P && P.form && (P.formTier || 2) >= 4 && cleanSub(P.formBranch, P.formSub).length < (P.formTier || 2) - 3) { fillPath(); setTimeout(() => banner(`ร่างของคุณแตกแขนง: ${branchOn().last.th}`, fullFormName()), 300); }
   $('#s-egg').hidden = true; $('#hud').hidden = false;
   started = true; me.dead = false; me.zone = -1;
   if (P.hp <= 0) P.hp = maxHp();
@@ -1368,7 +1510,7 @@ function enterWorld() {
 function hudStatic() {
   const c = col();
   $('#app').style.setProperty('--c-light', c.light); $('#app').style.setProperty('--c', c.c[1]);
-  $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, form: P.form, ft: P.formTier, fb: P.formBranch, rk: rankOf(P.lv), noShadow: true });
+  $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, form: P.form, ft: P.formTier, fb: P.formBranch, fs: P.formSub, rk: rankOf(P.lv), noShadow: true });
   updateFormBtn();
   updateSkillBar();
 }
@@ -1726,7 +1868,7 @@ function snapshotOut() {
   return { l };
 }
 function presenceState() {
-  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_INDEX.indexOf(P.form) + 1 : 0, ft: P.form ? P.formTier || 2 : 0, fb: P.formBranch ? BRANCH_KEYS.indexOf(P.formBranch) + 1 : 0, tt: P.title ? TITLES.findIndex(t => t.id === P.title) + 1 : 0, pt: (() => { const pt = activePet(); return pt ? [PET_FORM_KEYS.indexOf(pt.sp), pt.acc ? Object.keys(PET_ACCS).indexOf(pt.acc) : -1, pt.stage] : null; })(), sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
+  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_INDEX.indexOf(P.form) + 1 : 0, ft: P.form ? P.formTier || 2 : 0, fb: P.formBranch ? BRANCH_KEYS.indexOf(P.formBranch) + 1 : 0, fs: P.formSub || '', tt: P.title ? TITLES.findIndex(t => t.id === P.title) + 1 : 0, pt: (() => { const pt = activePet(); return pt ? [PET_FORM_KEYS.indexOf(pt.sp), pt.acc ? Object.keys(PET_ACCS).indexOf(pt.acc) : -1, pt.stage] : null; })(), sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
     lv: P.lv, hp: Math.round(P.hp / maxHp() * 100), hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon),
     a: me.atkCount, dead: me.dead ? 1 : 0, hid: document.hidden ? 1 : 0, h: hitsOut.slice(), ch: me.chat || null, ct: me.chatAt || null };
   if (hosting && sim) { s.M = snapshotOut(); s.k = sim.k.slice(); s.ma = sim.ma.slice(); }
@@ -1742,7 +1884,7 @@ function upsertRemote(p) {
   let r = remotes.get(p.peer);
   if (!r) { r = { x, y, walk: 0, swing: 0, a: pr.a, ct: pr.ct, bubble: '', bubbleT: 0 }; remotes.set(p.peer, r); chatLine('', `${name} เข้ามาในโลก`, true); }
   r.tx = x; r.ty = y; if (Math.hypot(r.x - x, r.y - y) > T * 8) { r.x = x; r.y = y; }
-  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_INDEX[clamp(num(pr.f, 0) | 0, 0, FORM_INDEX.length) - 1] || null; r.ft = clamp(num(pr.ft, 0) | 0, 0, 5); r.fb = BRANCH_KEYS[(num(pr.fb, 0) | 0) - 1] || null; r.tt = (TITLES[(num(pr.tt, 0) | 0) - 1] || {}).name || ''; r.pt = Array.isArray(pr.pt) && PET_FORM_KEYS[num(pr.pt[0], -1)] ? [PET_FORM_KEYS[num(pr.pt[0], -1)], Object.keys(PET_ACCS)[num(pr.pt[1], -1)] || null, clamp(num(pr.pt[2], 1) | 0, 1, 3)] : null; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
+  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_INDEX[clamp(num(pr.f, 0) | 0, 0, FORM_INDEX.length) - 1] || null; r.ft = clamp(num(pr.ft, 0) | 0, 0, 5); r.fb = BRANCH_KEYS[(num(pr.fb, 0) | 0) - 1] || null; r.fs = r.fb ? cleanSub(r.fb, pr.fs) : ''; r.tt = (TITLES[(num(pr.tt, 0) | 0) - 1] || {}).name || ''; r.pt = Array.isArray(pr.pt) && PET_FORM_KEYS[num(pr.pt[0], -1)] ? [PET_FORM_KEYS[num(pr.pt[0], -1)], Object.keys(PET_ACCS)[num(pr.pt[1], -1)] || null, clamp(num(pr.pt[2], 1) | 0, 1, 3)] : null; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
   r.lv = clamp(num(pr.lv, 1) | 0, 1, 999); r.hp = clamp(num(pr.hp, 100), 0, 100); const okGear = n => { n = num(n, 0) | 0; return (n >= 0 && n <= TIERS) || (n >= 100 && n < 100 + UNIQUE_KEYS.length) ? n : 0; }; r.hat = okGear(pr.hat); r.wp = okGear(pr.wp); r.dead = !!pr.dead;
   if (pr.a !== r.a) { r.a = pr.a; r.swing = .2; }
   if (pr.ct !== r.ct) { r.ct = pr.ct; const t = clean(pr.ch).slice(0, 80); if (t) { r.bubble = t; r.bubbleT = 6; chatLine(name, t); } }
@@ -1895,6 +2037,7 @@ function castSkill(i) {
   if (sk.steal && dealt > 0) healMe(Math.max(1, Math.round(dealt * sk.steal)));
   if (sk.bonusBuff) me.buffs.atk = { amt: Math.max(.25, buff('atk')), until: nowS() + 6 };
   if (sk.shieldAfter) addShield(sk.shieldAfter, 4);
+  if (sk.healAfter) healMe(Math.round(maxHp() * sk.healAfter));
   P.mp -= sk.cost; me.cds[sk.id] = skCd(sk, L); me.swing = .25; me.atkCount++; sfx('skill');
   fx.push({ type: 'emoji', e: sk.icon, x: me.x, y: me.y - 44, t: 0, dur: .6 });
 }
@@ -2232,9 +2375,9 @@ function renderForm(el) {
       <div class="pic">${blobSVG(P.color, 3, { form: f, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div>
       <b>${show ? formName(f) : '???'}</b><span class="arch">${FORM_ARCH[f].th}</span>
       <span class="odds">${odds[f] < .01 ? (odds[f] * 100).toFixed(1) : Math.round(odds[f] * 100)}%<small> โอกาส</small></span><span class="oddbar"><i style="width:${odds[f] * 100}%"></i></span></div>`; }).join('');
-  const tierBox = P.form ? `<div class="panel"><b style="font-family:var(--f-display)">ขั้นของร่าง</b><div class="tiers" style="margin-top:6px">${[2, 3, 4, 5].map(t => `<span class="btn${(P.formTier || 2) === t ? ' on' : ''}" style="cursor:default;display:flex;flex-direction:column;align-items:flex-start;gap:0"><b>ร่าง ${t} · ${t >= 3 && !P.formBranch ? stageFormName(formName(P.form), t) + '(แตกสาย)' : fullFormName(P.form, t)}</b><small style="font:600 11px var(--f-body)">Lv ${t > 2 ? FORM_TIER_LV[t] : 20} · สกิล ${formSkillFor(P.color, P.form, t, P.formBranch).name}</small></span>`).join('')}</div>
+  const tierBox = P.form ? `<div class="panel"><b style="font-family:var(--f-display)">ขั้นของร่าง</b><div class="tiers" style="margin-top:6px">${[2, 3, 4, 5].map(t => `<span class="btn${(P.formTier || 2) === t ? ' on' : ''}" style="cursor:default;display:flex;flex-direction:column;align-items:flex-start;gap:0"><b>ร่าง ${t} · ${t >= 3 && pathNodes(P.formBranch, P.formSub, t).length < t - 2 ? stageFormName(formName(P.form), t) + ' (แตกสาย)' : fullFormName(P.form, t)}</b><small style="font:600 11px var(--f-body)">Lv ${t > 2 ? FORM_TIER_LV[t] : 20} · สกิล ${formSkillFor(P.color, P.form, t, P.formBranch, P.formSub).name}</small></span>`).join('')}</div>
       <p class="muted" style="margin:6px 0 0;font-size:12px">แต่ละขั้นทำให้โบนัสของร่างและสกิลร่างแรงขึ้น และหน้าตาอลังการขึ้น</p>
-      ${(P.formTier || 2) === 2 ? `<p style="margin:8px 0 4px;font-size:13px"><b>ตอนขึ้นร่าง 3 จะแตกสายเป็น 1 ใน 3 สาย (หรือร่างยูนิค 1%)</b> <span class="muted">โอกาสขึ้นกับค่าสถานะ</span></p><div class="forms">${BRANCH_KEYS.map(k => { const o = branchOdds()[k]; return `<div class="fcard${BRANCH[k].unique ? ' secret' : ''}"><div class="pic">${blobSVG(P.color, 3, { form: P.form, ft: 3, fb: k, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div><b>${BRANCH[k].unique ? '???' : fullFormName(P.form, 3, k)}</b><span class="arch">${BRANCH[k].th}</span><span class="odds">${o < .02 ? (o * 100).toFixed(0) : Math.round(o * 100)}%<small> โอกาส</small></span><span class="muted" style="font-size:11px">${BRANCH[k].unique ? 'ยังไม่มีใครรู้' : BRANCH[k].desc}</span></div>`; }).join('')}</div>` : branchOn() ? `<p style="margin:8px 0 0;font-size:13px"><b>${branchOn().th}:</b> <span class="muted">${branchOn().desc}</span></p>` : ''}${canEvolve() ? `<button class="btn primary block" type="button" data-act="evolve" style="margin-top:8px">✨ วิวัฒน์เป็นร่าง ${(P.formTier || 2) + 1}</button>` : ''}</div>` : '';
+      ${(P.formTier || 2) === 2 ? `<p style="margin:8px 0 4px;font-size:13px"><b>ตอนขึ้นร่าง 3 จะแตกสายเป็น 1 ใน 3 สาย (หรือร่างยูนิค 1%)</b> <span class="muted">โอกาสขึ้นกับค่าสถานะ</span></p><div class="forms">${BRANCH_KEYS.map(k => { const o = branchOdds()[k]; return `<div class="fcard${BRANCH[k].unique ? ' secret' : ''}"><div class="pic">${blobSVG(P.color, 3, { form: P.form, ft: 3, fb: k, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div><b>${BRANCH[k].unique ? '???' : fullFormName(P.form, 3, k)}</b><span class="arch">${BRANCH[k].th}</span><span class="odds">${o < .02 ? (o * 100).toFixed(0) : Math.round(o * 100)}%<small> โอกาส</small></span><span class="muted" style="font-size:11px">${BRANCH[k].unique ? 'ยังไม่มีใครรู้' : BRANCH[k].desc}</span></div>`; }).join('')}</div>` : branchOn() ? `<p style="margin:8px 0 0;font-size:13px"><b>${branchOn().th}</b><br><span class="muted">${branchOn().nodes.map(x => x.desc || fxDesc(x)).join(' + ')}</span></p>${subCards()}` : ''}${canEvolve() ? `<button class="btn primary block" type="button" data-act="evolve" style="margin-top:8px">✨ วิวัฒน์เป็นร่าง ${(P.formTier || 2) + 1}</button>` : ''}</div>` : '';
   const uqCard = (P.seen || []).includes('unique') && P.form !== 'unique' ? `<button class="btn block" type="button" data-act="gounique" style="background:#FFF3B0">👑 กลับเป็น${formName('unique')} (ฟรี)</button>` : '';
   const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${fullFormName()}</b><div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div></div>` : '';
   el.innerHTML = `${cur}${tierBox}${uqCard}<p style="margin:0;font-size:14px">${ready ? '' : `<b>ปลดล็อกที่ Lv ${FORM_LV}</b> · `}${c.species}เปลี่ยนร่างได้ 5 แบบ และมีร่างลับอีก 2 แบบ (โอกาสแบบละ 0.5%) ร่างที่ได้เป็นการสุ่ม แต่ค่าสถานะไหนสูงกว่าปกติ โอกาสได้ร่างสายนั้นก็ยิ่งมาก <span class="muted">(อยากได้ร่างไหน ลองแจกแต้มสถานะให้ค่านั้นก่อน)</span></p>
@@ -2333,6 +2476,8 @@ function renderAdmin(el) {
     <div class="row2">${[2, 3, 4, 5].map(t => `<button class="btn" type="button" data-adm="tier" data-v="${t}" style="${(P.formTier || 2) === t ? 'background:#FFF3B0' : ''}">ร่าง ${t}</button>`).join('')}</div>
     <b style="font-family:var(--f-display)">สายของร่าง (ร่าง 3 ขึ้นไป)</b>
     <div class="row2">${BRANCH_KEYS.map(k => `<button class="btn" type="button" data-adm="branch" data-v="${k}" style="${P.formBranch === k ? 'background:#FFF3B0' : ''}">${BRANCH[k].th}</button>`).join('')}</div>
+    ${BRANCH[P.formBranch] ? `<div class="row2">${SUB[P.formBranch].map((x, i) => `<button class="btn" type="button" data-adm="sub4" data-v="${i}" style="${(P.formTier || 2) >= 4 && (P.formSub || '')[0] === String(i) ? 'background:#FFF3B0' : ''}">ร่าง4 ${x.th}</button>`).join('')}</div>
+    <div class="row2">${SUB[P.formBranch + ((P.formSub || '')[0] || '0')].map((x, i) => `<button class="btn" type="button" data-adm="sub5" data-v="${i}" style="${(P.formTier || 2) >= 5 && (P.formSub || '')[1] === String(i) ? 'background:#FFF3B0' : ''}">ร่าง5 ${x.th}</button>`).join('')}</div>` : ''}
     <b style="font-family:var(--f-display)">สัตว์เลี้ยง</b>
     <div class="row2"><button class="btn" type="button" data-adm="petkit">ไข่ 3 ใบ + อาหาร ×10 + ศิลา ×3 + ของสวมใส่ครบ</button><button class="btn" type="button" data-adm="petlv">สัตว์เลี้ยง Lv 30 + ผูกพัน 100</button></div>
     <b style="font-family:var(--f-display)">ของลับ · ฉายา</b>
@@ -2355,8 +2500,9 @@ function renderAdmin(el) {
 function adminAct(act, v) {
   if (!isAdmin) return;
   if (act === 'form') { setForm(v || null); toast(v ? `เปลี่ยนเป็น${formName(v)}แล้ว` : 'กลับเป็นร่างปกติ'); }
-  else if (act === 'tier') { P.formTier = +v; if (+v >= 3 && !BRANCH[P.formBranch]) P.formBranch = 'a'; toast(`ตั้งเป็นร่าง ${v}`); }
-  else if (act === 'branch') { P.formBranch = v; if ((P.formTier || 2) < 3) P.formTier = 3; toast(`ตั้งเป็น${BRANCH[v].th}`); }
+  else if (act === 'tier') { P.formTier = +v; if (+v >= 3 && !BRANCH[P.formBranch]) P.formBranch = 'a'; fillPath(); toast(`ตั้งเป็นร่าง ${v}`); }
+  else if (act === 'branch') { P.formBranch = v; P.formSub = ''; if ((P.formTier || 2) < 3) P.formTier = 3; fillPath(); toast(`ตั้งเป็น${BRANCH[v].th}`); }
+  else if (act === 'sub4' || act === 'sub5') { if (!BRANCH[P.formBranch]) P.formBranch = 'a'; const sub = cleanSub(P.formBranch, P.formSub); if (act === 'sub4') { P.formSub = v; P.formTier = Math.max(4, P.formTier || 2); } else { P.formSub = (sub[0] || '0') + v; P.formTier = 5; } fillPath(); toast(`ตั้งเป็น${branchOn().last.th}`); }
   else if (act === 'uniques') { for (const k of UNIQUE_KEYS) if (P.bag.length < BAG_MAX) P.bag.push(makeUnique(k)); toast('ใส่ของยูนิคไว้ในกระเป๋าแล้ว'); }
   else if (act === 'titles') { P.titles = TITLES.map(t => t.id); if (!P.title) P.title = TITLES[0].id; }
   else if (act === 'warps') { P.warps = WARPS.map((_, i) => i); }
@@ -2543,7 +2689,7 @@ function renderChar(el) {
   el.style.setProperty('--c', c.c[1]); el.style.setProperty('--c-light', c.light);
   const ref = { hp: Math.max(150, maxHp()), atk: 70, def: 70, spd: 70, luk: 70 };
   el.innerHTML = `
-    <div class="char-head"><div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny, form: P.form, ft: P.formTier, fb: P.formBranch, rk: rankOf(P.lv) })}</div>
+    <div class="char-head"><div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny, form: P.form, ft: P.formTier, fb: P.formBranch, fs: P.formSub, rk: rankOf(P.lv) })}</div>
       <div><p class="eyebrow">ยศ ${RANKS[rankOf(P.lv)].name} · ${P.form ? `${fullFormName()} · ${FORM_ARCH[P.form].th}` : `${c.species} · ${STAGE_NAME[s]}`}</p><div style="font:700 21px var(--f-display)">${esc(P.name)}</div>
         <div class="chips" style="margin-top:4px"><span class="chip">Lv ${P.lv}</span><span class="chip" style="background:${c.light}">สี${c.th}</span>${P.shiny ? '<span class="chip" style="background:#FFF3B0">✦</span>' : ''}</div>
         <p class="muted" style="margin:6px 0 0;font-size:13px">EXP ${P.xp}/${xpNeed(P.lv)} · ${P.lv < 5 ? 'วิวัฒนาการที่ Lv 5' : P.lv < 12 ? 'ร่างราชาที่ Lv 12' : 'วิวัฒนาการครบแล้ว'}</p></div></div>
@@ -2790,7 +2936,7 @@ function drawBubble(text, x, y) {
   ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 8);
 }
 function drawBlob(o) {
-  const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form, o.ft, o.rk, o.fb);
+  const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form, o.ft, o.rk, o.fb, o.fs);
   const t = o.walk, sq = o.moving ? Math.sin(t * 14) * .07 : Math.sin(nowS() * 3 + o.x) * .03;
   const lift = o.moving ? Math.abs(Math.sin(t * 14)) * 4 : 0;
   ctx.fillStyle = 'rgba(51,40,74,.2)'; ctx.beginPath(); ctx.ellipse(o.x, o.y + 2, size * .36, size * .1, 0, 0, 7); ctx.fill();
@@ -2979,8 +3125,8 @@ function render() {
   if (DG && DG.portal) { const pt = DG.portal; ents.push({ y: pt.y, d: () => { const tt = nowS(); for (let k = 0; k < 3; k++) { ctx.strokeStyle = ['#C9A6FF', '#8C5CF0', '#FFD1FF'][k]; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(pt.x, pt.y - 14, 22 - k * 6, 26 - k * 7, 0, tt * (2 + k) + k, tt * (2 + k) + k + 4.5); ctx.stroke(); } drawName('วงวาร์ปกลับเมือง', pt.x, pt.y - 46, '#E9D5FF'); } }); }
   for (const l of loot) if (inView(l.x, l.y)) ents.push({ y: l.y - 8, d: () => drawLoot(l) });
   for (const m of monsterList()) if (inView(m.rx, m.ry) && (curZ < 0 || zoneAt(m.rx, m.ry) === curZ)) ents.push({ y: m.ry, d: () => drawMon(m) });
-  for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, ft: r.ft, fb: r.fb, rk: rankOf(r.lv), title: r.tt, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
-  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, ft: P.formTier, fb: P.formBranch, rk: rankOf(P.lv), title: titleName(), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon), self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
+  for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, ft: r.ft, fb: r.fb, fs: r.fs, rk: rankOf(r.lv), title: r.tt, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
+  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, ft: P.formTier, fb: P.formBranch, fs: P.formSub, rk: rankOf(P.lv), title: titleName(), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon), self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
   { const pt = activePet(); if (pt && petObj.placed && !me.dead) ents.push({ y: petObj.y, d: () => drawPet(petObj.x, petObj.y, pt.sp, pt.acc, pt.stage, petObj.emoT > 0 ? petObj.emo : (pt.hunger < 15 ? '💢' : '')) }); }
   for (const r of remotes.values()) if (r.pt && !DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) { const [fk, ak, stg] = r.pt; ents.push({ y: r.y + 8, d: () => drawPet(r.x - r.d * 30, r.y + 8, fk, ak, stg, '') }); }
   ents.sort((a, b) => a.y - b.y);
