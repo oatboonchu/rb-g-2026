@@ -2118,11 +2118,16 @@ function updateFormBtn() {
   b.hidden = !(first || evo);
   b.textContent = evo ? `✨ วิวัฒน์เป็นร่าง ${(P.formTier || 2) + 1} ได้แล้ว!` : '✨ เปลี่ยนร่างได้แล้ว!';
 }
+function ensureRace() {
+  if (!P.form || RACES[P.race]) return;
+  P.race = rollRace(P.color); gearDirty();
+  setTimeout(() => { banner(`เกิดใหม่เป็นเผ่า${RACES[P.race].th}! ${RACES[P.race].e}`, RACES[P.race].desc); chatLine('', `${P.name} เกิดใหม่เป็นเผ่า${RACES[P.race].th}`, true); hudStatic(); }, 2600);
+}
 function setForm(f) {
   const old = P.form && formSkillFor(P.color, P.form);
   if (old && P.skills[old.id] > 1 && (!f || formSkillFor(P.color, f).id !== old.id)) { P.sp += P.skills[old.id] - 1; delete P.skills[old.id]; }
   P.form = f || null; P.formTier = f ? P.formTier || 2 : P.formTier;
-  if (f && !RACES[P.race]) { P.race = rollRace(P.color); setTimeout(() => { banner(`เกิดใหม่เป็นเผ่า${RACES[P.race].th}! ${RACES[P.race].e}`, RACES[P.race].desc); chatLine('', `${P.name} เกิดใหม่เป็นเผ่า${RACES[P.race].th}`, true); }, 2600); }
+  if (f) ensureRace();
   if (f) P.seen = [...new Set([...(P.seen || []), f])];
 }
 function evolveForm() {
@@ -3241,7 +3246,7 @@ function rollForm(paid) {
     cards.forEach((cd, k) => cd.classList.toggle('hi', k === i % N)); sfx('tap');
     if (i >= steps) {
       const old = P.form && formSkillFor(P.color, P.form); if (old && P.skills[old.id] > 1) { P.sp += P.skills[old.id] - 1; delete P.skills[old.id]; }
-      rolling = false; lastRoll = pick; P.form = pick; P.formTier = P.formTier || 2; P.hp = maxHp(); P.mp = maxMp();
+      rolling = false; lastRoll = pick; P.form = pick; P.formTier = P.formTier || 2; ensureRace(); P.hp = maxHp(); P.mp = maxMp();
       P.seen = [...new Set([...(P.seen || []), pick])];
       if (FORM_ARCH[pick].secret) { setTimeout(() => { banner('✨ ร่างลับ!! ✨', `${formName(pick)} · โอกาส 0.5%`); sfx('rare'); }, 2700); me.chat = `✨ ได้ร่างลับ ${formName(pick)}!`; me.chatAt = Date.now(); me.chatT = 6; }
       const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
@@ -3316,6 +3321,9 @@ function renderAdmin(el) {
     <div class="row2">${BRANCH_KEYS.map(k => `<button class="btn" type="button" data-adm="branch" data-v="${k}" style="${P.formBranch === k ? 'background:#FFF3B0' : ''}">${BRANCH[k].th}</button>`).join('')}</div>
     ${BRANCH[P.formBranch] ? `<div class="row2">${SUB[P.formBranch].map((x, i) => `<button class="btn" type="button" data-adm="sub4" data-v="${i}" style="${(P.formTier || 2) >= 4 && (P.formSub || '')[0] === String(i) ? 'background:#FFF3B0' : ''}">ร่าง4 ${x.th}</button>`).join('')}</div>
     <div class="row2">${SUB[P.formBranch + ((P.formSub || '')[0] || '0')].map((x, i) => `<button class="btn" type="button" data-adm="sub5" data-v="${i}" style="${(P.formTier || 2) >= 5 && (P.formSub || '')[1] === String(i) ? 'background:#FFF3B0' : ''}">ร่าง5 ${x.th}</button>`).join('')}</div>` : ''}
+    <b style="font-family:var(--f-display)">เผ่าพันธุ์ · ${RACES[P.race] ? RACES[P.race].e + ' ' + RACES[P.race].th : 'ยังไม่มี (ได้ตอนเปลี่ยนร่าง)'}</b>
+    <div class="row2">${RACE_KEYS.map(k => `<button class="btn" type="button" data-adm="race" data-v="${k}" style="${P.race === k ? 'background:#FFF3B0' : ''}">${RACES[k].e} ${RACES[k].th}</button>`).join('')}<button class="btn" type="button" data-adm="race" data-v="roll">🎲 สุ่มเผ่าใหม่</button></div>
+    <p class="muted" style="margin:0;font-size:12px">${RACE_KEYS.map(k => `${RACES[k].th}: ${RACES[k].desc}`).join(' · ')} · เห็นหน้าตาเผ่าหลังเปลี่ยนร่าง</p>
     <b style="font-family:var(--f-display)">สัตว์เลี้ยง</b>
     <div class="row2"><button class="btn" type="button" data-adm="petkit">ไข่ 3 ใบ + อาหาร ×10 + ศิลา ×3 + ของสวมใส่ครบ</button><button class="btn" type="button" data-adm="petlv">สัตว์เลี้ยง Lv 30 + ผูกพัน 100</button></div>
     <b style="font-family:var(--f-display)">ของลับ · ฉายา</b>
@@ -3326,7 +3334,7 @@ function renderAdmin(el) {
     <b style="font-family:var(--f-display)">ตัวละคร · Lv ${P.lv}</b>
     <div class="row2">
       <button class="btn" type="button" data-adm="lv" data-v="1">+1 เลเวล</button><button class="btn" type="button" data-adm="lv" data-v="10">+10 เลเวล</button>
-      ${RACE_KEYS.map(k => `<button class="btn" type="button" data-adm="race" data-v="${k}" style="${P.race === k ? 'background:#FFF3B0' : ''}">เผ่า${RACES[k].th}</button>`).join('')}<button class="btn" type="button" data-adm="traits">ปลุกทักษะแฝงทั้งหมด</button><button class="btn" type="button" data-adm="scen">เริ่ม Scenario ทั้งหมด</button><button class="btn" type="button" data-adm="enc">สู้ยูนิคมอน (สุ่ม)</button><button class="btn" type="button" data-adm="runes">รับรูนทุกแบบ ×3</button><button class="btn" type="button" data-adm="gear">รับของตำนาน 5 ชิ้น</button><button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
+      <button class="btn" type="button" data-adm="traits">ปลุกทักษะแฝงทั้งหมด</button><button class="btn" type="button" data-adm="scen">เริ่ม Scenario ทั้งหมด</button><button class="btn" type="button" data-adm="enc">สู้ยูนิคมอน (สุ่ม)</button><button class="btn" type="button" data-adm="runes">รับรูนทุกแบบ ×3</button><button class="btn" type="button" data-adm="gear">รับของตำนาน 5 ชิ้น</button><button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
       <button class="btn" type="button" data-adm="gold">ทอง +10,000</button><button class="btn" type="button" data-adm="heal">เติม HP/MP + รีเซ็ตคูลดาวน์</button>
       <button class="btn" type="button" data-adm="god" style="${me.god ? 'background:#FFF3B0' : ''}">อมตะ: ${me.god ? 'เปิด' : 'ปิด'}</button>
       <button class="btn" type="button" data-adm="gear">ของตำนานขั้นสูงสุดครบชุด</button><button class="btn" type="button" data-adm="items">ยาทุกชนิด ×10</button>
@@ -3355,7 +3363,7 @@ function adminAct(act, v) {
     announceSecret(foeStats(t, FOES[q.key].lv), m.x, m.y); closeSheet(); return;
   }
   else if (act === 'color') { P.color = v; toast(`เปลี่ยนเป็น${COLORS[v].species}`); }
-  else if (act === 'race') { P.race = v; gearDirty(); hudStatic(); toast(`เปลี่ยนเป็นเผ่า${RACES[v].th}`); }
+  else if (act === 'race') { P.race = v === 'roll' ? rollRace(P.color) : v; gearDirty(); hudStatic(); toast(`เปลี่ยนเป็นเผ่า${RACES[P.race].th} ${RACES[P.race].e}`); }
   else if (act === 'traits') { for (const k of TRAIT_KEYS) P.traits[k] = { xp: 300, evo: Math.random() < .5 ? null : ri(0, 2) }; P.latent.shown = true; if (!P.subjob) P.subjob = rollSubjob(); gearDirty(); toast('ปลุกทักษะแฝงทั้งหมดแล้ว'); }
   else if (act === 'scen') { for (const k in SCENARIOS) startScenario(k); }
   else if (act === 'enc') { closeSheet(); enterEncounter(pick(Object.keys(UNIQUE_MON))); return; }
