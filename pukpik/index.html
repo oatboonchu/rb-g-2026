@@ -142,15 +142,20 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .banner b{display:block;font:700 26px var(--f-display)}
 .banner span{font:600 14px var(--f-body)}
 @keyframes banner{0%{opacity:0;transform:translate(-50%,10px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
-.chatlog{position:absolute;left:var(--gl);bottom:284px;width:min(64vw,320px);display:flex;flex-direction:column;gap:2px;pointer-events:none!important}
+.chatlog{position:absolute;left:var(--gl);bottom:132px;width:min(64vw,320px);display:flex;flex-direction:column;gap:2px;pointer-events:none!important}
 .chatlog p{margin:0;font:600 13px/1.35 var(--f-body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8),0 0 2px rgba(0,0,0,.7);overflow-wrap:anywhere;animation:rise .2s ease}
 .chatlog p b{color:#FFE08A}
 .chatlog p.sys{color:#E6F3FF;font-weight:500}
-.acts{position:absolute;right:var(--gr);bottom:18px;width:250px;height:250px;pointer-events:none!important}
+.acts{position:absolute;right:var(--gr);bottom:18px;width:96px;height:96px;pointer-events:none!important}
+/* skill hotbar: square slots in a row along the bottom (potion + skills 1-5) */
+.hotbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:8px;padding:8px 10px;background:rgba(51,40,74,.55);border:2px solid var(--ink);border-radius:16px;box-shadow:0 3px 0 var(--ink);--slot:56px}
+.hotbar .abtn{position:relative;right:auto!important;bottom:auto!important;width:var(--slot)!important;height:var(--slot)!important;border-radius:12px;box-shadow:0 3px 0 var(--ink)}
+.hotbar .abtn[hidden]{display:none}
+@media (max-width:700px){.hotbar{left:var(--gl);transform:none;gap:4px;padding:5px;--slot:min(48px,calc((100vw - 170px) / 6))}.hotbar .abtn{font-size:20px!important}.hotbar .abtn small{font-size:9px;bottom:2px}}
 .acts>*{pointer-events:auto}
 .abtn{position:absolute;border-radius:50%;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;overflow:visible;touch-action:none}
 .abtn:active,.abtn.held{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
-.abtn .cd{position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(51,40,74,.55) var(--p,0%),transparent 0);pointer-events:none}
+.abtn .cd{position:absolute;inset:0;border-radius:inherit;background:conic-gradient(rgba(51,40,74,.55) var(--p,0%),transparent 0);pointer-events:none}
 .abtn small{position:absolute;bottom:4px;left:0;right:0;text-align:center;font:700 10px var(--f-body);color:var(--ink)}
 .abtn.atk{right:0;bottom:0;width:92px;height:92px;background:#FFC2AE;font-size:36px}
 .abtn.skl{width:54px;height:54px;background:var(--c-light,#FFE08A);font-size:24px}
@@ -196,16 +201,16 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .oddbar i{display:block;height:100%;background:var(--accent)}
 .story p{margin:0 0 10px;font:500 15px/1.7 var(--f-body)}
 .story p:last-child{font-weight:700;color:#7B4FD8}
-.talk.enc{bottom:330px;background:#FF6B6B;color:#fff;animation:rise .2s ease, pulse 1s infinite alternate}
+.talk.enc{bottom:180px;background:#FF6B6B;color:#fff;animation:rise .2s ease, pulse 1s infinite alternate}
 @keyframes pulse{to{transform:scale(1.06)}}
-.talk{position:absolute;right:var(--gr);bottom:282px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
+.talk{position:absolute;right:var(--gr);bottom:130px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
 .joy{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);background:rgba(51,40,74,.18);pointer-events:none!important;z-index:6}
 .joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.9);border:2.5px solid var(--ink)}
 .kb{display:none;position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font:700 10px/1 var(--f-body);color:var(--paper);background:var(--ink);border-radius:6px;padding:3px 5px;white-space:nowrap;pointer-events:none}
 .desk .kb{display:block}
 .desk .abtn .kb{bottom:auto;top:-14px;font-size:11px;padding:3px 6px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 /* hotkey tags sit outside the round buttons, beside each one, so they never cover the icon */
-.desk .abtn.skl.s0 .kb,.desk .abtn.skl.s1 .kb,.desk .abtn.skl.s2 .kb,.desk .abtn.pot .kb{top:50%;left:auto;right:calc(100% + 5px);transform:translateY(-50%)}
+.desk .hotbar .abtn .kb{top:-11px;left:50%;right:auto;transform:translateX(-50%)}
 .desk .abtn small{display:none}
 .desk .abtn.atk{width:80px;height:80px;font-size:32px}
 
@@ -213,7 +218,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .desk #cv.over-mon{cursor:pointer}
 .keys{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font-size:14px}
 .keys kbd{font:700 12px var(--f-body);background:var(--paper-2);border:2px solid var(--ink);border-bottom-width:3px;border-radius:8px;padding:2px 7px;white-space:nowrap;justify-self:start}
-.joyhint{position:absolute;left:var(--gl);bottom:40px;font:600 12px var(--f-body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);pointer-events:none!important;max-width:40vw}
+.joyhint{position:absolute;left:var(--gl);bottom:88px;font:600 12px var(--f-body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);pointer-events:none!important;max-width:40vw}
 .dead{position:absolute;inset:0;display:grid;place-items:center;background:rgba(51,40,74,.45);text-align:center;color:#fff;z-index:7;text-shadow:0 2px 0 var(--ink)}
 .dead b{display:block;font:700 28px var(--f-display)}
 .chatbar{position:absolute;left:0;right:0;bottom:0;z-index:20;display:flex;gap:8px;padding:10px var(--gr) 10px var(--gl);background:var(--paper);border-top:2px solid var(--ink)}
@@ -273,7 +278,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .records span{font-size:12px;color:var(--ink-soft)}
 .toast{position:absolute;left:50%;top:170px;transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font:600 14px var(--f-display);padding:8px 16px;border-radius:99px;animation:rise .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 @media (max-width:380px){.ibtn{width:38px;height:38px;font-size:17px}.menu-row{gap:6px}}
-@media (max-height:560px){.acts{transform:scale(.85);transform-origin:100% 100%}.chatlog{bottom:150px;width:min(40vw,320px)}.talk{bottom:240px}}
+@media (max-height:560px){.acts{transform:scale(.85);transform-origin:100% 100%}.chatlog{bottom:96px;width:min(40vw,320px)}.talk{bottom:112px}}
 @media (min-width:900px){.acts{bottom:28px;right:28px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
@@ -314,13 +319,15 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
     <button class="formbtn" type="button" id="bForm" hidden>✨ เปลี่ยนร่างได้แล้ว!</button>
     <button class="talk" type="button" id="bTalk" hidden>🛒 คุยกับป้าแมวเหมียว</button>
     <button class="talk enc" type="button" id="bEnc" hidden>⚠️ เข้าสู้ Unique Monster</button>
-    <div class="acts">
+    <div class="hotbar" id="hotbar">
       <button class="abtn pot" type="button" id="bPot" aria-label="ดื่มยา">🍯<b id="potN">0</b><span class="cd" id="potCd"></span><kbd class="kb">Q</kbd></button>
       <button class="abtn skl s0" type="button" id="bS0" data-sk="0" aria-label="สกิล 1"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">1</kbd></button>
       <button class="abtn skl s1" type="button" id="bS1" data-sk="1" aria-label="สกิล 2"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">2</kbd></button>
       <button class="abtn skl s2" type="button" id="bS2" data-sk="2" aria-label="สกิล 3"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">3</kbd></button>
       <button class="abtn skl s3" type="button" id="bS3" data-sk="3" aria-label="สกิล 4"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">4</kbd></button>
       <button class="abtn skl s4" type="button" id="bS4" data-sk="4" aria-label="สกิลร่าง" hidden><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">5</kbd></button>
+    </div>
+    <div class="acts">
       <button class="abtn atk" type="button" id="bAtk" aria-label="โจมตี">⚔️<span class="cd" id="atkCd"></span><kbd class="kb">Space</kbd></button>
     </div>
     <div class="dead" id="dead" hidden><div><b>หมดแรงซะแล้ว…</b><span id="deadT">กำลังพากลับเมือง</span></div></div>
