@@ -839,7 +839,10 @@ const SLOT = {
     names: ['ใบโคลเวอร์', 'กระดิ่งจิ๋ว', 'ตาทิพย์', 'อัญมณีนำโชค', 'ดาวตกนำโชค', 'ตะเกียงวิเศษ', 'เกล็ดหิมะนำโชค', 'ไข่มุกดำ', 'ขนนกเทวดา', 'ลูกแก้วมิติ'],
     icons: ['🍀', '🔔', '🧿', '💎', '🌟', '🪔', '❄️', '🦪', '🪶', '🔮'] },
 };
-const TIERS = 10, EN_MAX = 10;
+const TIERS = 24, EN_MAX = 10;
+// Tiers 11-24 reuse the base item looks with a map-themed title and keep scaling up.
+const TIER_SUFFIX = ['หิมพานต์', 'จักรวาล', 'ทะเลลึก', 'สะวันนา', 'ดึกดำบรรพ์', 'ฟาโรห์', 'หิมะมรณะ', 'ฝันร้าย', 'ราชาแมลง', 'จักรกล', 'เพลิงกัลป์', 'ดวงดาว', 'ทวยเทพ', 'กาลเวลา'];
+for (const k in SLOT) { const sl = SLOT[k]; for (let t = 10; t < TIERS; t++) { sl.base[t] = Math.round(sl.base[9] * Math.pow(1.15, t - 9)); sl.names[t] = sl.names[5 + (t - 10) % 5] + TIER_SUFFIX[t - 10]; sl.icons[t] = sl.icons[5 + (t - 10) % 5]; } }
 const RAR = [
   { th: 'ธรรมดา', c: '#8F88A0', m: 1 }, { th: 'ดี', c: '#2FAE62', m: 1.25 }, { th: 'หายาก', c: '#3F86F5', m: 1.55 },
   { th: 'มหากาพย์', c: '#A155E8', m: 1.9 }, { th: 'ตำนาน', c: '#FF8A1F', m: 2.4 }, { th: 'ยูนิค', c: '#D4A017', m: 3 },
@@ -925,6 +928,68 @@ Object.assign(FOES, {
   madsun:    genFoe('ดวงอาทิตย์คลั่ง', '🌞', 70, 1, 1.3, .9, 1.2),
   fullmoon:  genFoe('จันทร์เพ็ญ', '🌝', 70, 1.3, 1, 1.2, .9),
   voidking:  genFoe('ราชันย์แห่งความว่างเปล่า', '👿', 78, 1.1, 1.1, 1.1, 1, 1),
+  shark:      genFoe('ฉลามปะการัง', '🦈', 80, 1.1, 1.3, 1, 1.2),
+  puffer:     genFoe('ปลาปักเป้าพิษ', '🐡', 80, 1.3, 1, 1.3, .8),
+  crab:       genFoe('ปูยักษ์เกราะ', '🦀', 80, 1.2, 1, 1.5, .7),
+  lobster:    genFoe('กุ้งมังกรคลั่ง', '🦞', 80, 1, 1.2, 1.1, 1.1),
+  seaqueen:   genFoe('เจ้าสมุทรเงือก', '🧜', 89, 1.1, 1.1, 1.1, 1.1, 1),
+  zebra:      genFoe('ม้าลายสายฟ้า', '🦓', 90, 1, 1.1, .9, 1.5),
+  giraffe:    genFoe('ยีราฟยักษ์', '🦒', 90, 1.4, 1, 1.1, .9),
+  kangaroo:   genFoe('จิงโจ้นักมวย', '🦘', 90, 1, 1.3, 1, 1.2),
+  bison:      genFoe('ควายป่าทมิฬ', '🦬', 90, 1.4, 1.1, 1.3, .8),
+  leopard:    genFoe('เสือดาวราชันย์', '🐆', 99, 1, 1.2, 1, 1.4, 1),
+  sloth:      genFoe('สลอธยักษ์', '🦥', 100, 1.6, .9, 1.3, .5),
+  dodo:       genFoe('นกโดโดคลั่ง', '🦤', 100, 1, 1.1, 1, 1.2),
+  beaver:     genFoe('บีเวอร์ฟันเหล็ก', '🦫', 100, 1.1, 1.2, 1.2, .9),
+  orang:      genFoe('อุรังอุตังโบราณ', '🦧', 100, 1.3, 1.2, 1, 1),
+  rexking:    genFoe('ทีเร็กซ์ราชันย์', '🦖', 109, 1.2, 1.2, 1.1, 1, 1),
+  scarab:     genFoe('แมลงสคารับทอง', '🪲', 110, 1, 1, 1.4, 1),
+  tombrat:    genFoe('หนูสุสาน', '🐀', 110, .8, 1.2, .8, 1.6),
+  curse:      genFoe('วิญญาณคำสาป', '☠️', 110, 1, 1.3, .9, 1.1),
+  hauntblade: genFoe('ดาบผีสิง', '🗡️', 110, .9, 1.4, 1, 1.2),
+  pharaoh:    genFoe('ฟาโรห์อมตะ', '👑', 119, 1.1, 1.1, 1.2, 1, 1),
+  irongoat:   genFoe('แพะภูเขาเหล็ก', '🐐', 120, 1.2, 1.1, 1.4, 1),
+  crystalram: genFoe('แกะเขาคริสตัล', '🐏', 120, 1.3, 1.1, 1.2, .9),
+  snowdeer:   genFoe('กวางหิมะวิญญาณ', '🦌', 120, 1, 1.2, 1, 1.4),
+  icesprite:  genFoe('ภูตน้ำแข็ง', '🧊', 120, .9, 1.3, 1, 1.2),
+  icedragon:  genFoe('มังกรน้ำแข็งโบราณ', '🐉', 129, 1.2, 1.2, 1.1, 1, 1),
+  clown:      genFoe('ตัวตลกฝันร้าย', '🤡', 130, 1, 1.3, .9, 1.3),
+  mask:       genFoe('หน้ากากสองหน้า', '🎭', 130, 1, 1.2, 1.1, 1.1),
+  teddy:      genFoe('ตุ๊กตาหมีสาปแช่ง', '🧸', 130, 1.4, 1, 1.2, .8),
+  pumpkin:    genFoe('ฟักทองผี', '🎃', 130, 1.2, 1.1, 1.2, .9),
+  nightmare:  genFoe('ราชาฝันร้าย', '🌀', 139, 1.1, 1.2, 1.1, 1.1, 1),
+  ladybug:    genFoe('เต่าทองยักษ์', '🐞', 140, 1.2, 1, 1.5, .9),
+  mantis:     genFoe('ตั๊กแตนนักฆ่า', '🦗', 140, .9, 1.5, .9, 1.4),
+  roach:      genFoe('แมลงสาบเกราะ', '🪳', 140, 1.2, 1.1, 1.4, 1.3),
+  soldierant: genFoe('มดทหารยักษ์', '🐜', 140, 1.1, 1.2, 1.2, 1.1),
+  flylord:    genFoe('เจ้าแมลงวันปีศาจ', '🪰', 149, 1.1, 1.2, 1, 1.3, 1),
+  cog:        genFoe('เฟืองคลั่ง', '⚙️', 150, 1.2, 1.1, 1.5, .9),
+  bolter:     genFoe('น็อตมีชีวิต', '🔩', 150, 1, 1.2, 1.3, 1.1),
+  satellite:  genFoe('ดาวเทียมเพี้ยน', '🛰️', 150, 1, 1.3, 1, 1.3),
+  siren:      genFoe('ไซเรนคลั่ง', '🚨', 150, 1.1, 1.2, 1.1, 1.2),
+  titanarm:   genFoe('แขนกลไททัน', '🦾', 159, 1.3, 1.2, 1.3, .9, 1),
+  livevolcano: genFoe('ภูเขาไฟมีชีวิต', '🌋', 160, 1.5, 1.2, 1.3, .7),
+  livecomet:  genFoe('อุกกาบาตมีชีวิต', '☄️', 160, .9, 1.5, .9, 1.5),
+  hellox:     genFoe('วัวนรก', '🐂', 160, 1.3, 1.3, 1.1, 1),
+  hellbuff:   genFoe('ควายนรก', '🐃', 160, 1.4, 1.2, 1.3, .8),
+  yama:       genFoe('ยมราชเพลิงกัลป์', '🔱', 169, 1.2, 1.3, 1.2, 1, 1),
+  shootstar:  genFoe('ดาวตกคลั่ง', '🌠', 170, .9, 1.4, .9, 1.6),
+  planetoid:  genFoe('ดาวเคราะห์น้อย', '🪐', 170, 1.5, 1.1, 1.4, .7),
+  giantstar:  genFoe('ดาวยักษ์แดง', '🌟', 170, 1.2, 1.3, 1.1, 1),
+  deadstar:   genFoe('ดาวดับ', '🌑', 170, 1.1, 1.2, 1.2, 1.1),
+  milkyway:   genFoe('เจ้าแห่งทางช้างเผือก', '🌌', 179, 1.2, 1.3, 1.2, 1.1, 1),
+  holydove:   genFoe('นกพิราบศักดิ์สิทธิ์', '🕊️', 180, .9, 1.3, .9, 1.6),
+  godhorse:   genFoe('ม้าเทพ', '🐎', 180, 1.2, 1.2, 1.1, 1.4),
+  goldsheep:  genFoe('แกะทองคำ', '🐑', 180, 1.4, 1, 1.4, .9),
+  godeye:     genFoe('ดวงตาเทพ', '🧿', 180, 1, 1.4, 1, 1.2),
+  sungod:     genFoe('สุริยเทพ', '☀️', 189, 1.2, 1.3, 1.2, 1.1, 1),
+  timesand:   genFoe('ทรายกาลเวลา', '⏳', 190, 1.2, 1.2, 1.2, 1.1),
+  madclock:   genFoe('นาฬิกาคลั่ง', '🕰️', 190, 1.1, 1.4, 1, 1.2),
+  infinity:   genFoe('อนันต์มีชีวิต', '♾️', 190, 1.3, 1.2, 1.3, 1),
+  timeshard:  genFoe('ผลึกกาลเวลา', '💠', 190, 1, 1.3, 1.2, 1.3),
+  timelord:   genFoe('จ้าวแห่งกาลเวลา', '⌛', 200, 1.3, 1.4, 1.3, 1.1, 1),
+  megatitan:  genFoe('ไททันจักรกลยักษ์', '🦿', 125, 1.5, 1.2, 1.3, 1, 1, { lv: 125, tier: 15 }),
+  chronos:    genFoe('เทพแห่งกาลเวลา', '🌘', 200, 1.6, 1.3, 1.3, 1.1, 1, { lv: 200, tier: 23 }),
 });
 // Secret monsters: rare, sparkling, run away from players, always drop their own unique item.
 function secFoe(name, e, lv) { const o = genFoe(name, e, lv, 4, .6, 1.2, 2.4, 0, { lv, sec: 1, tier: 9 }); o.xp *= 6; o.gold *= 6; return o; }
@@ -999,7 +1064,7 @@ const runeDesc = id => { const q = runeOf(id); return q ? fmtOpt(q.r.k, q.r.v[q.
 const runeSetDesc = t => { const r = RUNES[t]; return fmtOpt(r.set[0], r.set[1]); };
 function runeCounts() { const n = {}; if (!P) return n; for (const sl of SLOTS) for (const id of (P.eq[sl] && P.eq[sl].sock) || []) { const q = runeOf(id); if (q) n[q.t] = (n[q.t] || 0) + 1; } return n; }
 function addRune(id, n = 1) { P.runes[id] = (P.runes[id] || 0) + n; if (P.runes[id] <= 0) delete P.runes[id]; }
-function rollRune(mlv, boost) { let g = 1 + Math.floor(mlv / 20); if (Math.random() < .2 + (boost || 0)) g++; return pick(RUNE_KEYS) + clamp(g, 1, 5); }
+function rollRune(mlv, boost) { let g = 1 + Math.floor(mlv / 40); if (Math.random() < .2 + (boost || 0)) g++; return pick(RUNE_KEYS) + clamp(g, 1, 5); }
 // Sum of an effect from equipped gear: secondary options, socketed runes and rune set bonuses. Cached per frame.
 let gearFxCache = null, gearFxAt = -1;
 function gearFx() {
@@ -1113,12 +1178,26 @@ const ZONES = [
   { name: 'มิติอสูร', lv: 52, spread: 5, bossOff: 6, foes: ['alien', 'pixel', 'robot', 'shade'], boss: 'eldritch', g: ['#30264A', '#2B2242'], road: '#4B3D72' },
   { name: 'หิมพานต์ต้องมนต์', lv: 60, spread: 5, bossOff: 8, foes: ['tiger', 'elephant', 'ape', 'rhino'], boss: 'tigerking', g: ['#C9B26A', '#C1A961'], road: '#EADCA8' },
   { name: 'สุดขอบจักรวาล', lv: 70, spread: 5, bossOff: 8, foes: ['ufo', 'darkmoon', 'madsun', 'fullmoon'], boss: 'voidking', g: ['#1D1836', '#19142F'], road: '#3D3268' },
+  { name: 'ทะเลลึกปะการัง', lv: 80, spread: 8, bossOff: 9, foes: ['shark', 'puffer', 'crab', 'lobster'], boss: 'seaqueen', g: ['#2F7FA8', '#2A779F'], road: '#7FC8D8' },
+  { name: 'ทุ่งสะวันนาไร้สิ้นสุด', lv: 90, spread: 8, bossOff: 9, foes: ['zebra', 'giraffe', 'kangaroo', 'bison'], boss: 'leopard', g: ['#D9B45A', '#D1AB50'], road: '#EFD9A0' },
+  { name: 'ป่าดึกดำบรรพ์', lv: 100, spread: 8, bossOff: 9, foes: ['sloth', 'dodo', 'beaver', 'orang'], boss: 'rexking', g: ['#3F7A3A', '#397234'], road: '#9C8A5A' },
+  { name: 'สุสานฟาโรห์', lv: 110, spread: 8, bossOff: 9, foes: ['scarab', 'tombrat', 'curse', 'hauntblade'], boss: 'pharaoh', g: ['#8C7A5A', '#847253'], road: '#C2AD80' },
+  { name: 'ภูเขาหิมะมรณะ', lv: 120, spread: 8, bossOff: 9, foes: ['irongoat', 'crystalram', 'snowdeer', 'icesprite'], boss: 'icedragon', g: ['#C8D8E8', '#BFD0E2'], road: '#9FB7CF' },
+  { name: 'ดินแดนฝันร้าย', lv: 130, spread: 8, bossOff: 9, foes: ['clown', 'mask', 'teddy', 'pumpkin'], boss: 'nightmare', g: ['#8E6FB0', '#8667A8'], road: '#D8B8F0' },
+  { name: 'ป่าแมลงยักษ์', lv: 140, spread: 8, bossOff: 9, foes: ['ladybug', 'mantis', 'roach', 'soldierant'], boss: 'flylord', g: ['#7A9A2F', '#72922A'], road: '#B8C878' },
+  { name: 'เมืองจักรกลร้าง', lv: 150, spread: 8, bossOff: 9, foes: ['cog', 'bolter', 'satellite', 'siren'], boss: 'titanarm', g: ['#6E7480', '#676D79'], road: '#A7ADB8' },
+  { name: 'นรกเพลิงกัลป์', lv: 160, spread: 8, bossOff: 9, foes: ['livevolcano', 'livecomet', 'hellox', 'hellbuff'], boss: 'yama', g: ['#6A1E1E', '#621A1A'], road: '#A0402A' },
+  { name: 'ทะเลดวงดาว', lv: 170, spread: 8, bossOff: 9, foes: ['shootstar', 'planetoid', 'giantstar', 'deadstar'], boss: 'milkyway', g: ['#262A5A', '#212552'], road: '#4E5494' },
+  { name: 'วิหารทวยเทพ', lv: 180, spread: 8, bossOff: 9, foes: ['holydove', 'godhorse', 'goldsheep', 'godeye'], boss: 'sungod', g: ['#E9D9A4', '#E2D29A'], road: '#FFF6D8' },
+  { name: 'ปลายสุดของกาลเวลา', lv: 190, spread: 8, bossOff: 10, foes: ['timesand', 'madclock', 'infinity', 'timeshard'], boss: 'timelord', g: ['#3A2C4A', '#342744'], road: '#7A6A94' },
 ];
 // Dungeons are solo arenas below the world map: three waves, then a boss, then a treasure drop.
 const DUNGEONS = [
   { name: 'ถ้ำใต้พิภพ', icon: '🦑', req: 10, fee: 300, pool: ['snake', 'troll', 'spider', 'rock', 'lizard'], lv: [12, 15], boss: 'kraken', bossLv: 16, tier: 3, waves: [5, 7, 9], colors: ['#4A4670', '#443F68'], wall: '#27233F' },
   { name: 'หอคอยมืด', icon: '🐲', req: 25, fee: 1500, pool: ['camel', 'djinn', 'yeti', 'polar', 'vulture'], lv: [28, 31], boss: 'darkdragon', bossLv: 33, tier: 6, waves: [6, 8, 10], colors: ['#433A55', '#3D344E'], wall: '#1D182B' },
   { name: 'เหวนิรันดร์', icon: '👁️', req: 45, fee: 5000, pool: ['alien', 'pixel', 'robot', 'shade', 'fairy'], lv: [55, 58], boss: 'eye', bossLv: 60, tier: 9, waves: [7, 9, 11], colors: ['#22173A', '#1D1433'], wall: '#0B0616' },
+  { name: 'ป้อมจักรกลไททัน', icon: '🦿', req: 100, fee: 20000, pool: ['cog', 'bolter', 'satellite', 'siren', 'scarab'], lv: [118, 122], boss: 'megatitan', bossLv: 125, tier: 15, waves: [7, 9, 11], colors: ['#4F5560', '#494F59'], wall: '#23262D' },
+  { name: 'ประตูกาลเวลา', icon: '⌛', req: 160, fee: 60000, pool: ['timesand', 'madclock', 'infinity', 'deadstar', 'godeye'], lv: [185, 190], boss: 'chronos', bossLv: 200, tier: 23, waves: [8, 10, 12], colors: ['#2C2140', '#271C39'], wall: '#0E0818' },
 ];
 const FOE_ZONE = FOE_KEYS.map(k => ZONES.findIndex(z => z.foes.includes(k) || z.boss === k));
 const SAVE_KEY = 'pukpik-save-v1';
@@ -1359,16 +1438,17 @@ function sfx(name) {
 function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
 
 /* ================= world generation (same seed for everyone) ================= */
-const T = 32, W = 276, HW = 96, H = 128; // rows HW..H-1 hold the dungeon arenas
-const TOWN = { x: 18, y: 48 };
-const BANDS = [9, 32, 54, 74, 94, 114, 134, 154, 174, 194, 214, 234];
+// Each map is a ring ~29 tiles wide around town; the last ring runs to the east edge.
+const BANDS = [9, 36]; while (BANDS.length < 24) BANDS.push(BANDS[BANDS.length - 1] + 29);
+const T = 32, W = 18 + BANDS[BANDS.length - 1] + 34, HW = 128, H = 160; // rows HW..H-1 hold the dungeon arenas
+const TOWN = { x: 18, y: 64 };
 function hash2(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
 function vnoise(x, y, s) {
   const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
   const a = hash2(xi, yi, s), b = hash2(xi + 1, yi, s), c = hash2(xi, yi + 1, s), d = hash2(xi + 1, yi + 1, s);
   return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
 }
-const roadY = x => 48 + Math.sin(x / 9) * 5 + Math.sin(x / 23) * 4;
+const roadY = x => TOWN.y + Math.sin(x / 9) * 5 + Math.sin(x / 23) * 4;
 // ground: 0 town, 1..5 zones. obj: 0 none, 1 tree, 2 pine, 3 rock, 4 crystal, 5 water, 6 lava, 7 pillar, 8 fountain, 9 stall, 10 house, 20+ decor (walkable)
 const GROUND = new Uint8Array(W * H), OBJ = new Uint8Array(W * H), ROAD = new Uint8Array(W * H);
 const BLOCK = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 31, 33]);
@@ -1394,12 +1474,12 @@ const ARENAS = DUNGEONS.map((d, i) => ({ x0: 4 + i * 46, y0: HW + 3, w: 40, h: 2
     if (Math.abs(y - roadY(x)) < 1.4 && x >= TOWN.x) ROAD[i] = 1;
   }
   for (let zi = 0; zi < ZONES.length; zi++) {
-    const d = [27, 48, 68, 88, 106, 126, 146, 166, 186, 204, 226, 246][zi], bx = Math.min(W - 8, TOWN.x + d), by = Math.round(roadY(bx) + (zi % 2 ? -10 : 10));
+    const lo = BANDS[zi], hi = zi + 1 < BANDS.length ? BANDS[zi + 1] : lo + 30, d = Math.round(lo + (hi - lo) * .78), bx = Math.min(W - 8, TOWN.x + d), by = Math.round(roadY(bx) + (zi % 2 ? -14 : 14));
     BOSS_POS.push({ x: bx * T + T / 2, y: by * T + T / 2 });
   }
   const nearBoss = (x, y) => BOSS_POS.some(b => Math.hypot(x - (b.x - T / 2) / T, y - (b.y - T / 2) / T) < 4);
   for (let y = 0; y < HW; y++) for (let x = 0; x < W; x++) {
-    const i = y * W + x, g = GROUND[i];
+    const i = y * W + x, g = GROUND[i] > 12 ? (GROUND[i] - 1) % 12 + 1 : GROUND[i];
     if (x === 0 || y === 0 || x === W - 1 || y === HW - 1) { OBJ[i] = g >= 3 ? (g === 5 || g === 10 ? 7 : 3) : (g === 2 ? 2 : 1); continue; }
     if (g === 0 || ROAD[i] || nearBoss(x, y)) continue;
     if (Math.hypot(x - TOWN.x, y - TOWN.y) < BANDS[0] + 2) continue;
@@ -1740,8 +1820,8 @@ const seenKills = new Set(), announced = new Set();
 let lastMaSeq = {}, lastSentKey = '', lastSentAt = 0;
 
 const SLOT_DEFS = [];
-ZONES.forEach((z, zi) => { for (let k = 0; k < 8; k++) SLOT_DEFS.push({ zi, boss: false }); SLOT_DEFS.push({ zi, boss: true }); });
-const SLOT_MOD = 128;
+ZONES.forEach((z, zi) => { for (let k = 0; k < 13; k++) SLOT_DEFS.push({ zi, boss: false }); SLOT_DEFS.push({ zi, boss: true }); });
+const SLOT_MOD = 512;
 const statCache = new Map();
 function foeStats(t, lv) {
   const key = t * 1000 + lv; let s = statCache.get(key); if (s) return s;
@@ -2324,7 +2404,7 @@ function reward(s, x, y, mlv, tierOverride) {
   gainXp(xp);
   save();
 }
-const LV_CAP = 80;
+const LV_CAP = 200;
 function gainXp(x) {
   P.xp += x;
   if (P.lv >= LV_CAP) { P.xp = Math.min(P.xp, xpNeed(P.lv)); return; }
@@ -3209,7 +3289,7 @@ function drawMinimap() {
     const c = document.createElement('canvas'); c.width = W; c.height = HW; const g = c.getContext('2d'), img = g.createImageData(W, HW);
     const pal = ['#EAD7A8', '#9FD884', '#4F9A63', '#6C679A', '#A05A45', '#4A3F66', '#E6CB88', '#E2F0F7', '#5E7A4A', '#F1E2F8', '#30264A', '#C9B26A', '#1B1633'];
     for (let i = 0; i < W * HW; i++) {
-      let hex = pal[GROUND[i]]; const o = OBJ[i];
+      let hex = pal[GROUND[i]] || (ZONES[GROUND[i] - 1] ? ZONES[GROUND[i] - 1].g[0] : '#1B1633'); const o = OBJ[i];
       if (o === 5) hex = '#5DB6F0'; else if (o === 6) hex = '#FF7A2A'; else if (o === 18) hex = '#6B2FD0'; else if (ROAD[i]) hex = '#E9DDB6'; else if (BLOCK.has(o)) hex = '#3A3152';
       const n = parseInt(hex.slice(1), 16); img.data[i * 4] = n >> 16; img.data[i * 4 + 1] = (n >> 8) & 255; img.data[i * 4 + 2] = n & 255; img.data[i * 4 + 3] = 255;
     }
@@ -3378,6 +3458,7 @@ const saved = migrate(load());
 if (saved) {
   P = saved;
   me.x = num(P.x, SPAWN.x); me.y = num(P.y, SPAWN.y);
+  if (P.wv !== 2 || solid(me.x, me.y)) { me.x = SPAWN.x; me.y = SPAWN.y; P.wv = 2; }
   if (solid(me.x, me.y) || inDungeonRows(me.y)) { me.x = SPAWN.x; me.y = SPAWN.y; }
   enterWorld();
 } else startEgg();
