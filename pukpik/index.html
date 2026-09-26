@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ไข่ปุ๊กปิ๊ก</title>
+<title>ไข่ปุ๊กปิ๊ก ออนไลน์</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
@@ -9,81 +9,58 @@
   color-scheme:light;
   --sky:#CDEBF5;--sand:#F6E6C4;--paper:#FFFBF3;--paper-2:#FBF0DA;
   --ink:#33284A;--ink-soft:#6F6485;--line:#E3D3B3;
-  --accent:#FF8A45;--accent-deep:#D9561A;
-  --good:#2FAE62;--hp:#F2485B;--mp:#3F86F5;--xp:#F5B324;
+  --accent:#FF8A45;--good:#2FAE62;--hp:#F2485B;--mp:#3F86F5;--xp:#F5B324;
   --f-display:"Mali","IBM Plex Sans Thai",system-ui,sans-serif;
   --f-body:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --gl:calc(12px + env(safe-area-inset-left,0px));--gr:calc(12px + env(safe-area-inset-right,0px));
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
 [hidden]{display:none!important}
 *{box-sizing:border-box}
 html{height:100%}
-body{height:100%;margin:0;font:15px/1.5 var(--f-body);color:var(--ink);background-color:var(--sand);
-  background-image:radial-gradient(circle at 18% 0%,#E8F7FB 0,transparent 50%),linear-gradient(180deg,var(--sky) 0%,#EAF2DC 48%,var(--sand) 100%);
-  -webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;overflow:hidden}
+body{height:100%;margin:0;font:15px/1.5 var(--f-body);color:var(--ink);background:#8CC973;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:none;-webkit-touch-callout:none}
 button{font-family:inherit;color:inherit}
 input{font-family:inherit}
+#app{position:relative;height:100%;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
-#app{position:relative;height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden}
-
-/* ---------- shared pieces ---------- */
-.btn{appearance:none;font:700 16px/1.2 var(--f-display);color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);min-height:50px;padding:10px 16px;cursor:pointer;transition:transform .06s,box-shadow .06s}
+/* ---------- shared ---------- */
+.btn{appearance:none;font:700 16px/1.2 var(--f-display);color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);min-height:48px;padding:10px 16px;cursor:pointer;transition:transform .06s,box-shadow .06s}
 .btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.primary{background:var(--accent)}
 .btn.block{width:100%}
-.btn.sm{min-height:40px;font-size:14px;padding:6px 12px;border-radius:12px;box-shadow:0 3px 0 var(--ink)}
-.btn:focus-visible,.tab:focus-visible,.icon-btn:focus-visible,.pet:focus-visible,.egg-btn:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
-.panel{background:var(--paper);border:2px solid var(--ink);border-radius:20px;box-shadow:0 4px 0 var(--ink);padding:14px}
-.h{font-family:var(--f-display);font-weight:700;margin:0;text-wrap:balance;line-height:1.25}
+.btn.sm{min-height:38px;font-size:14px;padding:6px 12px;border-radius:12px;box-shadow:0 3px 0 var(--ink)}
+button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
+.panel{background:var(--paper);border:2px solid var(--ink);border-radius:18px;box-shadow:0 3px 0 var(--ink);padding:12px}
+.h{font-family:var(--f-display);font-weight:700;margin:0;text-wrap:balance;line-height:1.3}
 .eyebrow{font:600 12px var(--f-body);letter-spacing:.08em;color:var(--ink-soft);margin:0}
 .muted{color:var(--ink-soft)}
-.num{font-variant-numeric:tabular-nums}
-.chip{display:inline-flex;align-items:center;gap:4px;font:600 12px var(--f-body);padding:2px 10px;border-radius:99px;border:2px solid var(--ink);background:var(--paper)}
-
-.bar{position:relative;height:14px;border:2px solid var(--ink);border-radius:99px;background:#fff;overflow:hidden}
-.bar>i{display:block;height:100%;width:0;border-radius:99px;transition:width .4s ease}
+.chip{display:inline-flex;align-items:center;gap:4px;font:600 12px var(--f-body);padding:2px 10px;border-radius:99px;border:2px solid var(--ink);background:var(--paper);white-space:nowrap}
+.bar{position:relative;height:12px;border:2px solid var(--ink);border-radius:99px;background:#fff;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;border-radius:99px;transition:width .25s ease}
 .bar.hp>i{background:linear-gradient(#FF8391,var(--hp))}
 .bar.mp>i{background:linear-gradient(#86B3FF,var(--mp))}
 .bar.xp>i{background:linear-gradient(#FFD877,var(--xp))}
-.bar-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;font:600 13px var(--f-body)}
-.bar-row .v{font-variant-numeric:tabular-nums;min-width:64px;text-align:right}
-
-/* ---------- top bar & tabs ---------- */
-.topbar{display:flex;align-items:center;gap:10px;padding:10px 16px 8px}
-.tb-who{flex:1;min-width:0;font:700 17px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tb-lv{display:inline-block;margin-left:6px;font:600 12px var(--f-body);padding:1px 8px;border-radius:99px;background:var(--ink);color:var(--paper);vertical-align:2px}
-.gold{display:inline-flex;align-items:center;gap:6px;font:700 15px var(--f-display);font-variant-numeric:tabular-nums;background:var(--paper);border:2px solid var(--ink);border-radius:99px;padding:2px 12px 2px 4px}
-.coin{display:inline-block;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFF0B0,#F5B324 60%,#C98A0C);border:2px solid var(--ink);flex:none}
-.icon-btn{width:40px;height:40px;flex:none;border-radius:50%;border:2px solid var(--ink);background:var(--paper);font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center}
-.views{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.view{padding:6px 16px 24px;display:flex;flex-direction:column;gap:14px}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 10px 10px;background:var(--paper);border-top:2px solid var(--ink)}
-.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:none;border-radius:14px;min-height:54px;font:600 12px var(--f-display);color:var(--ink-soft);cursor:pointer}
-.tab .ti{font-size:22px;line-height:1}
-.tab[aria-current="page"]{background:var(--ink);color:var(--paper)}
-.tab .dot{position:absolute;top:4px;left:calc(50% + 8px);width:10px;height:10px;border-radius:50%;background:var(--hp);border:2px solid var(--paper)}
-
-/* ---------- blob ---------- */
+.coin{display:inline-block;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFF0B0,#F5B324 60%,#C98A0C);border:2px solid var(--ink);flex:none}
 .blob-svg{display:block;width:100%;height:auto;overflow:visible}
-.blob-svg.st1{transform:scale(.84);transform-origin:50% 90%}
-.blob-svg.st3{transform:scale(1.06);transform-origin:50% 90%}
 .blob-body{transform-origin:60px 108px}
 .bob .blob-body{animation:bob 1.8s ease-in-out infinite}
 .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
-@keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-5px) scale(.96,1.04)}}
-@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
-.boing .blob-body{animation:boing .5s ease}
-@keyframes boing{0%{transform:scale(1,1)}25%{transform:scale(1.18,.8)}55%{transform:translateY(-18px) scale(.9,1.12)}80%{transform:scale(1.06,.94)}100%{transform:scale(1,1)}}
 .sparkle{animation:twinkle 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 .sparkle.b{animation-delay:.8s}
+@keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-5px) scale(.96,1.04)}}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
 @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{transform:translateY(12px);opacity:.3}to{transform:none;opacity:1}}
 
-/* ---------- egg / hatch screen ---------- */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;z-index:10}
-.egg-screen{align-items:center;overflow-y:auto;padding:18px 16px 24px;gap:10px;text-align:center;background:transparent}
-.logo{font:700 clamp(38px,11vw,50px)/1.3 var(--f-display);margin:0;color:var(--ink);text-shadow:3px 3px 0 var(--accent)}
-.egg-stage{position:relative;width:min(66vw,250px);aspect-ratio:1;max-width:100%;display:grid;place-items:center;flex:none}
+/* ---------- egg screen ---------- */
+.screen{position:absolute;inset:0;z-index:30;overflow-y:auto;background-color:var(--sand);
+  background-image:radial-gradient(circle at 18% 0%,#E8F7FB 0,transparent 50%),linear-gradient(180deg,var(--sky) 0%,#EAF2DC 48%,var(--sand) 100%)}
+.egg-inner{max-width:480px;margin:0 auto;padding:18px 16px 28px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.logo{font:700 clamp(36px,10vw,48px)/1.3 var(--f-display);margin:0;color:var(--ink);text-shadow:3px 3px 0 var(--accent)}
+.egg-stage{position:relative;width:min(62vw,240px);aspect-ratio:1;max-width:100%;display:grid;place-items:center;flex:none}
 .egg-btn{position:relative;z-index:2;background:none;border:0;padding:0;width:66%;cursor:pointer;border-radius:50%}
 .egg-btn svg{display:block;width:100%;height:auto;overflow:visible}
 .wobble{animation:wobble .45s ease}
@@ -100,244 +77,188 @@ input{font-family:inherit}
 .crack-meter{display:flex;gap:6px;justify-content:center}
 .crack-meter i{width:22px;height:8px;border-radius:99px;border:2px solid var(--ink);background:#fff}
 .crack-meter i.on{background:var(--accent)}
-.odds{width:100%;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px}
-.odd{display:flex;flex-direction:column;align-items:center;gap:0;font:600 11px/1.3 var(--f-body)}
-.odd .mini{width:100%;max-width:62px}
+.odds{width:100%;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.odd{display:flex;flex-direction:column;align-items:center;font:600 11px/1.3 var(--f-body)}
+.odd .mini{width:100%;max-width:60px}
 .odd b{font:700 13px var(--f-display)}
 .reveal{width:100%;text-align:left;display:flex;flex-direction:column;gap:12px;animation:rise .5s ease both}
-@keyframes rise{from{transform:translateY(16px);opacity:.3}to{transform:none;opacity:1}}
-.reveal .species{font-size:26px}
 .stat-list{display:flex;flex-direction:column;gap:7px}
 .stat-row{display:grid;grid-template-columns:78px 1fr 40px;align-items:center;gap:8px;font:600 13px var(--f-body)}
-.stat-row .bar{height:12px}
 .stat-row .bar>i{background:#CFC4DE}
 .stat-row.main .bar>i{background:var(--c)}
-.stat-row.main .lbl{color:var(--ink)}
 .stat-row .lbl{color:var(--ink-soft)}
+.stat-row.main .lbl{color:var(--ink)}
 .stat-row .val{text-align:right;font-variant-numeric:tabular-nums}
 .field{display:flex;flex-direction:column;gap:6px;font:600 13px var(--f-body)}
-.field input{font:600 17px var(--f-display);padding:10px 14px;border:2px solid var(--ink);border-radius:14px;background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text;width:100%}
-.field input:focus{outline:3px solid var(--mp);outline-offset:1px}
-
-/* ---------- home ---------- */
-.scene{position:relative;height:230px;border:2px solid var(--ink);border-radius:24px;overflow:hidden;box-shadow:0 4px 0 var(--ink);
-  background:radial-gradient(ellipse 60% 30% at 50% 88%,rgba(51,40,74,.12),transparent 70%),linear-gradient(#BFE8FF 0,#E4F5FB 55%,#A9DC8C 55%,#8CC973 100%)}
-.scene .cloud{position:absolute;height:18px;border-radius:99px;background:#fff;opacity:.9;animation:drift 30s linear infinite}
-.scene .cloud::before{content:"";position:absolute;left:22%;top:-10px;width:26px;height:26px;border-radius:50%;background:#fff}
-@keyframes drift{from{transform:translateX(-40px)}to{transform:translateX(420px)}}
-.scene .flower{position:absolute;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 3px #fff}
-.pet{position:absolute;left:50%;bottom:10px;width:150px;margin-left:-75px;background:none;border:0;padding:0;cursor:pointer;border-radius:50%}
-.speech{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:80%;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:6px 12px;font:600 14px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:rise .25s ease}
-.speech::after{content:"";position:absolute;left:50%;bottom:-8px;width:12px;height:12px;background:#fff;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:translateX(-50%) rotate(45deg)}
-.zzz{position:absolute;right:28%;top:40px;font:700 22px var(--f-display);animation:zzz 1.4s ease forwards}
-@keyframes zzz{from{opacity:0;transform:translate(0,10px)}30%{opacity:1}to{opacity:0;transform:translate(24px,-30px)}}
+.field input,.chatbar input{font:600 17px var(--f-display);padding:10px 14px;border:2px solid var(--ink);border-radius:14px;background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text;width:100%}
+.field input:focus,.chatbar input:focus{outline:3px solid var(--mp);outline-offset:1px}
 .id-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.id-row .h{font-size:24px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.bars{display:flex;flex-direction:column;gap:8px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.actions .wide{grid-column:1/-1;min-height:58px;font-size:19px}
 .skill-card{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
-.skill-ico{width:46px;height:46px;border-radius:14px;border:2px solid var(--ink);display:grid;place-items:center;font-size:22px;background:var(--c-light)}
+.skill-ico{width:44px;height:44px;border-radius:14px;border:2px solid var(--ink);display:grid;place-items:center;font-size:22px;background:var(--c-light)}
+.how{text-align:left;font-size:13px;color:var(--ink-soft);margin:0;padding-left:18px}
 
-/* ---------- map ---------- */
-.zone{display:grid;grid-template-columns:78px 1fr;gap:12px;align-items:start}
-.zone.locked{opacity:.55}
-.swatch{position:relative;width:78px;height:78px;border-radius:16px;border:2px solid var(--ink);overflow:hidden;display:grid;place-items:center;font-size:34px}
-.swatch .lock{position:absolute;inset:0;display:grid;place-items:center;background:rgba(51,40,74,.55);font-size:26px}
-.zone .meta{display:flex;flex-direction:column;gap:6px;min-width:0}
-.zone .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.zone .top .h{font-size:18px}
-.pips{display:flex;gap:5px;align-items:center;font:600 12px var(--f-body);color:var(--ink-soft)}
-.pips i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:#fff}
-.pips i.on{background:var(--good)}
-.zone .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
-.boss-done{color:var(--good);font-weight:600}
+/* ---------- HUD ---------- */
+#hud{position:absolute;inset:0;z-index:5;pointer-events:none}
+#hud>*{pointer-events:auto}
+.me-card{position:absolute;top:10px;left:var(--gl);width:min(56vw,260px);display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;background:var(--paper);border:2px solid var(--ink);border-radius:16px;box-shadow:0 3px 0 var(--ink);padding:6px 10px 7px 6px}
+.me-card .face{width:44px;height:44px;border-radius:12px;background:var(--c-light,#eee);border:2px solid var(--ink);padding:2px}
+.me-card .nm{display:flex;justify-content:space-between;gap:6px;font:700 13px var(--f-display);white-space:nowrap}
+.me-card .nm b{overflow:hidden;text-overflow:ellipsis}
+.me-card .nm span{font:600 12px var(--f-body);color:var(--ink-soft)}
+.me-card .bars{display:flex;flex-direction:column;gap:3px;margin-top:2px}
+.me-card .bar{height:10px;border-width:1.5px}
+.me-card .bar.xp{height:7px}
+.me-card .bar span{position:absolute;inset:0;font:700 8px/7px var(--f-body);text-align:center;color:var(--ink)}
+.menu-row{position:absolute;top:84px;left:var(--gl);display:flex;gap:8px}
+.ibtn{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);box-shadow:0 3px 0 var(--ink);font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;position:relative;padding:0}
+.ibtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.ibtn .dot{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--hp);border:2px solid var(--paper)}
+.side{position:absolute;top:10px;right:var(--gr);display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#mini{width:112px;height:84px;border:2px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink);background:#86C66A;display:block}
+.gold{display:inline-flex;align-items:center;gap:5px;font:700 14px var(--f-display);font-variant-numeric:tabular-nums;background:var(--paper);border:2px solid var(--ink);border-radius:99px;padding:1px 10px 1px 3px}
+.online{display:inline-flex;align-items:center;gap:5px;font:600 12px var(--f-body);background:var(--paper);border:2px solid var(--ink);border-radius:99px;padding:1px 9px}
+.online i{width:8px;height:8px;border-radius:50%;background:#B7B0C4}
+.online.on i{background:var(--good)}
+.banner{position:absolute;top:128px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none!important;color:#fff;
+  text-shadow:0 2px 0 var(--ink),2px 0 0 var(--ink),-2px 0 0 var(--ink),0 -2px 0 var(--ink);animation:banner 2.6s ease forwards;white-space:nowrap}
+.banner b{display:block;font:700 26px var(--f-display)}
+.banner span{font:600 14px var(--f-body)}
+@keyframes banner{0%{opacity:0;transform:translate(-50%,10px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+.chatlog{position:absolute;left:var(--gl);bottom:196px;width:min(64vw,320px);display:flex;flex-direction:column;gap:2px;pointer-events:none!important}
+.chatlog p{margin:0;font:600 13px/1.35 var(--f-body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8),0 0 2px rgba(0,0,0,.7);overflow-wrap:anywhere;animation:rise .2s ease}
+.chatlog p b{color:#FFE08A}
+.chatlog p.sys{color:#E6F3FF;font-weight:500}
+.acts{position:absolute;right:var(--gr);bottom:18px;width:190px;height:190px}
+.abtn{position:absolute;border-radius:50%;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;overflow:hidden;touch-action:none}
+.abtn:active,.abtn.held{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.abtn .cd{position:absolute;inset:0;background:conic-gradient(rgba(51,40,74,.55) var(--p,0%),transparent 0);pointer-events:none}
+.abtn small{position:absolute;bottom:4px;left:0;right:0;text-align:center;font:700 10px var(--f-body);color:var(--ink)}
+.abtn.atk{right:0;bottom:0;width:92px;height:92px;background:#FFC2AE;font-size:36px}
+.abtn.skl{right:100px;bottom:8px;width:68px;height:68px;background:var(--c-light,#FFE08A);font-size:28px}
+.abtn.pot{right:14px;bottom:104px;width:58px;height:58px;background:#FFE3A1;font-size:24px}
+.abtn.pot b{position:absolute;top:2px;right:8px;font:700 12px var(--f-display)}
+.abtn:disabled{filter:grayscale(.7);opacity:.7}
+.talk{position:absolute;right:var(--gr);bottom:222px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
+.joy{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);background:rgba(51,40,74,.18);pointer-events:none!important;z-index:6}
+.joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.9);border:2.5px solid var(--ink)}
+.joyhint{position:absolute;left:var(--gl);bottom:40px;font:600 12px var(--f-body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);pointer-events:none!important;max-width:40vw}
+.dead{position:absolute;inset:0;display:grid;place-items:center;background:rgba(51,40,74,.45);text-align:center;color:#fff;z-index:7;text-shadow:0 2px 0 var(--ink)}
+.dead b{display:block;font:700 28px var(--f-display)}
+.chatbar{position:absolute;left:0;right:0;bottom:0;z-index:20;display:flex;gap:8px;padding:10px var(--gr) 10px var(--gl);background:var(--paper);border-top:2px solid var(--ink)}
+.chatbar .btn{flex:none}
 
-/* ---------- shop & character ---------- */
-.sec-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:4px}
-.sec-title .h{font-size:19px}
-.rows{display:flex;flex-direction:column;gap:0;padding:4px 14px}
-.row{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:10px;padding:10px 0;border-bottom:2px dashed var(--line)}
+/* ---------- sheets ---------- */
+.modal-wrap{position:absolute;inset:0;z-index:40;background:rgba(51,40,74,.5);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.modal{position:relative;width:100%;max-width:460px;max-height:100%;overflow-y:auto;background:var(--paper);border:2px solid var(--ink);border-radius:24px;box-shadow:0 6px 0 var(--ink);padding:16px 14px 14px;display:flex;flex-direction:column;gap:12px;animation:sheet .28s cubic-bezier(.2,1.3,.4,1)}
+@keyframes sheet{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.modal>.h{font-size:22px;padding-right:44px}
+.x{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;border:2px solid var(--ink);background:var(--paper-2);font:700 18px var(--f-display);cursor:pointer}
+.m-body{display:flex;flex-direction:column;gap:12px}
+.center{text-align:center}
+.m-btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.eq-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.slot{position:relative;aspect-ratio:1;border:2px solid var(--ink);border-radius:14px;background:#fff;display:grid;place-items:center;font-size:24px;cursor:pointer;padding:0}
+.slot.empty{background:var(--paper-2);color:var(--ink-soft);font:600 10px var(--f-body);border-style:dashed}
+.slot.sel{outline:3px solid var(--mp);outline-offset:2px}
+.slot .lv{position:absolute;bottom:1px;right:4px;font:700 9px var(--f-body)}
+.slot.r1{box-shadow:inset 0 0 0 3px #2FAE62}.slot.r2{box-shadow:inset 0 0 0 3px #3F86F5}.slot.r3{box-shadow:inset 0 0 0 3px #A155E8;background:#F6EEFF}.slot.r4{box-shadow:inset 0 0 0 3px #FF8A1F;background:#FFF2E2}
+.bag{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.detail{display:flex;flex-direction:column;gap:8px}
+.detail .top{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center}
+.detail .big{width:52px;height:52px;font-size:30px;cursor:default}
+.statline{display:flex;flex-wrap:wrap;gap:6px}
+.up{color:var(--good);font-weight:700}.down{color:var(--hp);font-weight:700}
+.rows{display:flex;flex-direction:column;padding:2px 12px}
+.row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;padding:9px 0;border-bottom:2px dashed var(--line)}
 .row:last-child{border-bottom:0}
-.row .ico{font-size:26px;text-align:center;line-height:1}
+.row .ico{font-size:24px;text-align:center;line-height:1}
 .row .nm{font:700 15px var(--f-display)}
-.row .ds{font-size:13px;color:var(--ink-soft);line-height:1.35}
-.price{display:inline-flex;align-items:center;gap:4px}
-.price .coin{width:14px;height:14px;border-width:1.5px}
-.alloc{display:grid;grid-template-columns:84px 1fr 44px 40px;align-items:center;gap:8px;font:600 13px var(--f-body);padding:5px 0}
-.alloc .bar{height:12px}
+.row .ds{font-size:12px;color:var(--ink-soft);line-height:1.35}
+.alloc{display:grid;grid-template-columns:82px 1fr 44px 40px;align-items:center;gap:8px;font:600 13px var(--f-body);padding:4px 0}
 .alloc .bar>i{background:#CFC4DE}
 .alloc.main .bar>i{background:var(--c)}
-.alloc .val{text-align:right;font-variant-numeric:tabular-nums}
-.alloc .plus{width:40px;height:34px;min-height:0;padding:0;border-radius:10px;box-shadow:0 3px 0 var(--ink);font-size:18px}
-.alloc small{color:var(--good);font-weight:600}
-.char-head{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center}
-.char-head .portrait{background:var(--c-light);border:2px solid var(--ink);border-radius:20px;padding:6px 8px 2px}
+.alloc .val{text-align:right;font-variant-numeric:tabular-nums;line-height:1.1}
+.alloc small{color:var(--good);font-weight:600;font-size:11px}
+.alloc .btn{width:40px;min-height:34px;padding:0;border-radius:10px;box-shadow:0 3px 0 var(--ink);font-size:18px}
+.char-head{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center}
+.char-head .portrait{background:var(--c-light);border:2px solid var(--ink);border-radius:18px;padding:6px 8px 2px}
 .records{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
-.records b{display:block;font:700 20px var(--f-display);font-variant-numeric:tabular-nums}
+.records b{display:block;font:700 19px var(--f-display);font-variant-numeric:tabular-nums}
 .records span{font-size:12px;color:var(--ink-soft)}
-
-/* ---------- battle ---------- */
-.battle{background:var(--paper)}
-.arena{position:relative;flex:1;min-height:250px;overflow:hidden;border-bottom:2px solid var(--ink);
-  background:linear-gradient(var(--z1) 0,var(--z2) 56%,var(--zg) 56%,var(--zg2) 100%)}
-.arena.enter{animation:enter .5s ease}
-@keyframes enter{0%{filter:brightness(3)}100%{filter:none}}
-.hud{position:absolute;z-index:3;background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:6px 10px 8px;width:min(50%,230px);box-shadow:0 3px 0 var(--ink);display:flex;flex-direction:column;gap:4px}
-.hud .nm{display:flex;justify-content:space-between;gap:6px;font:700 14px var(--f-display);white-space:nowrap}
-.hud .nm b{overflow:hidden;text-overflow:ellipsis}
-.hud .nm span{font:600 12px var(--f-body);color:var(--ink-soft)}
-.hud .bar{height:11px}
-.hud .sub{display:flex;justify-content:space-between;font:600 11px var(--f-body);color:var(--ink-soft);font-variant-numeric:tabular-nums}
-.foe-hud{top:12px;left:12px}
-.me-hud{bottom:12px;right:12px}
-.status{display:flex;gap:4px;flex-wrap:wrap;min-height:0}
-.status .chip{font-size:11px;padding:0 7px;border-width:1.5px}
-.spot{position:absolute;z-index:2;width:38%;max-width:190px;aspect-ratio:1;display:grid;place-items:center}
-.spot::after{content:"";position:absolute;bottom:6%;left:12%;right:12%;height:13%;border-radius:50%;background:rgba(0,0,0,.2);z-index:-1}
-.foe-spot{top:9%;right:5%}
-.me-spot{bottom:5%;left:5%}
-.foe-sprite{position:relative;font-size:clamp(58px,19vw,96px);line-height:1;filter:drop-shadow(0 3px 0 rgba(51,40,74,.35));animation:hover 2.2s ease-in-out infinite}
-.foe-sprite.boss{font-size:clamp(74px,24vw,120px)}
-.foe-sprite.boss::before{content:"👑";position:absolute;top:-.42em;left:50%;transform:translateX(-50%) rotate(-8deg);font-size:.36em}
-@keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.me-sprite{width:100%}
-.lunge-me{animation:lungeMe .35s ease}
-@keyframes lungeMe{40%{transform:translate(22%,-16%)}}
-.lunge-foe{animation:lungeFoe .35s ease}
-@keyframes lungeFoe{40%{transform:translate(-22%,16%)}}
-.hit{animation:hit .45s ease}
-@keyframes hit{0%,100%{transform:translateX(0);filter:none}20%{transform:translateX(-8px);filter:brightness(2.2) saturate(0)}40%{transform:translateX(7px)}60%{transform:translateX(-5px);filter:brightness(1.6)}80%{transform:translateX(3px)}}
-.guard{animation:guard .5s ease}
-@keyframes guard{50%{transform:scale(.92,1.06);filter:drop-shadow(0 0 10px #86B3FF)}}
-.charge .foe-sprite{animation:charge .5s ease-in-out infinite}
-@keyframes charge{0%,100%{filter:drop-shadow(0 0 0 #F2485B)}50%{filter:drop-shadow(0 0 16px #F2485B);transform:scale(1.05)}}
-.faint{animation:faint .7s ease forwards}
-@keyframes faint{to{transform:translateY(30%) scale(.6);opacity:0}}
-.fx{position:absolute;inset:0;z-index:4;display:grid;place-items:center;pointer-events:none;font-size:clamp(40px,13vw,64px);animation:fx .55s ease forwards}
-@keyframes fx{0%{transform:scale(.4);opacity:0}30%{opacity:1}100%{transform:scale(1.4);opacity:0}}
-.float{position:absolute;left:50%;top:18%;z-index:5;transform:translateX(-50%);font:700 26px var(--f-display);color:#fff;pointer-events:none;white-space:nowrap;
-  text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink),2px 2px 0 var(--ink),-2px -2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink);animation:float .95s ease-out forwards}
-.float.crit{color:#FFD23F;font-size:32px}
-.float.heal{color:#7BE39A}
-.float.miss{color:#E4DDEF;font-size:20px}
-.float.mpc{color:#9CC2FF;font-size:20px}
-@keyframes float{0%{transform:translate(-50%,10px) scale(.7);opacity:0}20%{transform:translate(-50%,0) scale(1.15);opacity:1}100%{transform:translate(-50%,-46px) scale(1);opacity:0}}
-.zone-tag{position:absolute;z-index:1;left:12px;bottom:12px;font:600 12px var(--f-body);color:#fff;background:rgba(51,40,74,.55);padding:2px 10px;border-radius:99px;max-width:44%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.log{height:74px;overflow:hidden;padding:8px 16px;font-size:14px;line-height:1.45;background:var(--paper-2);border-bottom:2px solid var(--ink);display:flex;flex-direction:column;justify-content:flex-end}
-.log p{margin:0;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.log p:last-child{color:var(--ink);font-weight:600}
-.cmds{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px 14px;background:var(--paper)}
-.cmd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:62px;font-size:18px}
-.cmd small{font:600 11px var(--f-body);color:var(--ink-soft)}
-.cmd.atk{background:#FFC2AE}
-.cmd.skl{background:var(--c-light,#FFE08A)}
-.cmd.def{background:#C9DEFF}
-.cmd.itm{background:#FFE3A1}
-.cmd.run{grid-column:1/-1;min-height:44px;font-size:15px;flex-direction:row;gap:8px;background:var(--paper)}
-.cmds .back{grid-column:1/-1;min-height:44px;font-size:15px}
-.item-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;min-height:70px;font-size:15px}
-.item-btn .ico{font-size:22px;line-height:1.1}
-.item-btn small{font:600 11px var(--f-body);color:var(--ink-soft)}
-
-/* ---------- modal & toast ---------- */
-.modal-wrap{position:absolute;inset:0;z-index:40;background:rgba(51,40,74,.5);display:flex;align-items:flex-end;justify-content:center;padding:16px}
-.modal{width:100%;max-width:440px;max-height:100%;overflow-y:auto;background:var(--paper);border:2px solid var(--ink);border-radius:24px;box-shadow:0 6px 0 var(--ink);padding:18px 16px 16px;display:flex;flex-direction:column;gap:12px;animation:sheet .3s cubic-bezier(.2,1.3,.4,1)}
-@keyframes sheet{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-.modal .h{font-size:24px;text-align:center}
-.m-art{display:grid;place-items:center}
-.m-art:empty{display:none}
-.m-art .art{width:120px}
-.m-art .big-emo{font-size:64px;line-height:1}
-.m-body{font-size:15px;text-align:center}
-.m-body p{margin:0 0 6px}
-.m-btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
-.rewards{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:4px 0}
-.rewards .chip{font-size:14px;padding:4px 12px}
-.gains{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
-.gains div{border:2px solid var(--ink);border-radius:12px;padding:4px 0;background:#fff;font:600 11px var(--f-body)}
-.gains div.main{background:var(--c-light)}
-.gains b{display:block;font:700 16px var(--f-display);color:var(--good)}
-.toast{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font:600 14px var(--f-display);padding:8px 16px;border-radius:99px;animation:rise .25s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-@media (min-height:760px){.scene{height:260px}.pet{width:170px;margin-left:-85px}}
+.toast{position:absolute;left:50%;top:170px;transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font:600 14px var(--f-display);padding:8px 16px;border-radius:99px;animation:rise .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+@media (max-height:560px){.acts{transform:scale(.85);transform-origin:100% 100%}.chatlog{bottom:120px}.talk{bottom:180px}}
+@media (min-width:900px){.acts{bottom:28px;right:28px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
 <div id="app">
-  <header class="topbar" id="topbar" hidden>
-    <div class="tb-who"><span id="tbName"></span><span class="tb-lv num" id="tbLv"></span></div>
-    <span class="gold"><span class="coin"></span><span id="tbGold">0</span></span>
-    <button class="icon-btn" id="muteBtn" type="button" aria-label="เปิดหรือปิดเสียง">🔊</button>
-  </header>
+  <canvas id="cv"></canvas>
 
-  <main class="views" id="views" hidden>
-    <section class="view" id="v-home"></section>
-    <section class="view" id="v-map" hidden></section>
-    <section class="view" id="v-shop" hidden></section>
-    <section class="view" id="v-char" hidden></section>
-  </main>
-
-  <nav class="tabs" id="tabs" hidden>
-    <button class="tab" type="button" data-tab="home"><span class="ti">🏠</span>บ้าน</button>
-    <button class="tab" type="button" data-tab="map"><span class="ti">🗺️</span>ผจญภัย</button>
-    <button class="tab" type="button" data-tab="shop"><span class="ti">🛒</span>ร้านค้า</button>
-    <button class="tab" type="button" data-tab="char"><span class="ti" id="charTabIco">🐣</span>ตัวละคร</button>
-  </nav>
-
-  <section class="screen egg-screen" id="s-egg" hidden>
-    <div>
-      <p class="eyebrow">RPG ฟักไข่ · สุ่ม 1 ใน 5 สี</p>
-      <h1 class="logo">ไข่ปุ๊กปิ๊ก</h1>
-    </div>
-    <div class="egg-stage" id="eggStage">
-      <div class="rays" id="rays" hidden></div>
-      <button class="egg-btn egg-idle" id="eggBtn" type="button" aria-label="แตะไข่ให้ฟัก"></button>
-      <div class="hatched" id="hatched" hidden></div>
-    </div>
-    <p class="egg-hint" id="eggHint">ไข่กำลังจะฟัก… แตะรัวๆ ให้ออกมาเร็วขึ้น!</p>
-    <div class="crack-meter" id="crackMeter"></div>
-    <div class="odds" id="odds"></div>
-    <div class="reveal" id="reveal" hidden></div>
-  </section>
-
-  <section class="screen battle" id="s-battle" hidden>
-    <div class="arena" id="arena">
-      <div class="hud foe-hud">
-        <div class="nm"><b id="bFoeName"></b><span id="bFoeLv" class="num"></span></div>
-        <div class="bar hp"><i id="bFoeHp"></i></div>
-        <div class="status" id="bFoeStatus"></div>
+  <div id="hud" hidden>
+    <div class="me-card" id="meCard">
+      <div class="face" id="hudFace"></div>
+      <div>
+        <div class="nm"><b id="hudName"></b><span id="hudLv"></span></div>
+        <div class="bars">
+          <div class="bar hp"><i id="hudHp"></i><span id="hudHpT"></span></div>
+          <div class="bar mp"><i id="hudMp"></i><span id="hudMpT"></span></div>
+          <div class="bar xp"><i id="hudXp"></i></div>
+        </div>
       </div>
-      <div class="spot foe-spot" id="foeSpot"><div class="foe-sprite" id="bFoe"></div></div>
-      <div class="spot me-spot" id="meSpot"><div class="me-sprite" id="bMe"></div></div>
-      <div class="hud me-hud">
-        <div class="nm"><b id="bMeName"></b><span id="bMeLv" class="num"></span></div>
-        <div class="bar hp"><i id="bMeHp"></i></div>
-        <div class="sub"><span>HP</span><span id="bMeHpT"></span></div>
-        <div class="bar mp"><i id="bMeMp"></i></div>
-        <div class="sub"><span>MP</span><span id="bMeMpT"></span></div>
-        <div class="status" id="bMeStatus"></div>
+    </div>
+    <div class="menu-row">
+      <button class="ibtn" type="button" id="bBag" aria-label="กระเป๋า">🎒</button>
+      <button class="ibtn" type="button" id="bChar" aria-label="ตัวละคร">🐣</button>
+      <button class="ibtn" type="button" id="bChat" aria-label="แชท">💬</button>
+      <button class="ibtn" type="button" id="bMute" aria-label="เปิดหรือปิดเสียง">🔊</button>
+    </div>
+    <div class="side">
+      <canvas id="mini" width="224" height="168" aria-label="แผนที่ย่อ"></canvas>
+      <span class="gold"><span class="coin"></span><span id="hudGold">0</span></span>
+      <span class="online" id="online"><i></i><span id="onlineT">เล่นคนเดียว</span></span>
+    </div>
+    <div class="chatlog" id="chatlog" aria-live="polite"></div>
+    <p class="joyhint" id="joyhint">ลากนิ้วบนจอเพื่อเดิน</p>
+    <button class="talk" type="button" id="bTalk" hidden>🛒 คุยกับป้าแมวเหมียว</button>
+    <div class="acts">
+      <button class="abtn pot" type="button" id="bPot" aria-label="ดื่มยา">🍯<b id="potN">0</b><span class="cd" id="potCd"></span></button>
+      <button class="abtn skl" type="button" id="bSkill" aria-label="ใช้สกิล"><span id="skillIco">🔥</span><span class="cd" id="skillCd"></span><small id="skillMp"></small></button>
+      <button class="abtn atk" type="button" id="bAtk" aria-label="โจมตี">⚔️<span class="cd" id="atkCd"></span></button>
+    </div>
+    <div class="dead" id="dead" hidden><div><b>หมดแรงซะแล้ว…</b><span id="deadT">กำลังพากลับเมือง</span></div></div>
+  </div>
+  <div class="joy" id="joy" hidden><i id="joyK"></i></div>
+
+  <form class="chatbar" id="chatbar" hidden>
+    <input id="chatIn" maxlength="80" autocomplete="off" placeholder="พิมพ์ข้อความถึงทุกคน" aria-label="ข้อความแชท">
+    <button class="btn sm primary" type="submit">ส่ง</button>
+    <button class="btn sm" type="button" id="chatX">ปิด</button>
+  </form>
+
+  <section class="screen" id="s-egg" hidden>
+    <div class="egg-inner">
+      <div>
+        <p class="eyebrow">MMORPG ฟักไข่ · สุ่ม 1 ใน 5 สี</p>
+        <h1 class="logo">ไข่ปุ๊กปิ๊ก ออนไลน์</h1>
       </div>
-      <div class="zone-tag" id="bZone"></div>
+      <div class="egg-stage">
+        <div class="rays" id="rays" hidden></div>
+        <button class="egg-btn egg-idle" id="eggBtn" type="button" aria-label="แตะไข่ให้ฟัก"></button>
+        <div class="hatched" id="hatched" hidden></div>
+      </div>
+      <p class="egg-hint" id="eggHint"></p>
+      <div class="crack-meter" id="crackMeter"></div>
+      <div class="odds" id="odds"></div>
+      <div class="reveal" id="reveal" hidden></div>
     </div>
-    <div class="log" id="bLog" aria-live="polite"></div>
-    <div class="cmds" id="bCmds">
-      <button class="btn cmd atk" type="button" data-act="attack">โจมตี<small>ตีปกติ</small></button>
-      <button class="btn cmd skl" type="button" data-act="skill"><span id="bSkillName">สกิล</span><small id="bSkillCost"></small></button>
-      <button class="btn cmd def" type="button" data-act="defend">ป้องกัน<small>ลดดาเมจครึ่งหนึ่ง · +2 MP</small></button>
-      <button class="btn cmd itm" type="button" data-act="items">ไอเทม<small id="bItemCount"></small></button>
-      <button class="btn cmd run" type="button" data-act="run" id="bRun">หนี</button>
-    </div>
-    <div class="cmds" id="bItems" hidden></div>
   </section>
 
   <div class="modal-wrap" id="modal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-      <div class="m-art" id="mArt"></div>
+      <button class="x" type="button" id="mX" aria-label="ปิด">✕</button>
       <h2 class="h" id="mTitle"></h2>
       <div class="m-body" id="mBody"></div>
-      <div class="m-btns" id="mBtns"></div>
     </div>
   </div>
   <div class="toast" id="toast" hidden></div>
@@ -351,98 +272,89 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 const ri = (a, b) => Math.floor(rnd(a, b + 1));
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
+const clean = s => (typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f​-‏‪-‮⁠-⁯]/g, '').trim() : '');
 const INK = '#33284A';
+const nowS = () => performance.now() / 1000;
 
-/* ================= data ================= */
+/* ================= game data ================= */
 const STATS = ['hp', 'atk', 'def', 'spd', 'luk'];
 const STAT_NAME = { hp: 'พลังชีวิต', atk: 'โจมตี', def: 'ป้องกัน', spd: 'ความเร็ว', luk: 'โชค' };
 const STAT_SHORT = { hp: 'HP', atk: 'ATK', def: 'DEF', spd: 'SPD', luk: 'LUK' };
-
 const COLORS = {
-  red:    { th: 'แดง',    species: 'ปุ๊กเพลิง',   main: 'atk', trait: 'โจมตีแรงที่สุด ปิดเกมไว',
-            c: ['#FFA3A0', '#FF5A5F', '#C3303B'], light: '#FFD3CF',
-            skill: { name: 'หมัดเพลิง', icon: '🔥', cost: 5, desc: 'ต่อยแรง ×2.2 เท่า' },
-            lines: ['ร้อนแรงไปเลย!', 'ขอตีอะไรสักหน่อยได้ไหม', 'หมัดนี้ไฟลุกนะ!'] },
-  blue:   { th: 'น้ำเงิน', species: 'ปุ๊กวารี',    main: 'def', trait: 'ป้องกันแน่นหนา โดนตีแทบไม่เจ็บ',
-            c: ['#A8D4FF', '#4A9DFF', '#2360BF'], light: '#D2E7FF',
-            skill: { name: 'โล่วารี', icon: '💧', cost: 4, desc: 'โจมตี + กันดาเมจ 60% อีก 3 ครั้ง' },
-            lines: ['ใจเย็นๆ นะ', 'ฉันจะปกป้องเธอเอง', 'บลุบ บลุบ~'] },
-  yellow: { th: 'เหลือง',  species: 'ปุ๊กสายฟ้า',  main: 'spd', trait: 'ว่องไว ได้ลงมือก่อน หลบเก่ง',
-            c: ['#FFF3A6', '#FFD23F', '#D49F00'], light: '#FFF0B3',
-            skill: { name: 'สายฟ้าแลบ', icon: '⚡', cost: 4, desc: 'ฟาด 2 ครั้งติด ไม่มีวันพลาด' },
-            lines: ['ไปเร็วๆ ไปๆ!', 'ซิ่งงงงง!', 'ฉันเร็วกว่าลมอีกนะ'] },
-  brown:  { th: 'น้ำตาล',  species: 'ปุ๊กผืนดิน',  main: 'hp',  trait: 'พลังชีวิตมหาศาล อึดที่สุด',
-            c: ['#E2B892', '#A8744A', '#6E4424'], light: '#EED9C4',
-            skill: { name: 'ดินฟื้นฟู', icon: '🌰', cost: 5, desc: 'ฟื้น HP 40% ของทั้งหมด' },
-            lines: ['ง่วงจัง…', 'ฉันแข็งแรงเหมือนภูเขา', 'ดินหอมดีนะ'] },
-  green:  { th: 'เขียว',   species: 'ปุ๊กใบไม้',   main: 'luk', trait: 'โชคดี คริติคอลบ่อย ได้ทองและของดรอปเยอะ',
-            c: ['#B6F2B8', '#5CCB6B', '#2C8A3C'], light: '#D2F4D4',
-            skill: { name: 'ใบไม้ดูดพลัง', icon: '🍃', cost: 4, desc: 'โจมตี ×1.3 คริติคอลง่าย ดูดเลือด 50%' },
-            lines: ['วันนี้ต้องโชคดีแน่ๆ', 'เจอใบโคลเวอร์สี่แฉกด้วย!', 'ฟุ้งๆ~'] },
+  red:    { th: 'แดง', species: 'ปุ๊กเพลิง', main: 'atk', trait: 'โจมตีแรงที่สุด ล้มมอนไว', c: ['#FFA3A0', '#FF5A5F', '#C3303B'], light: '#FFD3CF',
+            skill: { name: 'ระเบิดเพลิง', icon: '🔥', cost: 8, desc: 'ระเบิดไฟรอบตัว ตีทุกตัวใกล้ๆ ×1.8' } },
+  blue:   { th: 'น้ำเงิน', species: 'ปุ๊กวารี', main: 'def', trait: 'ป้องกันแน่น โดนรุมก็ยังไหว', c: ['#A8D4FF', '#4A9DFF', '#2360BF'], light: '#D2E7FF',
+            skill: { name: 'โล่วารี', icon: '💧', cost: 6, desc: 'โล่น้ำลดดาเมจ 60% นาน 6 วินาที + กระแทกรอบตัว' } },
+  yellow: { th: 'เหลือง', species: 'ปุ๊กสายฟ้า', main: 'spd', trait: 'เดินเร็ว ตีรัว หลบเก่ง', c: ['#FFF3A6', '#FFD23F', '#D49F00'], light: '#FFF0B3',
+            skill: { name: 'สายฟ้าลูกโซ่', icon: '⚡', cost: 7, desc: 'ฟาดสายฟ้าใส่ 3 ตัวที่ใกล้ที่สุด ×1.3 ไม่มีพลาด' } },
+  brown:  { th: 'น้ำตาล', species: 'ปุ๊กผืนดิน', main: 'hp', trait: 'พลังชีวิตมหาศาล อึดที่สุด', c: ['#E2B892', '#A8744A', '#6E4424'], light: '#EED9C4',
+            skill: { name: 'ดินฟื้นฟู', icon: '🌰', cost: 8, desc: 'ฟื้น HP 40% และกระแทกพื้นรอบตัว' } },
+  green:  { th: 'เขียว', species: 'ปุ๊กใบไม้', main: 'luk', trait: 'โชคดี คริบ่อย ของดรอปดีกว่าคนอื่น', c: ['#B6F2B8', '#5CCB6B', '#2C8A3C'], light: '#D2F4D4',
+            skill: { name: 'ใบไม้ดูดพลัง', icon: '🍃', cost: 6, desc: 'ตีตัวใกล้สุด ×1.6 คริง่าย ดูดเลือด 50%' } },
 };
 const COLOR_KEYS = Object.keys(COLORS);
-const BASE  = { hp: 42, atk: 9, def: 7, spd: 7, luk: 6 };
+const BASE = { hp: 42, atk: 9, def: 7, spd: 7, luk: 6 };
 const BONUS = { hp: 28, atk: 5, def: 5, spd: 5, luk: 6 };
-const GROW  = { hp: 7, atk: 2, def: 1.6, spd: 1.4, luk: 1.2 };
+const GROW = { hp: 7, atk: 2, def: 1.6, spd: 1.4, luk: 1.2 };
 const POINT_VALUE = { hp: 6, atk: 1, def: 1, spd: 1, luk: 1 };
 const STAGE_NAME = ['', 'วัยเบบี้', 'วัยซ่า', 'ร่างราชา'];
-const STAGE_LV = [0, 1, 5, 12];
 
-const ITEMS = {
+const CONSUME = {
   potion: { name: 'ยาน้ำผึ้ง', icon: '🍯', price: 15, desc: 'ฟื้น HP 40% (อย่างน้อย 30)' },
-  ether:  { name: 'น้ำค้างมานา', icon: '💧', price: 20, desc: 'ฟื้น MP 12' },
+  ether:  { name: 'น้ำค้างมานา', icon: '💧', price: 20, desc: 'ฟื้น MP 15' },
   elixir: { name: 'ยาอายุวัฒนะ', icon: '✨', price: 90, desc: 'ฟื้น HP และ MP จนเต็ม' },
 };
-const GEAR = {
-  weapon: { label: 'อาวุธ', icon: '🗡️', tiers: [
-    { name: 'กิ่งไม้วิเศษ', atk: 3, price: 30 }, { name: 'ดาบไม้ไผ่', atk: 6, price: 140 },
-    { name: 'ดาบเหล็กกล้า', atk: 10, price: 420 }, { name: 'ดาบคริสตัล', atk: 15, price: 1000 },
-    { name: 'ดาบดาวตก', atk: 22, price: 2400 } ] },
-  armor: { label: 'เกราะ', icon: '🛡️', tiers: [
-    { name: 'ผ้าพันคอนุ่มนิ่ม', def: 3, price: 30 }, { name: 'เกราะใบไม้', def: 6, price: 140 },
-    { name: 'เกราะเหล็ก', def: 10, price: 420 }, { name: 'เกราะคริสตัล', def: 15, price: 1000 },
-    { name: 'เกราะเกล็ดมังกร', def: 22, price: 2400 } ] },
-  charm: { label: 'เครื่องราง', icon: '🔔', tiers: [
-    { name: 'กระดิ่งจิ๋ว', spd: 2, luk: 2, price: 60 }, { name: 'ขนนกนำทาง', spd: 5, luk: 5, price: 320 },
-    { name: 'ดาวนำโชค', spd: 9, luk: 9, price: 1300 } ] },
+const SLOTS = ['weapon', 'armor', 'hat', 'shoes', 'charm'];
+const SLOT = {
+  weapon: { th: 'อาวุธ', stat: 'atk', base: [3, 7, 12, 18, 26], names: ['กิ่งไม้วิเศษ', 'ดาบไม้ไผ่', 'ดาบเหล็กกล้า', 'ดาบคริสตัล', 'ดาบดาวตก'], icons: ['🪵', '🗡️', '🗡️', '⚔️', '🔱'] },
+  armor:  { th: 'เกราะ', stat: 'def', base: [3, 7, 12, 18, 26], names: ['ผ้าพันคอนุ่ม', 'เสื้อใบไม้', 'เกราะเหล็ก', 'เกราะคริสตัล', 'เกราะเกล็ดมังกร'], icons: ['🧣', '🦺', '🥋', '🛡️', '🛡️'] },
+  hat:    { th: 'หมวก', stat: 'hp', base: [14, 32, 56, 85, 125], names: ['หมวกแก๊ป', 'หมวกสาน', 'หมวกนักมายากล', 'หมวกเหล็ก', 'มงกุฎราชันย์'], icons: ['🧢', '👒', '🎩', '🪖', '👑'] },
+  shoes:  { th: 'รองเท้า', stat: 'spd', base: [2, 4, 7, 10, 14], names: ['รองเท้าแตะ', 'รองเท้าผ้าใบ', 'รองเท้าบูท', 'รองเท้าอัศวิน', 'รองเท้าลมกรด'], icons: ['🩴', '👟', '🥾', '👢', '🛼'] },
+  charm:  { th: 'เครื่องราง', stat: 'luk', base: [2, 4, 7, 10, 14], names: ['ใบโคลเวอร์', 'กระดิ่งจิ๋ว', 'ตาทิพย์', 'อัญมณีนำโชค', 'ดาวตกนำโชค'], icons: ['🍀', '🔔', '🧿', '💎', '🌟'] },
 };
+const RAR = [
+  { th: 'ธรรมดา', c: '#8F88A0', m: 1 }, { th: 'ดี', c: '#2FAE62', m: 1.25 }, { th: 'หายาก', c: '#3F86F5', m: 1.55 },
+  { th: 'มหากาพย์', c: '#A155E8', m: 1.9 }, { th: 'ตำนาน', c: '#FF8A1F', m: 2.4 },
+];
+const BAG_MAX = 30;
 
 const FOES = {
   worm:     { name: 'หนอนซน', e: '🐛', hp: 18, atk: 6, def: 2, spd: 4, xp: 6, gold: 4 },
   bee:      { name: 'ผึ้งจอมต่อย', e: '🐝', hp: 14, atk: 7, def: 1, spd: 9, xp: 7, gold: 5 },
   shroom:   { name: 'เห็ดเดินได้', e: '🍄', hp: 26, atk: 5, def: 4, spd: 3, xp: 8, gold: 6 },
-  wormking: { name: 'ราชาหนอนยักษ์', e: '🐛', hp: 95, atk: 10, def: 5, spd: 5, xp: 45, gold: 45, boss: 1 },
+  wormking: { name: 'ราชาหนอนยักษ์', e: '🐛', hp: 110, atk: 10, def: 5, spd: 5, xp: 50, gold: 45, boss: 1 },
   wolf:     { name: 'หมาป่าเงา', e: '🐺', hp: 40, atk: 13, def: 6, spd: 10, xp: 16, gold: 12 },
   bat:      { name: 'ค้างคาวหิว', e: '🦇', hp: 30, atk: 12, def: 4, spd: 14, xp: 15, gold: 11 },
   treant:   { name: 'ต้นไม้ขี้โมโห', e: '🌳', hp: 62, atk: 11, def: 10, spd: 3, xp: 18, gold: 14 },
-  bear:     { name: 'หมีป่าจอมโหด', e: '🐻', hp: 210, atk: 18, def: 10, spd: 7, xp: 120, gold: 100, boss: 1 },
+  bear:     { name: 'หมีป่าจอมโหด', e: '🐻', hp: 240, atk: 18, def: 10, spd: 7, xp: 130, gold: 100, boss: 1 },
   spider:   { name: 'แมงมุมผลึก', e: '🕷️', hp: 62, atk: 20, def: 10, spd: 14, xp: 30, gold: 22 },
   ghost:    { name: 'วิญญาณถ้ำ', e: '👻', hp: 55, atk: 22, def: 8, spd: 12, xp: 32, gold: 24 },
   rock:     { name: 'ศิลาเดินได้', e: '🪨', hp: 92, atk: 18, def: 18, spd: 4, xp: 34, gold: 26 },
-  golem:    { name: 'ยักษ์หินคริสตัล', e: '🗿', hp: 380, atk: 27, def: 18, spd: 6, xp: 260, gold: 200, boss: 1 },
+  golem:    { name: 'ยักษ์หินคริสตัล', e: '🗿', hp: 420, atk: 27, def: 18, spd: 6, xp: 280, gold: 200, boss: 1 },
   lizard:   { name: 'ซาลาแมนเดอร์', e: '🦎', hp: 92, atk: 30, def: 14, spd: 15, xp: 50, gold: 36 },
   flame:    { name: 'ภูตเพลิง', e: '🔥', hp: 76, atk: 34, def: 11, spd: 17, xp: 52, gold: 38 },
   scorp:    { name: 'แมงป่องลาวา', e: '🦂', hp: 112, atk: 29, def: 20, spd: 11, xp: 55, gold: 40 },
-  dragon:   { name: 'มังกรลาวา', e: '🐉', hp: 580, atk: 40, def: 24, spd: 13, xp: 450, gold: 340, boss: 1 },
+  dragon:   { name: 'มังกรลาวา', e: '🐉', hp: 640, atk: 40, def: 24, spd: 13, xp: 480, gold: 340, boss: 1 },
   skull:    { name: 'โครงกระดูกอัศวิน', e: '💀', hp: 132, atk: 42, def: 22, spd: 14, xp: 80, gold: 55 },
   mage:     { name: 'พ่อมดมืด', e: '🧙', hp: 112, atk: 48, def: 16, spd: 18, xp: 85, gold: 60 },
   oni:      { name: 'ยักษ์โอนิ', e: '👹', hp: 165, atk: 44, def: 26, spd: 10, xp: 90, gold: 65 },
-  demon:    { name: 'จอมมารเงา', e: '😈', hp: 950, atk: 55, def: 30, spd: 18, xp: 1000, gold: 800, boss: 1 },
+  demon:    { name: 'จอมมารเงา', e: '😈', hp: 1100, atk: 55, def: 30, spd: 18, xp: 1100, gold: 800, boss: 1 },
 };
+const FOE_KEYS = Object.keys(FOES);
 const ZONES = [
-  { name: 'ทุ่งหญ้าสดใส', lv: 1,  z: ['#BFE8FF', '#E8F7FC', '#A6DB88', '#86C66A'], foes: ['worm', 'bee', 'shroom'], boss: 'wormking', flavor: 'ลมเย็นสบาย ดอกไม้บาน เหมาะกับมือใหม่' },
-  { name: 'ป่าลึกลับ',   lv: 4,  z: ['#9ED5BA', '#CBEAD5', '#5DA271', '#3E8055'], foes: ['wolf', 'bat', 'treant'],   boss: 'bear',     flavor: 'ต้นไม้สูงบังแสง ได้ยินเสียงหอนไกลๆ' },
-  { name: 'ถ้ำคริสตัล',  lv: 8,  z: ['#6C70AE', '#A5A7D8', '#56508A', '#3E386C'], foes: ['spider', 'ghost', 'rock'], boss: 'golem',    flavor: 'ผลึกเรืองแสงระยิบระยับ เย็นยะเยือก' },
-  { name: 'ภูเขาไฟ',     lv: 12, z: ['#FFAE85', '#FFD9B8', '#B2553C', '#86382A'], foes: ['lizard', 'flame', 'scorp'], boss: 'dragon',  flavor: 'ร้อนระอุ ลาวาไหลเอื่อยๆ' },
-  { name: 'ปราสาทมืด',   lv: 16, z: ['#7B6BA0', '#AC9CCB', '#4B3F68', '#2F2745'], foes: ['skull', 'mage', 'oni'],    boss: 'demon',   flavor: 'ที่พำนักของจอมมารเงา ด่านสุดท้าย' },
+  { name: 'ทุ่งหญ้าสดใส', lv: 1,  foes: ['worm', 'bee', 'shroom'],   boss: 'wormking', g: ['#A6DB88', '#9CD27E'], road: '#E6D29E' },
+  { name: 'ป่าลึกลับ',   lv: 4,  foes: ['wolf', 'bat', 'treant'],   boss: 'bear',     g: ['#62A873', '#5A9F6B'], road: '#C9B383' },
+  { name: 'ถ้ำคริสตัล',  lv: 8,  foes: ['spider', 'ghost', 'rock'], boss: 'golem',    g: ['#77719F', '#6F6997'], road: '#9B95C2' },
+  { name: 'ภูเขาไฟ',     lv: 12, foes: ['lizard', 'flame', 'scorp'], boss: 'dragon',   g: ['#A0604A', '#975641'], road: '#C98A6C' },
+  { name: 'ปราสาทมืด',   lv: 16, foes: ['skull', 'mage', 'oni'],    boss: 'demon',    g: ['#51466E', '#4A3F66'], road: '#71659A' },
 ];
-const WINS_FOR_BOSS = 4;
+const FOE_ZONE = FOE_KEYS.map(k => ZONES.findIndex(z => z.foes.includes(k) || z.boss === k));
 const SAVE_KEY = 'pukpik-save-v1';
 const PREF_KEY = 'pukpik-prefs';
 
-/* ================= art ================= */
+/* ================= art: blob & egg (SVG) ================= */
 let uid = 0;
 const SK = `fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"`;
 const ACC = {
@@ -454,61 +366,48 @@ const ACC = {
 };
 const CROWN = `<g transform="rotate(-14 34 30)"><path d="M20 34L22 19L29 26L34 14L39 26L46 19L48 34Z" fill="#FFD23F" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="34" cy="29" r="2.5" fill="#FF5A5F"/></g>`;
 const STAR = (x, y, s, cls) => `<path class="sparkle ${cls}" d="M${x} ${y - s}L${x + s * .3} ${y - s * .3}L${x + s} ${y}L${x + s * .3} ${y + s * .3}L${x} ${y + s}L${x - s * .3} ${y + s * .3}L${x - s} ${y}L${x - s * .3} ${y - s * .3}Z" fill="#FFE98A" stroke="${INK}" stroke-width="1.5"/>`;
-
 function blobSVG(color, st = 1, o = {}) {
   const c = COLORS[color].c, id = 'g' + (++uid), mood = o.mood || 'idle';
   let eyes, mouth;
-  if (mood === 'happy') {
-    eyes = `<path d="M39 70Q46 60 53 70" ${SK}/><path d="M67 70Q74 60 81 70" ${SK}/>`;
-    mouth = `<path d="M52 80Q60 92 68 80Z" fill="${INK}"/>`;
-  } else if (mood === 'hurt') {
-    eyes = `<path d="M40 61L51 67L40 73" ${SK}/><path d="M80 61L69 67L80 73" ${SK}/>`;
-    mouth = `<path d="M53 85Q60 78 67 85" ${SK}/>`;
-  } else if (mood === 'sleep') {
-    eyes = `<path d="M39 68Q46 73 53 68" ${SK}/><path d="M67 68Q74 73 81 68" ${SK}/>`;
-    mouth = `<ellipse cx="60" cy="83" rx="3" ry="3.5" fill="${INK}"/>`;
-  } else {
-    eyes = `<g class="eyes"><ellipse cx="46" cy="67" rx="6" ry="8" fill="${INK}"/><ellipse cx="74" cy="67" rx="6" ry="8" fill="${INK}"/><circle cx="48.3" cy="63.5" r="2.4" fill="#fff"/><circle cx="76.3" cy="63.5" r="2.4" fill="#fff"/></g>`;
-    mouth = `<path d="M54 80Q60 86 66 80" ${SK}/>`;
-  }
+  if (mood === 'happy') { eyes = `<path d="M39 70Q46 60 53 70" ${SK}/><path d="M67 70Q74 60 81 70" ${SK}/>`; mouth = `<path d="M52 80Q60 92 68 80Z" fill="${INK}"/>`; }
+  else if (mood === 'hurt') { eyes = `<path d="M40 61L51 67L40 73" ${SK}/><path d="M80 61L69 67L80 73" ${SK}/>`; mouth = `<path d="M53 85Q60 78 67 85" ${SK}/>`; }
+  else if (mood === 'sleep') { eyes = `<path d="M39 68Q46 73 53 68" ${SK}/><path d="M67 68Q74 73 81 68" ${SK}/>`; mouth = `<ellipse cx="60" cy="83" rx="3" ry="3.5" fill="${INK}"/>`; }
+  else { eyes = `<g class="eyes"><ellipse cx="46" cy="67" rx="6" ry="8" fill="${INK}"/><ellipse cx="74" cy="67" rx="6" ry="8" fill="${INK}"/><circle cx="48.3" cy="63.5" r="2.4" fill="#fff"/><circle cx="76.3" cy="63.5" r="2.4" fill="#fff"/></g>`; mouth = `<path d="M54 80Q60 86 66 80" ${SK}/>`; }
   const [back, front] = st >= 2 ? ACC[color]() : ['', ''];
   const sparkle = o.shiny ? STAR(104, 28, 7, '') + STAR(14, 50, 5, 'b') + STAR(100, 92, 4, 'b') : '';
-  return `<svg viewBox="0 0 120 120" class="blob-svg st${st}" aria-hidden="true"><defs><radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient></defs>`
-    + `<ellipse cx="60" cy="111" rx="34" ry="5.5" fill="rgba(51,40,74,.18)"/>`
-    + `<g class="blob-body">${back}<path d="M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z" fill="url(#${id})" stroke="${INK}" stroke-width="3"/>`
+  const shadow = o.noShadow ? '' : `<ellipse cx="60" cy="111" rx="34" ry="5.5" fill="rgba(51,40,74,.18)"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true"><defs><radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient></defs>`
+    + shadow + `<g class="blob-body">${back}<path d="M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z" fill="url(#${id})" stroke="${INK}" stroke-width="3"/>`
     + `<ellipse cx="40" cy="42" rx="11" ry="5.5" fill="#fff" opacity=".6" transform="rotate(-32 40 42)"/>`
     + `${eyes}<ellipse cx="33" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/><ellipse cx="87" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/>${mouth}${front}${st >= 3 ? CROWN : ''}</g>${sparkle}</svg>`;
 }
-
-const CRACKS = [
-  'M60 34L53 45L62 51L55 62',
-  'M55 62L65 70L58 79',
-  'M26 82L37 86L32 95L44 99',
-  'M94 74L85 81L95 88L86 97',
-  'M44 99L58 79L86 97',
-];
+const CRACKS = ['M60 34L53 45L62 51L55 62', 'M55 62L65 70L58 79', 'M26 82L37 86L32 95L44 99', 'M94 74L85 81L95 88L86 97', 'M44 99L58 79L86 97'];
 function eggSVG(n) {
   let cracks = '';
-  for (let i = 0; i < Math.min(n, CRACKS.length); i++) cracks += `<path d="${CRACKS[i]}" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  for (let i = 0; i < Math.min(n, CRACKS.length); i++) cracks += `<path d="${CRACKS[i]}" ${SK}/>`;
   return `<svg viewBox="0 0 120 150" aria-hidden="true"><defs><radialGradient id="eggG" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#FFF4DE"/><stop offset="1" stop-color="#E9CF9F"/></radialGradient></defs>`
-    + `<ellipse cx="60" cy="142" rx="36" ry="6" fill="rgba(51,40,74,.2)"/>`
-    + `<path d="M60 6C91 6 110 58 110 90C110 122 88 140 60 140C32 140 10 122 10 90C10 58 29 6 60 6Z" fill="url(#eggG)" stroke="${INK}" stroke-width="3"/>`
+    + `<ellipse cx="60" cy="142" rx="36" ry="6" fill="rgba(51,40,74,.2)"/><path d="M60 6C91 6 110 58 110 90C110 122 88 140 60 140C32 140 10 122 10 90C10 58 29 6 60 6Z" fill="url(#eggG)" stroke="${INK}" stroke-width="3"/>`
     + `<circle cx="38" cy="60" r="8" fill="#FF5A5F" opacity=".75"/><circle cx="80" cy="48" r="6" fill="#4A9DFF" opacity=".75"/><circle cx="74" cy="100" r="9" fill="#FFD23F" opacity=".85"/><circle cx="36" cy="112" r="6.5" fill="#5CCB6B" opacity=".75"/><circle cx="92" cy="118" r="5" fill="#A8744A" opacity=".75"/>`
     + `<ellipse cx="40" cy="36" rx="9" ry="14" fill="#fff" opacity=".7" transform="rotate(24 40 36)"/>${cracks}</svg>`;
+}
+const blobImgs = new Map();
+function blobImg(color, st, shiny, mood) {
+  const k = color + st + (shiny ? 's' : '') + mood;
+  let im = blobImgs.get(k);
+  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, noShadow: true })); blobImgs.set(k, im); }
+  return im;
 }
 
 /* ================= sound ================= */
 let AC = null, muted = false;
 const SFX = {
-  tap: [[660, .05]], crack: [[300, .05, 'square'], [220, .06, 'square']],
-  hatch: [[523, .08], [659, .08], [784, .08], [1047, .25]],
-  hit: [[200, .06, 'square'], [120, .08, 'square']], crit: [[900, .05, 'square'], [300, .06, 'square'], [150, .1, 'square']],
-  hurt: [[150, .08, 'sawtooth'], [90, .12, 'sawtooth']], miss: [[880, .05], [660, .06]],
-  heal: [[523, .07], [659, .07], [880, .12]], skill: [[440, .05, 'triangle'], [660, .05, 'triangle'], [990, .08, 'triangle']],
-  coin: [[988, .06], [1319, .14]], win: [[523, .1], [659, .1], [784, .1], [1047, .3]],
-  lose: [[392, .15, 'triangle'], [330, .15, 'triangle'], [262, .35, 'triangle']],
-  lvl: [[523, .08], [659, .08], [784, .08], [1047, .08], [1319, .3]], guard: [[330, .06, 'triangle'], [440, .1, 'triangle']],
-  charge: [[110, .2, 'sawtooth'], [130, .2, 'sawtooth']],
+  tap: [[660, .05]], crack: [[300, .05, 'square'], [220, .06, 'square']], hatch: [[523, .08], [659, .08], [784, .08], [1047, .25]],
+  swing: [[520, .03, 'triangle'], [380, .04, 'triangle']], hit: [[200, .05, 'square'], [120, .07, 'square']],
+  crit: [[900, .05, 'square'], [300, .06, 'square'], [150, .1, 'square']], hurt: [[150, .07, 'sawtooth'], [90, .1, 'sawtooth']],
+  miss: [[880, .04], [660, .05]], heal: [[523, .07], [659, .07], [880, .12]], skill: [[440, .05, 'triangle'], [660, .05, 'triangle'], [990, .08, 'triangle']],
+  coin: [[988, .05], [1319, .1]], pick: [[700, .04], [1050, .08]], kill: [[330, .05, 'square'], [660, .08]],
+  lvl: [[523, .08], [659, .08], [784, .08], [1047, .08], [1319, .3]], die: [[392, .15, 'triangle'], [330, .15, 'triangle'], [262, .35, 'triangle']],
+  rare: [[784, .06], [988, .06], [1175, .06], [1568, .2]], boss: [[110, .25, 'sawtooth'], [98, .3, 'sawtooth']],
 };
 function sfx(name) {
   if (muted || !SFX[name]) return;
@@ -519,132 +418,175 @@ function sfx(name) {
     for (const [f, d, type] of SFX[name]) {
       const o = AC.createOscillator(), g = AC.createGain();
       o.type = type || 'sine'; o.frequency.value = f;
-      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.12, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d);
-      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d + .02);
-      t += d * .9;
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.1, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d + .02); t += d * .9;
     }
-  } catch (e) { /* audio unavailable */ }
+  } catch (e) { /* no audio */ }
 }
 function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
 
-/* ================= state ================= */
-let P = null;          // player save
-let B = null;          // current battle
-let tab = 'home';
-let started = false;
+/* ================= world generation (same seed for everyone) ================= */
+const T = 32, W = 128, H = 96;
+const TOWN = { x: 18, y: 48 };
+const BANDS = [9, 32, 54, 74, 94];
+function hash2(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
+function vnoise(x, y, s) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi, s), b = hash2(xi + 1, yi, s), c = hash2(xi, yi + 1, s), d = hash2(xi + 1, yi + 1, s);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+const roadY = x => 48 + Math.sin(x / 9) * 5 + Math.sin(x / 23) * 4;
+// ground: 0 town, 1..5 zones. obj: 0 none, 1 tree, 2 pine, 3 rock, 4 crystal, 5 water, 6 lava, 7 pillar, 8 fountain, 9 stall, 10 house, 20+ decor (walkable)
+const GROUND = new Uint8Array(W * H), OBJ = new Uint8Array(W * H), ROAD = new Uint8Array(W * H);
+const BLOCK = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+const BOSS_POS = [];
+const ZONE_TILES = [[], [], [], [], []];
+const SHOP = { x: TOWN.x - 4, y: TOWN.y - 3 };
+(function genWorld() {
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x, d0 = Math.hypot(x - TOWN.x, y - TOWN.y);
+    const d = d0 + (vnoise(x / 7, y / 7, 1) - .5) * 9;
+    let g = 5;
+    if (d0 < BANDS[0]) g = 0; else for (let b = 1; b < BANDS.length; b++) if (d < BANDS[b]) { g = b; break; }
+    if (g === 0 && d0 >= BANDS[0]) g = 1;
+    GROUND[i] = g;
+    if (Math.abs(y - roadY(x)) < 1.4 && x >= TOWN.x) ROAD[i] = 1;
+  }
+  for (let zi = 0; zi < 5; zi++) {
+    const d = [27, 48, 68, 88, 106][zi], bx = Math.min(W - 8, TOWN.x + d), by = Math.round(roadY(bx) + (zi % 2 ? -10 : 10));
+    BOSS_POS.push({ x: bx * T + T / 2, y: by * T + T / 2 });
+  }
+  const nearBoss = (x, y) => BOSS_POS.some(b => Math.hypot(x - (b.x - T / 2) / T, y - (b.y - T / 2) / T) < 4);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x, g = GROUND[i];
+    if (x === 0 || y === 0 || x === W - 1 || y === H - 1) { OBJ[i] = g >= 3 ? (g === 5 ? 7 : 3) : (g === 2 ? 2 : 1); continue; }
+    if (g === 0 || ROAD[i] || nearBoss(x, y)) continue;
+    if (Math.hypot(x - TOWN.x, y - TOWN.y) < BANDS[0] + 2) continue;
+    const n = vnoise(x / 5, y / 5, 2), r = hash2(x, y, 3);
+    let o = 0;
+    if (g === 1) o = n > .8 ? 5 : r < .05 ? 1 : r < .2 ? 20 : 0;
+    else if (g === 2) o = n < .13 ? 5 : r < .13 + (n > .6 ? .12 : 0) ? (r < .07 ? 2 : 1) : r < .2 ? 21 : 0;
+    else if (g === 3) o = r < .07 ? 3 : r < .12 ? 4 : r < .18 ? 22 : 0;
+    else if (g === 4) o = n > .76 ? 6 : r < .07 ? 3 : r < .13 ? 23 : 0;
+    else o = (x % 7 === 0 && y % 7 === 0) ? 7 : r < .05 ? 3 : r < .1 ? 24 : 0;
+    OBJ[i] = o;
+  }
+  // town furniture
+  const put = (x, y, o) => { OBJ[y * W + x] = o; };
+  put(TOWN.x, TOWN.y, 8); put(TOWN.x + 1, TOWN.y, 8); put(TOWN.x, TOWN.y + 1, 8); put(TOWN.x + 1, TOWN.y + 1, 8);
+  put(SHOP.x, SHOP.y, 9); put(SHOP.x + 1, SHOP.y, 9);
+  for (const [hx, hy] of [[TOWN.x - 5, TOWN.y + 4], [TOWN.x + 4, TOWN.y - 5], [TOWN.x - 1, TOWN.y - 6], [TOWN.x + 5, TOWN.y + 4]]) { put(hx, hy, 10); put(hx + 1, hy, 10); }
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const i = y * W + x, g = GROUND[i];
+    if (g >= 1 && !BLOCK.has(OBJ[i]) && Math.hypot(x - TOWN.x, y - TOWN.y) > BANDS[0] + 3) ZONE_TILES[g - 1].push(i);
+  }
+})();
+const tileAt = (px, py) => { const x = Math.floor(px / T), y = Math.floor(py / T); return (x < 0 || y < 0 || x >= W || y >= H) ? -1 : y * W + x; };
+const solid = (px, py) => { const i = tileAt(px, py); return i < 0 || BLOCK.has(OBJ[i]); };
+const monSolid = (px, py) => { const i = tileAt(px, py); return i < 0 || BLOCK.has(OBJ[i]) || GROUND[i] === 0; };
+const zoneAt = (px, py) => { const i = tileAt(px, py); return i < 0 ? 0 : GROUND[i]; };
+const inTown = (px, py) => Math.hypot(px / T - TOWN.x - .5, py / T - TOWN.y - .5) < BANDS[0];
+function moveBody(o, dx, dy, r, isSolid) {
+  if (dx) { const nx = o.x + dx, ex = nx + Math.sign(dx) * r; if (!isSolid(ex, o.y - r * .6) && !isSolid(ex, o.y + r * .6)) o.x = nx; }
+  if (dy) { const ny = o.y + dy, ey = ny + Math.sign(dy) * r; if (!isSolid(o.x - r * .6, ey) && !isSolid(o.x + r * .6, ey)) o.y = ny; }
+}
+const SPAWN = { x: (TOWN.x + 1) * T, y: (TOWN.y + 3) * T };
 
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) {} }
+/* ================= player save ================= */
+let P = null;
+const me = { x: SPAWN.x, y: SPAWN.y, dir: 1, moving: false, walk: 0, atkCd: 0, skillCd: 0, potCd: 0, swing: 0, atkCount: 0, lastHurt: -99, dead: false, deadT: 0, shieldT: 0, hurtT: 0, zone: -1, chat: '', chatT: 0, chatAt: 0 };
+function save() { if (!P) return; P.x = Math.round(me.x); P.y = Math.round(me.y); try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) {} }
 function load() { try { const s = localStorage.getItem(SAVE_KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
 function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify({ muted })); } catch (e) {} }
-function loadPrefs() { try { const s = JSON.parse(localStorage.getItem(PREF_KEY) || '{}'); muted = !!s.muted; } catch (e) {} }
-
-function valid(p) { return p && p.v === 1 && COLORS[p.color] && p.base && typeof p.lv === 'number'; }
-
-function gearBonus(k) {
-  let v = 0;
-  for (const slot in GEAR) { const t = P.gear[slot]; if (t >= 0) v += GEAR[slot].tiers[t][k] || 0; }
-  return v;
+function loadPrefs() { try { muted = !!JSON.parse(localStorage.getItem(PREF_KEY) || '{}').muted; } catch (e) {} }
+function migrate(s) {
+  if (!s || !COLORS[s.color] || !s.base || typeof s.lv !== 'number') return null;
+  if (s.v === 1) { s.v = 2; s.bag = []; s.eq = {}; s.items = s.items || { potion: 3, ether: 1, elixir: 0 }; s.bossKills = (s.bosses || []).filter(Boolean).length; delete s.gear; delete s.wins; delete s.bosses; delete s.unlocked; }
+  if (s.v !== 2) return null;
+  s.bag = Array.isArray(s.bag) ? s.bag.filter(it => it && SLOT[it.slot]) : [];
+  s.eq = s.eq || {};
+  for (const k of Object.keys(s.eq)) if (!SLOT[k] || !s.eq[k]) delete s.eq[k];
+  s.items = Object.assign({ potion: 0, ether: 0, elixir: 0 }, s.items);
+  s.kills = s.kills || 0; s.bossKills = s.bossKills || 0; s.points = s.points || 0; s.gold = s.gold || 0; s.xp = s.xp || 0;
+  return s;
 }
-const st = k => P.base[k] + gearBonus(k);
-const maxHp = () => st('hp');
-const maxMp = () => 10 + (P.lv - 1) * 2;
-const xpNeed = lv => Math.round(12 * Math.pow(lv, 1.45));
-const stageOf = lv => (lv >= STAGE_LV[3] ? 3 : lv >= STAGE_LV[2] ? 2 : 1);
-const col = () => COLORS[P.color];
-
 function makePlayer(color, shiny) {
   const main = COLORS[color].main, base = {};
   for (const k of STATS) base[k] = BASE[k] + (k === 'hp' ? ri(0, 6) : ri(0, 2)) + (k === main ? BONUS[k] : 0) + (shiny ? (k === 'hp' ? 8 : 2) : 0);
-  return {
-    v: 1, name: COLORS[color].species, color, shiny, lv: 1, xp: 0, base, points: 0, gold: 30,
-    hp: base.hp, mp: 10, items: { potion: 3, ether: 1, elixir: 0 }, gear: { weapon: -1, armor: -1, charm: -1 },
-    unlocked: 0, wins: ZONES.map(() => 0), bosses: ZONES.map(() => false), kills: 0, battles: 0, born: Date.now(),
-  };
+  return { v: 2, name: COLORS[color].species, color, shiny, lv: 1, xp: 0, base, points: 0, gold: 20, hp: base.hp, mp: 20,
+    items: { potion: 3, ether: 1, elixir: 0 }, bag: [], eq: {}, kills: 0, bossKills: 0, born: Date.now() };
+}
+const col = () => COLORS[P.color];
+function gearBonus(k) { let v = 0; for (const s of SLOTS) { const it = P.eq[s]; if (it) v += it.stats[k] || 0; } return v; }
+const st = k => P.base[k] + gearBonus(k);
+const maxHp = () => st('hp');
+const maxMp = () => 20 + (P.lv - 1) * 3;
+const xpNeed = lv => Math.round(14 * Math.pow(lv, 1.55));
+const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
+const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75);
+const moveSpeed = () => Math.min(230, 118 + st('spd') * 1.3);
+function itemName(it) { return SLOT[it.slot].names[it.tier]; }
+function itemIcon(it) { return SLOT[it.slot].icons[it.tier]; }
+function itemPrice(it) { return Math.round((6 + it.tier * it.tier * 14 + it.tier * 10) * (1 + it.r * 0.8)); }
+function statText(stats) { return STATS.filter(k => stats[k]).map(k => `${STAT_SHORT[k]} +${stats[k]}`).join(' · '); }
+
+/* ================= loot ================= */
+function rollRarity(minR) {
+  const l = st('luk'), r = Math.random() * 100;
+  const q = r < 1 + l * .03 ? 4 : r < 5 + l * .08 ? 3 : r < 15 + l * .15 ? 2 : r < 40 + l * .2 ? 1 : 0;
+  return Math.max(q, minR || 0);
+}
+function makeItem(tier, minR) {
+  const slot = pick(SLOTS), s = SLOT[slot], r = rollRarity(minR), stats = {};
+  stats[s.stat] = Math.max(1, Math.round(s.base[tier] * RAR[r].m * rnd(.85, 1.15)));
+  const others = SLOTS.filter(q => q !== slot);
+  for (let i = 0; i < r; i++) { const o = SLOT[pick(others)]; stats[o.stat] = (stats[o.stat] || 0) + Math.max(1, Math.round(o.base[tier] * rnd(.22, .4))); }
+  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slot, tier, r, stats };
+}
+const loot = [];
+function dropLoot(kind, x, y, val) {
+  const a = rnd(0, Math.PI * 2), sp = rnd(30, 70);
+  loot.push({ kind, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, z: 0, vz: 90, val, t: nowS() });
 }
 
-function gainXp(x) {
-  P.xp += x;
-  let res = null;
-  while (P.xp >= xpNeed(P.lv)) {
-    P.xp -= xpNeed(P.lv);
-    const before = stageOf(P.lv);
-    P.lv++;
-    if (!res) res = { from: P.lv - 1, gains: { hp: 0, atk: 0, def: 0, spd: 0, luk: 0 }, evolved: 0 };
-    for (const k of STATS) {
-      const g = GROW[k] * (k === col().main ? 2 : 1);
-      const add = Math.floor(g) + (Math.random() < g % 1 ? 1 : 0);
-      P.base[k] += add; res.gains[k] += add;
-    }
-    P.points += 2;
-    if (stageOf(P.lv) > before) res.evolved = stageOf(P.lv);
-  }
-  if (res) { res.to = P.lv; P.hp = maxHp(); P.mp = maxMp(); }
-  return res;
-}
-
-/* ================= ui helpers ================= */
+/* ================= helpers: UI ================= */
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.hidden = false;
   t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
-  clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 1800);
+  clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 1900);
 }
-function modal({ title, body = '', art = '', buttons }) {
-  return new Promise(res => {
-    $('#mTitle').textContent = title;
-    $('#mArt').innerHTML = art;
-    $('#mBody').innerHTML = body;
-    const wrap = $('#mBtns'); wrap.innerHTML = '';
-    (buttons || [{ label: 'ตกลง', value: 'ok', primary: true }]).forEach(b => {
-      const el = document.createElement('button');
-      el.type = 'button'; el.className = 'btn' + (b.primary ? ' primary' : ''); el.textContent = b.label;
-      el.onclick = () => { $('#modal').hidden = true; sfx('tap'); res(b.value); };
-      wrap.appendChild(el);
-    });
-    $('#modal').hidden = false;
-    const first = wrap.querySelector('.primary') || wrap.firstChild;
-    first && first.focus({ preventScroll: true });
-  });
+function banner(title, sub) {
+  const b = document.createElement('div'); b.className = 'banner';
+  b.innerHTML = `<b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}`;
+  $('#hud').appendChild(b); setTimeout(() => b.remove(), 2700);
 }
-function retrigger(el, cls, ms = 600) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); }
-function floatText(host, text, cls = '') {
-  const s = document.createElement('span'); s.className = 'float ' + cls; s.textContent = text;
-  host.appendChild(s); setTimeout(() => s.remove(), 1000);
+function chatLine(name, text, sys) {
+  const box = $('#chatlog'), p = document.createElement('p');
+  if (sys) { p.className = 'sys'; p.textContent = text; }
+  else { const b = document.createElement('b'); b.textContent = name + ': '; p.appendChild(b); p.appendChild(document.createTextNode(text)); }
+  box.appendChild(p);
+  while (box.children.length > 5) box.firstChild.remove();
+  setTimeout(() => { p.style.transition = 'opacity .6s'; p.style.opacity = '0'; setTimeout(() => p.remove(), 700); }, 12000);
 }
-function fxBurst(host, emo) {
-  const s = document.createElement('div'); s.className = 'fx'; s.textContent = emo;
-  host.appendChild(s); setTimeout(() => s.remove(), 600);
+let sheetRender = null;
+function openSheet(title, render) {
+  $('#mTitle').textContent = title; sheetRender = render; render($('#mBody')); $('#modal').hidden = false; keys.clear(); joy.active = false; $('#joy').hidden = true;
 }
-function setVars(el) {
-  const c = col();
-  el.style.setProperty('--c', c.c[1]); el.style.setProperty('--c-light', c.light);
-}
-function barRow(label, cls, cur, max) {
-  return `<div class="bar-row"><span>${label}</span><div class="bar ${cls}"><i style="width:${clamp(cur / max * 100, 0, 100)}%"></i></div><span class="v">${cur} / ${max}</span></div>`;
-}
-function statRows(base, main, refMax) {
-  return STATS.map(k => `<div class="stat-row${k === main ? ' main' : ''}"><span class="lbl">${STAT_NAME[k]}</span><div class="bar"><i style="width:${clamp(base[k] / refMax[k] * 100, 4, 100)}%"></i></div><span class="val">${base[k]}</span></div>`).join('');
-}
+function refreshSheet() { if (sheetRender && !$('#modal').hidden) sheetRender($('#mBody')); }
+function closeSheet() { $('#modal').hidden = true; sheetRender = null; }
+$('#mX').onclick = () => { sfx('tap'); closeSheet(); };
+$('#modal').addEventListener('pointerdown', e => { if (e.target.id === 'modal') closeSheet(); });
 
 /* ================= egg & hatching ================= */
 let crack = 0, hatching = false, autoT = null, rolled = null;
-function showScreen(id) {
-  for (const s of ['#s-egg', '#s-battle']) $(s).hidden = s !== id;
-  const hub = id === null;
-  $('#topbar').hidden = !hub; $('#views').hidden = !hub; $('#tabs').hidden = !hub;
-}
 function startEgg() {
-  showScreen('#s-egg');
+  $('#s-egg').hidden = false; $('#hud').hidden = true;
   crack = 0; hatching = false; rolled = null;
   $('#reveal').hidden = true; $('#hatched').hidden = true; $('#rays').hidden = true;
   $('#eggBtn').hidden = false; $('#odds').hidden = false; $('#crackMeter').hidden = false;
   $('#eggHint').textContent = 'ไข่กำลังจะฟัก… แตะรัวๆ ให้ออกมาเร็วขึ้น!';
-  $('#odds').innerHTML = COLOR_KEYS.map(k => {
-    const c = COLORS[k];
-    return `<div class="odd"><div class="mini">${blobSVG(k, 1)}</div><b>${c.th}</b><span class="muted">${STAT_NAME[c.main]}</span></div>`;
-  }).join('');
-  renderEgg();
-  clearInterval(autoT);
-  autoT = setInterval(() => crackEgg(false), 1300);
+  $('#odds').innerHTML = COLOR_KEYS.map(k => `<div class="odd"><div class="mini">${blobSVG(k, 1)}</div><b>${COLORS[k].th}</b><span class="muted">${STAT_NAME[COLORS[k].main]}</span></div>`).join('');
+  renderEgg(); clearInterval(autoT); autoT = setInterval(() => crackEgg(false), 1300);
 }
 function renderEgg() {
   $('#eggBtn').innerHTML = eggSVG(crack);
@@ -652,515 +594,841 @@ function renderEgg() {
 }
 function crackEgg(tapped) {
   if (hatching) return;
-  crack++;
-  sfx(tapped ? 'crack' : 'tap');
-  if (tapped) buzz(15);
-  const btn = $('#eggBtn');
-  btn.classList.remove('egg-idle');
-  retrigger(btn, 'wobble', 460);
-  renderEgg();
-  if (crack > CRACKS.length) hatch();
+  crack++; sfx(tapped ? 'crack' : 'tap'); if (tapped) buzz(15);
+  const btn = $('#eggBtn'); btn.classList.remove('egg-idle', 'wobble'); void btn.offsetWidth; btn.classList.add('wobble');
+  renderEgg(); if (crack > CRACKS.length) hatch();
 }
+$('#eggBtn').onclick = () => crackEgg(true);
 async function hatch() {
   hatching = true; clearInterval(autoT);
-  await sleep(350);
+  await new Promise(r => setTimeout(r, 350));
   const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
   sfx('hatch'); buzz([30, 40, 60]);
-  await sleep(120);
-  const color = pick(COLOR_KEYS), shiny = Math.random() < 0.05;
+  const color = pick(COLOR_KEYS), shiny = Math.random() < 0.05, c = COLORS[color];
   rolled = makePlayer(color, shiny);
-  const c = COLORS[color];
   $('#eggBtn').hidden = true; $('#odds').hidden = true; $('#crackMeter').hidden = true;
   const rays = $('#rays'); rays.style.setProperty('--ray', c.light); rays.hidden = false;
   const h = $('#hatched'); h.innerHTML = blobSVG(color, 1, { mood: 'happy', shiny }); h.hidden = false; h.classList.add('bob');
   $('#eggHint').innerHTML = `ฟักแล้ว! ได้ <b style="color:${c.c[2]}">${c.species}</b> สี${c.th}${shiny ? ' ✦ ประกายแสงหายาก!' : ''}`;
   const rv = $('#reveal');
   rv.style.setProperty('--c', c.c[1]); rv.style.setProperty('--c-light', c.light);
+  const ref = { hp: 90, atk: 18, def: 18, spd: 18, luk: 18 };
   rv.innerHTML = `
     <div class="panel" style="display:flex;flex-direction:column;gap:12px">
-      <div class="id-row"><h2 class="h species">${c.species}</h2><div class="chips"><span class="chip" style="background:${c.light}">สี${c.th}</span><span class="chip">เด่น: ${STAT_NAME[c.main]}</span>${shiny ? '<span class="chip" style="background:#FFF3B0">✦ ประกายแสง</span>' : ''}</div></div>
+      <div class="id-row"><h2 class="h" style="font-size:24px">${c.species}</h2><div class="chips"><span class="chip" style="background:${c.light}">สี${c.th}</span><span class="chip">เด่น: ${STAT_NAME[c.main]}</span>${shiny ? '<span class="chip" style="background:#FFF3B0">✦ ประกายแสง</span>' : ''}</div></div>
       <p style="margin:0">${c.trait}</p>
-      <div class="stat-list">${statRows(rolled.base, c.main, { hp: 90, atk: 18, def: 18, spd: 18, luk: 18 })}</div>
+      <div class="stat-list">${STATS.map(k => `<div class="stat-row${k === c.main ? ' main' : ''}"><span class="lbl">${STAT_NAME[k]}</span><div class="bar"><i style="width:${clamp(rolled.base[k] / ref[k] * 100, 4, 100)}%"></i></div><span class="val">${rolled.base[k]}</span></div>`).join('')}</div>
       <div class="skill-card"><div class="skill-ico">${c.skill.icon}</div><div><b>สกิล: ${c.skill.name}</b> <span class="muted">· ${c.skill.cost} MP</span><div class="muted" style="font-size:13px">${c.skill.desc}</div></div></div>
     </div>
-    <label class="field" for="nameInput">ตั้งชื่อให้ปุ๊กปิ๊กของคุณ
+    <label class="field" for="nameInput">ตั้งชื่อ (คนอื่นในโลกจะเห็นชื่อนี้)
       <input id="nameInput" maxlength="14" autocomplete="off" value="${esc(c.species)}">
     </label>
-    <button class="btn primary block" id="startBtn" type="button" style="min-height:58px;font-size:19px">เริ่มผจญภัย!</button>`;
+    <ul class="how"><li>ลากนิ้วที่ไหนก็ได้บนจอเพื่อเดิน (คอมใช้ WASD)</li><li>กด ⚔️ ค้างไว้เพื่อตีมอนที่อยู่ใกล้ สกิลกดปุ่มสี ยากดปุ่ม 🍯</li><li>เดินทับของที่ดรอปเพื่อเก็บ แล้วเปิด 🎒 เพื่อสวมใส่</li></ul>
+    <button class="btn primary block" id="startBtn" type="button" style="min-height:56px;font-size:19px">เข้าสู่โลก!</button>`;
   rv.hidden = false;
   $('#startBtn').onclick = () => {
-    const nm = ($('#nameInput').value || '').trim().slice(0, 14);
-    rolled.name = nm || c.species;
-    P = rolled; rolled = null; save();
-    sfx('win');
-    enterHub('home');
-    toast(`ยินดีต้อนรับ ${P.name}!`);
+    rolled.name = clean($('#nameInput').value).slice(0, 14) || c.species;
+    P = rolled; rolled = null; me.x = SPAWN.x; me.y = SPAWN.y; save(); sfx('lvl');
+    enterWorld();
   };
 }
 
-/* ================= hub ================= */
-function enterHub(t) { showScreen(null); showTab(t || tab); }
-function renderTop() {
-  $('#tbName').textContent = P.name;
-  $('#tbLv').textContent = 'Lv ' + P.lv;
-  $('#tbGold').textContent = P.gold.toLocaleString();
-  $('#muteBtn').textContent = muted ? '🔇' : '🔊';
-  const ico = $('#charTabIco');
-  ico.innerHTML = P.points > 0 ? '🐣<span class="dot"></span>' : '🐣';
+/* ================= entering the world ================= */
+let started = false;
+function enterWorld() {
+  $('#s-egg').hidden = true; $('#hud').hidden = false;
+  started = true; me.dead = false; me.zone = -1;
+  if (P.hp <= 0) P.hp = maxHp();
+  P.hp = Math.min(P.hp, maxHp()); P.mp = clamp(num(P.mp, maxMp()), 0, maxMp());
+  hudStatic(); updateHud(true);
+  chatLine('', `${P.name} เข้าสู่โลกปุ๊กปิ๊ก`, true);
+  lastSentKey = ''; resize();
 }
-function showTab(t) {
-  tab = t;
-  for (const v of ['home', 'map', 'shop', 'char']) $('#v-' + v).hidden = v !== t;
-  document.querySelectorAll('.tab').forEach(b => { if (b.dataset.tab === t) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-  renderTop();
-  ({ home: renderHome, map: renderMap, shop: renderShop, char: renderChar })[t]();
-  $('#views').scrollTop = 0;
+function hudStatic() {
+  const c = col();
+  $('#app').style.setProperty('--c-light', c.light); $('#app').style.setProperty('--c', c.c[1]);
+  $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, noShadow: true });
+  $('#skillIco').textContent = c.skill.icon;
+  $('#skillMp').textContent = c.skill.cost + ' MP';
+  $('#bMute').textContent = muted ? '🔇' : '🔊';
 }
-
-function renderHome() {
-  const c = col(), s = stageOf(P.lv), el = $('#v-home');
-  setVars(el);
-  const tired = P.hp < maxHp() * 0.3;
-  el.innerHTML = `
-    <div class="scene" id="scene">
-      <span class="cloud" style="top:26px;width:60px;left:0"></span>
-      <span class="cloud" style="top:58px;width:44px;left:0;animation-duration:44s;animation-delay:-20s"></span>
-      <span class="flower" style="left:12%;bottom:22%;background:#FF8FB1"></span>
-      <span class="flower" style="left:22%;bottom:10%;background:#FFD23F"></span>
-      <span class="flower" style="right:14%;bottom:18%;background:#8CCBFF"></span>
-      <span class="flower" style="right:26%;bottom:7%;background:#FF8FB1"></span>
-      <button class="pet bob" id="pet" type="button" aria-label="เล่นกับ ${esc(P.name)}">${blobSVG(P.color, s, { shiny: P.shiny, mood: tired ? 'hurt' : 'idle' })}</button>
-    </div>
-    <div class="id-row">
-      <div><p class="eyebrow">${c.species} · ${STAGE_NAME[s]}</p><h2 class="h">${esc(P.name)}</h2></div>
-      <div class="chips"><span class="chip" style="background:${c.light}">สี${c.th}</span><span class="chip">เด่น: ${STAT_NAME[c.main]}</span>${P.shiny ? '<span class="chip" style="background:#FFF3B0">✦ ประกายแสง</span>' : ''}</div>
-    </div>
-    <div class="panel bars">
-      ${barRow('HP', 'hp', P.hp, maxHp())}
-      ${barRow('MP', 'mp', P.mp, maxMp())}
-      ${barRow('EXP', 'xp', P.xp, xpNeed(P.lv))}
-    </div>
-    <div class="actions">
-      <button class="btn primary wide" type="button" data-go="map">ออกผจญภัย</button>
-      <button class="btn" type="button" id="restBtn">นอนพัก<br><small class="muted" style="font:600 12px var(--f-body)">ฟื้น HP/MP เต็ม</small></button>
-      <button class="btn" type="button" data-go="shop">ร้านค้า<br><small class="muted" style="font:600 12px var(--f-body)">ยาและอุปกรณ์</small></button>
-    </div>
-    <div class="panel skill-card"><div class="skill-ico">${c.skill.icon}</div><div><b>${c.skill.name}</b> <span class="muted">· ${c.skill.cost} MP</span><div class="muted" style="font-size:13px">${c.skill.desc}</div></div></div>
-    ${P.points > 0 ? `<button class="btn block" type="button" data-go="char" style="background:#FFF3B0">มีแต้มสถานะ ${P.points} แต้ม แตะเพื่ออัปค่าพลัง</button>` : ''}
-    <p class="muted" style="margin:0;font-size:13px;text-align:center">${P.lv < STAGE_LV[2] ? `วิวัฒนาการครั้งถัดไปที่ Lv ${STAGE_LV[2]}` : P.lv < STAGE_LV[3] ? `ร่างราชารออยู่ที่ Lv ${STAGE_LV[3]}` : 'วิวัฒนาการครบทุกร่างแล้ว'}</p>`;
-  $('#pet').onclick = petTap;
-  $('#restBtn').onclick = rest;
-}
-function say(text) {
-  const sc = $('#scene'); if (!sc) return;
-  sc.querySelector('.speech')?.remove();
-  const b = document.createElement('div'); b.className = 'speech'; b.textContent = text; sc.appendChild(b);
-  clearTimeout(say._t); say._t = setTimeout(() => b.remove(), 2200);
-}
-function petTap() {
-  const pet = $('#pet');
-  retrigger(pet, 'boing', 520);
-  sfx('tap'); buzz(10);
-  say(pick(['ปุ๊ก!', 'ปิ๊ก ปิ๊ก!', 'หิวแล้ววว', 'ไปผจญภัยกันเถอะ!', 'จั๊กจี้นะ!', ...col().lines]));
-}
-function rest() {
-  if (P.hp >= maxHp() && P.mp >= maxMp()) { say('ยังไม่ง่วงเลย!'); return; }
-  P.hp = maxHp(); P.mp = maxMp(); save();
-  sfx('heal');
-  renderHome();
-  $('#pet').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, mood: 'sleep' });
-  const z = document.createElement('span'); z.className = 'zzz'; z.textContent = 'Zzz'; $('#scene').appendChild(z);
-  setTimeout(() => { if (tab === 'home' && $('#pet')) { $('#pet').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, mood: 'happy' }); say('สดชื่นแล้ว!'); } }, 1400);
+let hudKey = '';
+function updateHud(force) {
+  const k = [P.hp, maxHp(), P.mp, maxMp(), P.xp, P.lv, P.gold, P.items.potion, P.points, P.name].join('|');
+  if (!force && k === hudKey) return; hudKey = k;
+  $('#hudName').textContent = P.name; $('#hudLv').textContent = 'Lv ' + P.lv;
+  $('#hudHp').style.width = (P.hp / maxHp() * 100) + '%'; $('#hudHpT').textContent = `${Math.ceil(P.hp)}/${maxHp()}`;
+  $('#hudMp').style.width = (P.mp / maxMp() * 100) + '%'; $('#hudMpT').textContent = `${Math.floor(P.mp)}/${maxMp()}`;
+  $('#hudXp').style.width = (P.xp / xpNeed(P.lv) * 100) + '%';
+  $('#hudGold').textContent = P.gold.toLocaleString();
+  $('#potN').textContent = P.items.potion;
+  $('#bChar').innerHTML = '🐣' + (P.points > 0 ? '<span class="dot"></span>' : '');
 }
 
-function renderMap() {
-  const el = $('#v-map');
-  el.innerHTML = `<div><p class="eyebrow">แผนที่โลก</p><h2 class="h" style="font-size:24px">เลือกดินแดนที่จะไป</h2><p class="muted" style="margin:4px 0 0;font-size:13px">ชนะ ${WINS_FOR_BOSS} ครั้งในดินแดนเพื่อท้าบอส ปราบบอสแล้วดินแดนใหม่จะเปิด</p></div>`
-    + ZONES.map((z, i) => {
-      const locked = i > P.unlocked, wins = Math.min(P.wins[i], WINS_FOR_BOSS), boss = FOES[z.boss];
-      const bossReady = P.wins[i] >= WINS_FOR_BOSS;
-      const lvWarn = !locked && P.lv < z.lv;
-      return `<div class="panel zone${locked ? ' locked' : ''}">
-        <div class="swatch" style="background:linear-gradient(${z.z[0]},${z.z[1]} 55%,${z.z[2]} 55%)">${FOES[z.foes[0]].e}${locked ? '<span class="lock">🔒</span>' : ''}</div>
-        <div class="meta">
-          <div class="top"><h3 class="h">${z.name}</h3><span class="chip num"${lvWarn ? ' style="background:#FFD3CF"' : ''}>Lv ${z.lv}+</span></div>
-          <div class="muted" style="font-size:13px">${locked ? 'ปราบบอสของดินแดนก่อนหน้าเพื่อเปิดทาง' : z.flavor}</div>
-          ${locked ? '' : `<div class="pips">${Array.from({ length: WINS_FOR_BOSS }, (_, k) => `<i class="${k < wins ? 'on' : ''}"></i>`).join('')}<span>${P.bosses[i] ? `<span class="boss-done">ปราบ${boss.name}แล้ว</span>` : bossReady ? 'บอสพร้อมแล้ว!' : `ชนะ ${wins}/${WINS_FOR_BOSS}`}</span></div>
-          <div class="btns"><button class="btn sm primary" type="button" data-explore="${i}">สำรวจ</button><button class="btn sm" type="button" data-boss="${i}" ${bossReady ? '' : 'disabled'}>${boss.e} ท้าบอส</button></div>`}
-        </div></div>`;
-    }).join('');
+/* ================= multiplayer: room presence ================= */
+// Everyone shares one set of monsters. One open page is the "host" that moves them;
+// it publishes them in its presence. Others send their hits in their own presence.
+let room = null, myPeer = null, hosting = false, hostPeer = null, online = 1;
+let sim = null;                // host-only simulation
+let views = new Map();         // non-host: monsters from host snapshot
+let lastSnap = null;           // last snapshot seen from any host
+const remotes = new Map();     // other players
+const hitsOut = []; let hitSeq = 0;
+const myHits = new Map();      // monster id -> time I last hit it
+const rewarded = new Set();
+const seenKills = new Set();
+let lastMaSeq = {}, lastSentKey = '', lastSentAt = 0;
+
+const SLOT_DEFS = [];
+ZONES.forEach((z, zi) => { for (let k = 0; k < 9; k++) SLOT_DEFS.push({ zi, boss: false }); SLOT_DEFS.push({ zi, boss: true }); });
+const statCache = new Map();
+function foeStats(t, lv) {
+  const key = t * 1000 + lv; let s = statCache.get(key); if (s) return s;
+  const k = FOE_KEYS[t], d = FOES[k], zl = ZONES[FOE_ZONE[t]].lv, off = lv - zl - (d.boss ? 2 : 0), m = 1 + 0.1 * off;
+  s = { name: d.name, e: d.e, boss: !!d.boss, maxHp: Math.round(d.hp * m * 1.6), atk: Math.round(d.atk * m), def: Math.round(d.def * m), spd: Math.round(d.spd * m), xp: Math.round(d.xp * m), gold: Math.round(d.gold * m), zi: FOE_ZONE[t] };
+  statCache.set(key, s); return s;
 }
-
-function renderShop() {
-  const el = $('#v-shop');
-  const itemRows = Object.entries(ITEMS).map(([id, it]) => `
-    <div class="row"><span class="ico">${it.icon}</span><div><div class="nm">${it.name} <span class="muted num" style="font:600 12px var(--f-body)">มี ${P.items[id]}</span></div><div class="ds">${it.desc}</div></div>
-    <button class="btn sm" type="button" data-buy="${id}" ${P.gold < it.price ? 'disabled' : ''}><span class="price"><span class="coin"></span>${it.price}</span></button></div>`).join('');
-  const gearRows = Object.entries(GEAR).map(([slot, g]) => {
-    const cur = P.gear[slot], next = g.tiers[cur + 1];
-    const eff = t => STATS.filter(k => t[k]).map(k => `${STAT_SHORT[k]} +${t[k]}`).join(' · ');
-    const now = cur >= 0 ? `ใส่อยู่: ${g.tiers[cur].name} (${eff(g.tiers[cur])})` : 'ยังไม่มี';
-    return `<div class="row"><span class="ico">${g.icon}</span><div><div class="nm">${next ? next.name : g.label + ' ขั้นสูงสุดแล้ว'}</div><div class="ds">${next ? eff(next) + '<br>' : ''}${now}</div></div>
-      ${next ? `<button class="btn sm" type="button" data-gear="${slot}" ${P.gold < next.price ? 'disabled' : ''}><span class="price"><span class="coin"></span>${next.price.toLocaleString()}</span></button>` : '<span class="chip">ครบ</span>'}</div>`;
-  }).join('');
-  el.innerHTML = `<div><p class="eyebrow">ร้านป้าแมวเหมียว</p><h2 class="h" style="font-size:24px">ร้านค้า</h2></div>
-    <div class="sec-title"><h3 class="h">ยาและของใช้</h3><span class="muted" style="font-size:13px">ใช้ได้ระหว่างต่อสู้</span></div>
-    <div class="panel rows">${itemRows}</div>
-    <div class="sec-title"><h3 class="h">อุปกรณ์</h3><span class="muted" style="font-size:13px">ซื้อขั้นใหม่แทนของเดิม</span></div>
-    <div class="panel rows">${gearRows}</div>`;
+function newMon(slot, t, lv, x, y) {
+  const s = foeStats(t, lv), sd = SLOT_DEFS[slot];
+  return { id: 0, slot, t, lv, x, y, rx: x, ry: y, sx: x, sy: y, hp: s.maxHp, maxHp: s.maxHp, def: s.def, spd: s.spd, atk: s.atk, boss: sd.boss, zi: sd.zi,
+    cd: rnd(.4, 1.2), wx: x, wy: y, wt: 0, target: null, charge: 0, atkN: 0, dir: 1, lunge: 0, flash: 0 };
 }
-
-function renderChar() {
-  const c = col(), el = $('#v-char'), s = stageOf(P.lv);
-  setVars(el);
-  const ref = { hp: Math.max(120, maxHp()), atk: 60, def: 60, spd: 60, luk: 60 };
-  const rows = STATS.map(k => {
-    const b = gearBonus(k);
-    return `<div class="alloc${k === c.main ? ' main' : ''}"><span>${STAT_NAME[k]}${k === c.main ? ' ★' : ''}</span><div class="bar"><i style="width:${clamp(st(k) / Math.max(ref[k], st(k)) * 100, 3, 100)}%"></i></div><span class="val">${st(k)}${b ? `<br><small>+${b}</small>` : ''}</span>
-      <button class="btn plus" type="button" data-alloc="${k}" ${P.points > 0 ? '' : 'disabled'} aria-label="เพิ่ม${STAT_NAME[k]}">+</button></div>`;
-  }).join('');
-  const gearList = Object.entries(GEAR).map(([slot, g]) => `<div class="row"><span class="ico">${g.icon}</span><div><div class="nm">${P.gear[slot] >= 0 ? g.tiers[P.gear[slot]].name : '—'}</div><div class="ds">${g.label}</div></div><span></span></div>`).join('');
-  el.innerHTML = `
-    <div class="panel char-head">
-      <div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny })}</div>
-      <div><p class="eyebrow">${c.species} · ${STAGE_NAME[s]}</p><h2 class="h" style="font-size:22px">${esc(P.name)}</h2>
-        <div class="chips" style="margin-top:6px"><span class="chip num">Lv ${P.lv}</span><span class="chip" style="background:${c.light}">สี${c.th}</span></div>
-        <p class="muted" style="margin:6px 0 0;font-size:13px">${c.trait}</p></div>
-    </div>
-    <div class="sec-title"><h3 class="h">ค่าสถานะ</h3><span class="chip num" style="${P.points ? 'background:#FFF3B0' : ''}">แต้มว่าง ${P.points}</span></div>
-    <div class="panel">${rows}<p class="muted" style="margin:6px 0 0;font-size:12px">ได้ 2 แต้มทุกเลเวล · 1 แต้ม = HP +${POINT_VALUE.hp} หรือค่าอื่น +1 · ★ คือค่าเด่นของสี${c.th} (โตเร็วกว่าเท่าตัว)</p></div>
-    <div class="sec-title"><h3 class="h">อุปกรณ์ที่ใส่</h3></div>
-    <div class="panel rows">${gearList}</div>
-    <div class="sec-title"><h3 class="h">บันทึกการผจญภัย</h3></div>
-    <div class="panel records"><div><b>${P.kills}</b><span>ปราบศัตรู</span></div><div><b>${P.bosses.filter(Boolean).length}/${ZONES.length}</b><span>บอสที่ชนะ</span></div><div><b>${P.items.potion + P.items.ether + P.items.elixir}</b><span>ไอเทมในกระเป๋า</span></div></div>
-    <button class="btn block" type="button" id="newEggBtn" style="background:var(--paper-2)">ฟักไข่ใบใหม่ (เริ่มเกมใหม่)</button>`;
-  $('#newEggBtn').onclick = async () => {
-    const ok = await modal({ title: 'ฟักไข่ใบใหม่?', art: `<div class="art">${blobSVG(P.color, s, { mood: 'hurt', shiny: P.shiny })}</div>`, body: `<p>${esc(P.name)} Lv ${P.lv} และของทั้งหมดจะหายไป แล้วจะได้สุ่มสีใหม่</p>`, buttons: [{ label: 'ไม่ดีกว่า', value: false }, { label: 'ฟักใหม่', value: true, primary: true }] });
-    if (!ok) return;
-    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-    P = null; tab = 'home'; startEgg();
-  };
+function playersForSim() {
+  const list = [];
+  if (!me.dead && started) list.push({ peer: myPeer || 'me', x: me.x, y: me.y, me: true });
+  for (const [peer, r] of remotes) if (!r.dead) list.push({ peer, x: r.tx, y: r.ty });
+  return list;
 }
+function randomSpawn(zi, players) {
+  const tiles = ZONE_TILES[zi];
+  for (let n = 0; n < 30; n++) {
+    const i = tiles[Math.floor(Math.random() * tiles.length)], x = (i % W) * T + T / 2, y = Math.floor(i / W) * T + T / 2;
+    if (players.every(p => Math.hypot(p.x - x, p.y - y) > 7 * T)) return { x, y };
+  }
+  return null;
+}
+function spawnSlot(slot, players) {
+  const sd = SLOT_DEFS[slot], z = ZONES[sd.zi];
+  const pos = sd.boss ? (players.some(p => Math.hypot(p.x - BOSS_POS[sd.zi].x, p.y - BOSS_POS[sd.zi].y) < 6 * T) ? null : BOSS_POS[sd.zi]) : randomSpawn(sd.zi, players);
+  if (!pos) return;
+  const t = FOE_KEYS.indexOf(sd.boss ? z.boss : pick(z.foes)), lv = z.lv + (sd.boss ? 2 : ri(0, 2));
+  const m = newMon(slot, t, lv, pos.x, pos.y); m.id = (sim.gen++) * 64 + slot;
+  sim.mons.set(m.id, m);
+}
+function becomeHost() {
+  hosting = true;
+  sim = { mons: new Map(), respawn: SLOT_DEFS.map(() => 0), gen: 1, ma: [], maSeq: 1, k: [], lastSeq: {} };
+  const t0 = nowS();
+  if (lastSnap && Array.isArray(lastSnap.l)) {
+    for (const a of lastSnap.l) {
+      if (!Array.isArray(a)) continue;
+      const [id, t, lv, x, y, hp] = a.map(v => num(v, 0)); const slot = id % 64;
+      if (!SLOT_DEFS[slot] || !FOE_KEYS[t] || [...sim.mons.values()].some(m => m.slot === slot)) continue;
+      const m = newMon(slot, t, clamp(lv, 1, 30), clamp(x, 0, W * T), clamp(y, 0, H * T)); m.id = id; m.hp = clamp(hp, 1, m.maxHp);
+      const v = views.get(id); if (v) { m.rx = v.rx; m.ry = v.ry; }
+      sim.mons.set(id, m); sim.gen = Math.max(sim.gen, Math.floor(id / 64) + 1);
+    }
+  }
+  SLOT_DEFS.forEach((sd, slot) => { if (![...sim.mons.values()].some(m => m.slot === slot)) sim.respawn[slot] = t0 + (lastSnap ? rnd(3, 8) : rnd(0, 1.5)) + (sd.boss && lastSnap ? 20 : 0); });
+  if (room) for (const p of room.peers()) { const h = p.presence && p.presence.h; if (Array.isArray(h)) sim.lastSeq[p.peer] = Math.max(0, ...h.map(e => num(e && e[0], 0))); }
+  views = new Map();
+}
+function stepDown() {
+  if (sim) { views = new Map(); for (const m of sim.mons.values()) views.set(m.id, { ...m }); }
+  hosting = false; sim = null;
+}
+function monsterList() { return hosting ? (sim ? sim.mons.values() : []) : views.values(); }
+function getMon(id) { return hosting ? sim && sim.mons.get(id) : views.get(id); }
 
-/* hub click delegation */
-document.addEventListener('click', e => {
-  const t = e.target.closest('button'); if (!t) return;
-  if (t.dataset.tab) { sfx('tap'); showTab(t.dataset.tab); }
-  else if (t.dataset.go) { sfx('tap'); showTab(t.dataset.go); }
-  else if (t.dataset.explore) explore(+t.dataset.explore);
-  else if (t.dataset.boss) startBattle(+t.dataset.boss, true);
-  else if (t.dataset.buy) {
-    const it = ITEMS[t.dataset.buy]; if (P.gold < it.price) return;
-    P.gold -= it.price; P.items[t.dataset.buy]++; save(); sfx('coin'); toast(`ซื้อ ${it.name} แล้ว`); renderTop(); renderShop();
-  } else if (t.dataset.gear) {
-    const g = GEAR[t.dataset.gear], next = g.tiers[P.gear[t.dataset.gear] + 1]; if (!next || P.gold < next.price) return;
-    const hpFrac = P.hp / maxHp();
-    P.gold -= next.price; P.gear[t.dataset.gear]++; P.hp = Math.min(maxHp(), Math.round(hpFrac * maxHp())); save();
-    sfx('coin'); toast(`สวม ${next.name} แล้ว!`); renderTop(); renderShop();
-  } else if (t.dataset.alloc) {
-    if (P.points <= 0) return;
-    const k = t.dataset.alloc; P.points--; P.base[k] += POINT_VALUE[k]; if (k === 'hp') P.hp += POINT_VALUE.hp;
-    save(); sfx('tap'); renderTop(); renderChar();
-  } else if (t.id === 'muteBtn') { muted = !muted; savePrefs(); renderTop(); if (!muted) sfx('tap'); }
-});
-
-/* ================= exploring ================= */
-async function explore(zi) {
-  sfx('tap');
-  const z = ZONES[zi], r = Math.random();
-  if (r < 0.1) {
-    showScreen(null);
-    let body, art = '<div class="big-emo">🎁</div>';
-    if (Math.random() < 0.55) {
-      const g = Math.round((z.lv * rnd(6, 9) + 6) * (1 + st('luk') / 100));
-      P.gold += g; body = `<p>ในหีบมีทอง</p><div class="rewards"><span class="chip"><span class="coin"></span> +${g}</span></div>`;
+function hitPlayer(peer, atk, mult, spd) {
+  if (peer === 'me' || peer === myPeer) receiveHit(atk, mult, spd);
+  else { sim.ma.push([sim.maSeq++, peer, atk, Math.round(mult * 10), spd]); if (sim.ma.length > 8) sim.ma.shift(); }
+}
+function damageMon(m, dmg, byPeer) {
+  if (m.hp <= 0) return;
+  m.hp -= dmg; m.flash = .15;
+  if (!m.target && byPeer) m.target = byPeer;
+  if (m.hp <= 0) {
+    sim.mons.delete(m.id);
+    sim.respawn[m.slot] = nowS() + (m.boss ? 75 : rnd(6, 11));
+    const kill = [m.id, m.t, m.lv, Math.round(m.x), Math.round(m.y)];
+    sim.k.push(kill); if (sim.k.length > 12) sim.k.shift();
+    onKill(kill);
+  }
+}
+function simTick(dt) {
+  if (!sim) return;
+  const t0 = nowS(), players = playersForSim();
+  for (let slot = 0; slot < SLOT_DEFS.length; slot++) if (sim.respawn[slot] && t0 >= sim.respawn[slot]) {
+    sim.respawn[slot] = 0; spawnSlot(slot, players);
+    if (![...sim.mons.values()].some(m => m.slot === slot)) sim.respawn[slot] = t0 + 3;
+  }
+  for (const m of sim.mons.values()) {
+    m.lunge = Math.max(0, m.lunge - dt); m.flash = Math.max(0, m.flash - dt); m.cd = Math.max(0, m.cd - dt);
+    const aggro = (m.boss ? 6 : 4.5) * T, leash = (m.boss ? 10 : 8) * T;
+    let tp = m.target ? players.find(p => p.peer === m.target || (p.me && m.target === 'me')) : null;
+    if (tp && (inTown(tp.x, tp.y) || Math.hypot(tp.x - m.sx, tp.y - m.sy) > leash)) { tp = null; }
+    if (!tp) {
+      m.target = null;
+      let bd = aggro;
+      for (const p of players) { if (inTown(p.x, p.y)) continue; const d = Math.hypot(p.x - m.x, p.y - m.y); if (d < bd && Math.hypot(p.x - m.sx, p.y - m.sy) < leash) { bd = d; tp = p; } }
+      if (tp) m.target = tp.peer;
+    }
+    if (m.charge > 0) {
+      m.charge -= dt;
+      if (m.charge <= 0) { for (const p of players) if (Math.hypot(p.x - m.x, p.y - m.y) < 78) hitPlayer(p.peer, m.atk, 1.8, 0); fx.push({ type: 'ring', x: m.x, y: m.y, r0: 20, r1: 90, t: 0, dur: .4, c: '#F2485B' }); }
+      continue;
+    }
+    const spd = (m.boss ? 58 : 50) + m.spd * 1.6;
+    if (tp) {
+      const dx = tp.x - m.x, dy = tp.y - m.y, d = Math.hypot(dx, dy), reach = m.boss ? 40 : 28;
+      if (dx) m.dir = dx < 0 ? -1 : 1;
+      if (d > reach) moveBody(m, dx / d * spd * dt, dy / d * spd * dt, 11, monSolid);
+      else if (m.cd <= 0) {
+        m.cd = m.boss ? 1.5 : 1.3; m.atkN++; m.lunge = .25;
+        if (m.boss && m.atkN % 4 === 0) m.charge = .9; else hitPlayer(tp.peer, m.atk, 1, m.spd);
+      }
     } else {
-      const id = Math.random() < 0.8 ? 'potion' : Math.random() < 0.7 ? 'ether' : 'elixir';
-      P.items[id]++; body = `<p>ในหีบมีของ</p><div class="rewards"><span class="chip">${ITEMS[id].icon} ${ITEMS[id].name} +1</span></div>`;
+      if (t0 > m.wt) { m.wt = t0 + rnd(2, 5); m.wx = m.sx + rnd(-3, 3) * T; m.wy = m.sy + rnd(-3, 3) * T; }
+      const dx = m.wx - m.x, dy = m.wy - m.y, d = Math.hypot(dx, dy);
+      if (d > 4) { moveBody(m, dx / d * spd * .45 * dt, dy / d * spd * .45 * dt, 11, monSolid); if (dx) m.dir = dx < 0 ? -1 : 1; }
+      m.hp = Math.min(m.maxHp, m.hp + m.maxHp * .06 * dt);
     }
-    save(); sfx('coin'); renderTop();
-    const ch = await modal({ title: 'เจอหีบสมบัติ!', art, body, buttons: [{ label: 'กลับแผนที่', value: 'map' }, { label: 'สำรวจต่อ', value: 'again', primary: true }] });
-    return ch === 'again' ? explore(zi) : showTab('map');
+    m.rx = m.x; m.ry = m.y;
   }
-  if (r < 0.16) {
-    const h = Math.round(maxHp() * 0.5);
-    P.hp = Math.min(maxHp(), P.hp + h); P.mp = Math.min(maxMp(), P.mp + 5); save(); sfx('heal');
-    const ch = await modal({ title: 'เจอน้ำพุวิเศษ', art: '<div class="big-emo">⛲</div>', body: `<p>${esc(P.name)} ดื่มน้ำจนชุ่มฉ่ำ</p><div class="rewards"><span class="chip">HP ${P.hp}/${maxHp()}</span><span class="chip">MP ${P.mp}/${maxMp()}</span></div>`, buttons: [{ label: 'กลับแผนที่', value: 'map' }, { label: 'สำรวจต่อ', value: 'again', primary: true }] });
-    return ch === 'again' ? explore(zi) : showTab('map');
-  }
-  startBattle(zi, false);
 }
+function hostProcessPeers() {
+  if (!sim || !room) return;
+  for (const p of room.peers()) {
+    if (p.sameTab || !p.presence) continue;
+    const h = p.presence.h; if (!Array.isArray(h)) continue;
+    let last = sim.lastSeq[p.peer] || 0, mx = last;
+    for (const e of h) {
+      if (!Array.isArray(e)) continue;
+      const seq = num(e[0], 0), id = num(e[1], -1), dmg = clamp(num(e[2], 0), 0, 5000);
+      if (seq <= last) continue; mx = Math.max(mx, seq);
+      const m = sim.mons.get(id); if (m) damageMon(m, dmg, p.peer);
+    }
+    sim.lastSeq[p.peer] = mx;
+  }
+}
+function applySnapshot(pr) {
+  const M = pr.M; if (!M || !Array.isArray(M.l)) return;
+  lastSnap = M;
+  const seen = new Set();
+  for (const a of M.l) {
+    if (!Array.isArray(a)) continue;
+    const id = num(a[0], -1), t = num(a[1], -1), lv = clamp(num(a[2], 1), 1, 40); if (id < 0 || !FOE_KEYS[t]) continue;
+    seen.add(id);
+    let v = views.get(id);
+    const s = foeStats(t, lv);
+    if (!v) { v = { id, t, lv, x: num(a[3], 0), y: num(a[4], 0), rx: num(a[3], 0), ry: num(a[4], 0), dir: 1, flash: 0, lunge: 0, predHp: null, predT: 0 }; views.set(id, v); }
+    const nx = num(a[3], v.x), ny = num(a[4], v.y);
+    if (nx !== v.x) v.dir = nx < v.x ? -1 : 1;
+    v.x = nx; v.y = ny; v.t = t; v.lv = lv; v.maxHp = s.maxHp; v.def = s.def; v.spd = s.spd; v.boss = s.boss;
+    v.hp = clamp(num(a[5], 1), 0, s.maxHp);
+    const fl = num(a[6], 0); v.charge = fl & 1 ? 1 : 0; if (fl & 2 && !v._l) v.lunge = .25; v._l = fl & 2;
+  }
+  for (const id of [...views.keys()]) if (!seen.has(id)) views.delete(id);
+  const hk = hostPeer || '';
+  if (Array.isArray(pr.k)) for (const k of pr.k) { if (!Array.isArray(k)) continue; const id = num(k[0], -1); if (seenKills.has(id)) continue; seenKills.add(id); onKill(k.map(v => num(v, 0))); }
+  if (Array.isArray(pr.ma)) {
+    const first = !(hk in lastMaSeq); let last = lastMaSeq[hk] || 0, mx = last;
+    for (const e of pr.ma) {
+      if (!Array.isArray(e)) continue; const seq = num(e[0], 0); if (seq <= last) continue; mx = Math.max(mx, seq);
+      if (!first && e[1] === myPeer) receiveHit(clamp(num(e[2], 1), 1, 999), clamp(num(e[3], 10), 1, 30) / 10, num(e[4], 0));
+    }
+    lastMaSeq[hk] = mx;
+  }
+}
+function snapshotOut() {
+  if (!sim) return null;
+  const l = [];
+  for (const m of sim.mons.values()) l.push([m.id, m.t, m.lv, Math.round(m.x), Math.round(m.y), Math.max(1, Math.round(m.hp)), (m.charge > 0 ? 1 : 0) | (m.lunge > 0 ? 2 : 0)]);
+  return { l };
+}
+function presenceState() {
+  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
+    lv: P.lv, hp: Math.round(P.hp / maxHp() * 100), hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0,
+    a: me.atkCount, dead: me.dead ? 1 : 0, hid: document.hidden ? 1 : 0, h: hitsOut.slice(), ch: me.chat || null, ct: me.chatAt || null };
+  if (hosting && sim) { s.M = snapshotOut(); s.k = sim.k.slice(); s.ma = sim.ma.slice(); }
+  else { s.M = null; s.k = null; s.ma = null; }
+  return s;
+}
+function upsertRemote(p) {
+  if (p.sameTab || p.kind !== 'viewer') return;
+  const pr = p.presence || {};
+  const name = clean(pr.n).slice(0, 14);
+  if (pr.v !== 2 || !name || !COLORS[pr.c]) { remotes.delete(p.peer); return; }
+  const x = clamp(num(pr.x, SPAWN.x), 0, W * T), y = clamp(num(pr.y, SPAWN.y), 0, H * T);
+  let r = remotes.get(p.peer);
+  if (!r) { r = { x, y, walk: 0, swing: 0, a: pr.a, ct: pr.ct, bubble: '', bubbleT: 0 }; remotes.set(p.peer, r); chatLine('', `${name} เข้ามาในโลก`, true); }
+  r.tx = x; r.ty = y; if (Math.hypot(r.x - x, r.y - y) > T * 8) { r.x = x; r.y = y; }
+  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
+  r.lv = clamp(num(pr.lv, 1) | 0, 1, 999); r.hp = clamp(num(pr.hp, 100), 0, 100); r.hat = clamp(num(pr.hat, 0) | 0, 0, 5); r.wp = clamp(num(pr.wp, 0) | 0, 0, 5); r.dead = !!pr.dead;
+  if (pr.a !== r.a) { r.a = pr.a; r.swing = .2; }
+  if (pr.ct !== r.ct) { r.ct = pr.ct; const t = clean(pr.ch).slice(0, 80); if (t) { r.bubble = t; r.bubbleT = 6; chatLine(name, t); } }
+}
+function electHost() {
+  if (!room || !myPeer) { if (!hosting) becomeHost(); hostPeer = null; return; }
+  const ps = room.peers();
+  const live = ps.filter(p => !p.sameTab && p.kind === 'viewer' && p.presence && p.presence.v === 2 && p.presence.g && !p.presence.hid);
+  const claim = live.filter(p => p.presence.M).map(p => p.peer);
+  const visible = !document.hidden && started;
+  if (hosting && visible) claim.push(myPeer);
+  let host;
+  if (claim.length) host = claim.sort()[0];
+  else { const pool = live.map(p => p.peer); if (visible) pool.push(myPeer); host = pool.sort()[0]; }
+  hostPeer = host || null;
+  if (host === myPeer && !hosting) becomeHost();
+  else if (host !== myPeer && hosting) stepDown();
+  if (!hosting && host) { const hp = ps.find(p => p.peer === host); if (hp && hp.presence) applySnapshot(hp.presence); }
+  online = live.length + 1;
+}
+function netTick() {
+  if (!started) return;
+  if (room) {
+    electHost();
+    if (hosting) hostProcessPeers();
+    const s = presenceState(), k = JSON.stringify(s), t0 = nowS();
+    if (k !== lastSentKey && t0 - lastSentAt >= .09) { lastSentKey = k; lastSentAt = t0; room.presence(s).catch(() => {}); }
+  } else if (!hosting) becomeHost();
+  const o = $('#online');
+  o.classList.toggle('on', !!room);
+  $('#onlineT').textContent = room ? `ออนไลน์ ${online} คน` : 'เล่นคนเดียว';
+}
+setInterval(netTick, 100);
+(async () => {
+  const C = window.claude;
+  if (!(C && typeof C.use === 'function')) return;
+  try { room = await C.use('room'); } catch (e) { room = null; }
+  if (!room) return;
+  room.onPeers(ch => {
+    const mine = ch.peers.find(p => p.sameTab); if (mine) myPeer = mine.peer;
+    for (const p of ch.joined) upsertRemote(p);
+    for (const p of ch.updated) upsertRemote(p);
+    for (const p of ch.left) { const r = remotes.get(p.peer); if (r) { chatLine('', `${r.name} ออกจากโลก`, true); remotes.delete(p.peer); } }
+  }, () => { room = null; remotes.clear(); myPeer = null; });
+})();
 
-/* ================= battle ================= */
-function startBattle(zi, isBoss) {
-  const z = ZONES[zi], id = isBoss ? z.boss : pick(z.foes), d = FOES[id];
-  const off = isBoss ? 0 : ri(0, 2), m = 1 + 0.1 * off;
-  const foe = { id, name: d.name, e: d.e, boss: !!d.boss, lv: z.lv + off + (isBoss ? 2 : 0),
-    maxHp: Math.round(d.hp * m), atk: Math.round(d.atk * m), def: Math.round(d.def * m), spd: Math.round(d.spd * m),
-    xp: Math.round(d.xp * m), gold: Math.round(d.gold * m) };
-  foe.hp = foe.maxHp;
-  B = { zi, foe, turn: 0, shield: 0, defending: false, charging: false, busy: false, log: [], mood: '' };
-  P.battles++;
-  showScreen('#s-battle');
-  const a = $('#arena');
-  a.style.setProperty('--z1', z.z[0]); a.style.setProperty('--z2', z.z[1]); a.style.setProperty('--zg', z.z[2]); a.style.setProperty('--zg2', z.z[3]);
-  a.classList.remove('charge');
-  retrigger(a, 'enter', 520);
-  setVars($('#s-battle'));
-  const fe = $('#bFoe'); fe.className = 'foe-sprite' + (foe.boss ? ' boss' : ''); fe.textContent = foe.e;
-  $('#bZone').textContent = z.name;
-  $('#bLog').innerHTML = '';
-  $('#bSkillName').textContent = col().skill.name;
-  $('#bRun').disabled = foe.boss;
-  $('#bRun').textContent = foe.boss ? 'หนีบอสไม่ได้!' : 'หนี';
-  $('#bItems').hidden = true; $('#bCmds').hidden = false;
-  log(foe.boss ? `บอส ${foe.name} ขวางทางอยู่!` : `${foe.name} กระโดดออกมา!`);
-  renderBattle(true);
-  setCmds(true);
-  if (foe.boss) sfx('charge');
-}
-function log(msg) {
-  B.log.push(msg); if (B.log.length > 3) B.log.shift();
-  $('#bLog').innerHTML = B.log.map(l => `<p>${esc(l)}</p>`).join('');
-}
-function renderBattle(force) {
-  const f = B.foe;
-  $('#bFoeName').textContent = f.name; $('#bFoeLv').textContent = 'Lv ' + f.lv;
-  $('#bFoeHp').style.width = (f.hp / f.maxHp * 100) + '%';
-  $('#bFoeStatus').innerHTML = B.charging ? '<span class="chip" style="background:#FFD3CF">กำลังรวบรวมพลัง!</span>' : '';
-  $('#bMeName').textContent = P.name; $('#bMeLv').textContent = 'Lv ' + P.lv;
-  $('#bMeHp').style.width = (P.hp / maxHp() * 100) + '%'; $('#bMeHpT').textContent = `${P.hp}/${maxHp()}`;
-  $('#bMeMp').style.width = (P.mp / maxMp() * 100) + '%'; $('#bMeMpT').textContent = `${P.mp}/${maxMp()}`;
-  const chips = [];
-  if (B.shield > 0) chips.push(`<span class="chip" style="background:#D2E7FF">โล่วารี ×${B.shield}</span>`);
-  if (B.defending) chips.push('<span class="chip" style="background:#C9DEFF">ป้องกัน</span>');
-  $('#bMeStatus').innerHTML = chips.join('');
-  const mood = P.hp <= 0 ? 'hurt' : P.hp < maxHp() * 0.3 ? 'hurt' : 'idle';
-  if (force || mood !== B.mood) { B.mood = mood; $('#bMe').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, mood }); $('#bMe').classList.add('bob'); }
-  $('#arena').classList.toggle('charge', B.charging);
-  const sk = col().skill;
-  $('#bSkillCost').textContent = `${sk.cost} MP · ${sk.desc.split(' ')[0]}`;
-  const n = P.items.potion + P.items.ether + P.items.elixir;
-  $('#bItemCount').textContent = n ? `มี ${n} ชิ้น` : 'ไม่มีของ';
-}
-function setCmds(on) {
-  const sk = col().skill;
-  document.querySelectorAll('#bCmds button, #bItems button').forEach(b => {
-    let dis = !on;
-    if (on && b.dataset.act === 'skill') dis = P.mp < sk.cost;
-    if (on && b.dataset.act === 'run') dis = B.foe.boss;
-    if (on && b.dataset.use) dis = !(P.items[b.dataset.use] > 0);
-    b.disabled = dis;
-  });
-}
+/* ================= combat: me ================= */
+const fx = [], floaters = [];
+function floatAt(x, y, text, color, size) { floaters.push({ x: x + rnd(-6, 6), y, text: String(text), color, size: size || 18, t: 0 }); }
 function dmgCalc(atk, def, mult) { return Math.max(1, Math.round(atk * rnd(0.9, 1.1) * mult - def * 0.5)); }
-
-function showItems() {
-  sfx('tap');
-  const wrap = $('#bItems');
-  wrap.innerHTML = Object.entries(ITEMS).map(([id, it]) =>
-    `<button class="btn item-btn" type="button" data-use="${id}"><span class="ico">${it.icon}</span>${it.name}<small>มี ${P.items[id]} · ${it.desc}</small></button>`).join('')
-    + `<button class="btn back" type="button" data-back="1">ย้อนกลับ</button>`;
-  $('#bCmds').hidden = true; wrap.hidden = false;
-  setCmds(true);
+function nearestMon(range, exclude) {
+  let best = null, bd = range;
+  for (const m of monsterList()) { if (m.hp <= 0 || (exclude && exclude.has(m.id))) continue; const d = Math.hypot(m.rx - me.x, m.ry - me.y); if (d < bd) { bd = d; best = m; } }
+  return best;
 }
-function hideItems() { $('#bItems').hidden = true; $('#bCmds').hidden = false; }
-
-$('#s-battle').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b || b.disabled || !B || B.busy) return;
-  if (b.dataset.act === 'items') return showItems();
-  if (b.dataset.back) { sfx('tap'); return hideItems(); }
-  if (b.dataset.use) return act('item', b.dataset.use);
-  if (b.dataset.act) return act(b.dataset.act);
-});
-
-function heal(n, host) {
-  const before = P.hp; P.hp = Math.min(maxHp(), P.hp + n);
-  const got = P.hp - before;
-  floatText(host || $('#meSpot'), '+' + got, 'heal'); sfx('heal');
-  return got;
-}
-function useItem(id) {
-  P.items[id]--;
-  const it = ITEMS[id];
-  if (id === 'potion') { const g = heal(Math.max(30, Math.round(maxHp() * 0.4))); log(`${P.name} ใช้${it.name} ฟื้น HP ${g}`); }
-  else if (id === 'ether') { const b = P.mp; P.mp = Math.min(maxMp(), P.mp + 12); floatText($('#meSpot'), `+${P.mp - b} MP`, 'mpc'); sfx('heal'); log(`${P.name} ใช้${it.name} ฟื้น MP ${P.mp - b}`); }
-  else { P.hp = maxHp(); P.mp = maxMp(); floatText($('#meSpot'), 'เต็ม!', 'heal'); sfx('lvl'); log(`${P.name} ใช้${it.name} พลังเต็มเปี่ยม!`); }
-  fxBurst($('#meSpot'), it.icon);
-}
-
-async function act(kind, arg) {
-  if (!B || B.busy) return;
-  const f = B.foe, sk = col().skill;
-  if (kind === 'skill' && P.mp < sk.cost) { toast('MP ไม่พอ ลองป้องกันเพื่อเติม MP'); return; }
-  if (kind === 'item' && !(P.items[arg] > 0)) return;
-  B.busy = true; setCmds(false); hideItems();
-  B.turn++; B.defending = false;
-  if (kind === 'run') {
-    const chance = clamp(55 + (st('spd') - f.spd) * 5, 20, 95);
-    if (Math.random() * 100 < chance) {
-      log(`${P.name} หนีสำเร็จ!`); sfx('miss'); await sleep(650);
-      save(); B = null; enterHub('map'); return;
-    }
-    log('หนีไม่พ้น!'); await sleep(450);
-    await foeTurn(); if (P.hp <= 0) return lose();
-    return endRound();
-  }
-  const pFirst = kind === 'defend' || kind === 'item' || st('spd') >= f.spd;
-  if (pFirst) {
-    await playerTurn(kind, arg); if (f.hp <= 0) return win();
-    await sleep(380);
-    await foeTurn(); if (P.hp <= 0) return lose();
-  } else {
-    await foeTurn(); if (P.hp <= 0) return lose();
-    await sleep(380);
-    await playerTurn(kind, arg); if (f.hp <= 0) return win();
-  }
-  endRound();
-}
-function endRound() {
-  P.mp = Math.min(maxMp(), P.mp + 1);
-  B.busy = false; renderBattle(); setCmds(true);
-}
-
-async function playerTurn(kind, arg) {
-  const f = B.foe, c = col();
-  if (kind === 'attack') { log(`${P.name} พุ่งชน!`); await playerHit(1, {}); }
-  else if (kind === 'skill') {
-    P.mp -= c.skill.cost; log(`${P.name} ใช้ ${c.skill.name}!`); sfx('skill');
-    renderBattle();
-    if (P.color === 'red') await playerHit(2.2, { fx: '🔥' });
-    else if (P.color === 'blue') { B.shield = 3; fxBurst($('#meSpot'), '🫧'); await playerHit(1, { fx: '💧' }); }
-    else if (P.color === 'yellow') { await playerHit(0.9, { sure: true, fx: '⚡' }); if (f.hp > 0) { await sleep(260); await playerHit(0.9, { sure: true, fx: '⚡' }); } }
-    else if (P.color === 'brown') { fxBurst($('#meSpot'), '🌰'); const g = heal(Math.round(maxHp() * 0.4)); log(`ผืนดินฟื้นพลังให้ ${g} HP`); }
-    else if (P.color === 'green') { const d = await playerHit(1.3, { critBonus: 40, fx: '🍃' }); if (d > 0) { await sleep(200); const g = heal(Math.max(1, Math.round(d * 0.5))); log(`ดูดพลังกลับมา ${g} HP`); } }
-  } else if (kind === 'defend') {
-    B.defending = true; P.mp = Math.min(maxMp(), P.mp + 2);
-    retrigger($('#bMe'), 'guard', 520); sfx('guard');
-    floatText($('#meSpot'), '+2 MP', 'mpc'); log(`${P.name} ตั้งท่าป้องกัน`);
-  } else if (kind === 'item') useItem(arg);
-  renderBattle();
-}
-async function playerHit(mult, o) {
-  const f = B.foe;
-  retrigger($('#bMe'), 'lunge-me', 360);
-  await sleep(170);
-  const dodge = o.sure ? 0 : clamp(3 + (f.spd - st('spd')) * 1.5, 0, 30);
-  if (Math.random() * 100 < dodge) { floatText($('#foeSpot'), 'หลบ!', 'miss'); sfx('miss'); log(`${f.name} หลบได้!`); return 0; }
-  let d = dmgCalc(st('atk'), f.def, mult);
+function monsIn(range) { const out = []; for (const m of monsterList()) if (m.hp > 0 && Math.hypot(m.rx - me.x, m.ry - me.y) < range) out.push(m); return out; }
+function attackMon(m, mult, o = {}) {
+  const t0 = nowS();
+  myHits.set(m.id, t0);
+  const dodge = o.sure ? 0 : clamp(3 + (m.spd - st('spd')) * 1.5, 0, 30);
+  if (Math.random() * 100 < dodge) { floatAt(m.rx, m.ry - 26, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return 0; }
+  let d = dmgCalc(st('atk'), m.def, mult);
   const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0), 0, 75);
   if (crit) d = Math.round(d * 1.75);
-  f.hp = Math.max(0, f.hp - d);
-  if (o.fx) fxBurst($('#foeSpot'), o.fx);
-  retrigger($('#bFoe'), 'hit', 460);
-  floatText($('#foeSpot'), crit ? `${d}!` : d, crit ? 'crit' : '');
+  floatAt(m.rx, m.ry - 26, crit ? d + '!' : d, crit ? '#FFD23F' : '#fff', crit ? 24 : 19);
   sfx(crit ? 'crit' : 'hit');
-  log(crit ? `คริติคอล! ${f.name} โดน ${d}` : `${f.name} โดน ${d}`);
-  renderBattle();
-  await sleep(250);
+  if (hosting) damageMon(m, d, myPeer || 'me');
+  else {
+    hitsOut.push([++hitSeq, m.id, d]); if (hitsOut.length > 10) hitsOut.shift();
+    m.predHp = Math.max(0, (m.predHp != null && t0 - m.predT < .8 ? m.predHp : m.hp) - d); m.predT = t0; m.flash = .15;
+  }
   return d;
 }
-async function foeTurn() {
-  const f = B.foe;
-  if (f.boss && B.charging) { B.charging = false; log(`${f.name} ปล่อยท่าไม้ตาย!`); await foeHit(1.8, true); return; }
-  if (f.boss && B.turn % 3 === 0) {
-    B.charging = true; log(`${f.name} กำลังรวบรวมพลัง… กดป้องกันไว้!`); sfx('charge');
-    renderBattle(); await sleep(450); return;
-  }
-  await foeHit(1, false);
+function doAttack() {
+  if (!started || me.dead || me.atkCd > 0) return;
+  me.atkCd = atkCooldown(); me.atkCount++; me.swing = .2;
+  const tgt = nearestMon(62);
+  if (tgt) { me.dir = tgt.rx < me.x ? -1 : 1; attackMon(tgt, 1); }
+  else sfx('swing');
+  fx.push({ type: 'slash', x: me.x + me.dir * 20, y: me.y - 8, dir: me.dir, t: 0, dur: .2 });
 }
-async function foeHit(mult, big) {
-  const f = B.foe;
-  retrigger($('#bFoe'), 'lunge-foe', 360);
-  await sleep(170);
-  const dodge = big ? 0 : clamp(3 + (st('spd') - f.spd) * 1.5, 0, 35);
-  if (Math.random() * 100 < dodge) { floatText($('#meSpot'), 'หลบ!', 'miss'); sfx('miss'); log(`${P.name} หลบได้อย่างสวยงาม!`); return; }
-  let d = dmgCalc(f.atk, st('def'), mult);
-  if (B.defending) d = Math.round(d * 0.5);
-  if (B.shield > 0) { d = Math.round(d * 0.4); B.shield--; }
-  d = Math.max(1, d);
-  P.hp = Math.max(0, P.hp - d);
-  retrigger($('#bMe'), 'hit', 460);
-  floatText($('#meSpot'), d, big ? 'crit' : '');
-  sfx(big ? 'crit' : 'hurt'); buzz(big ? 80 : 30);
-  log(`${P.name} โดน ${d}${B.defending ? ' (ป้องกันไว้)' : ''}`);
-  renderBattle();
-  await sleep(250);
+function doSkill() {
+  if (!started || me.dead || me.skillCd > 0) return;
+  const c = col();
+  if (P.mp < c.skill.cost) { toast('MP ไม่พอ'); return; }
+  const color = P.color;
+  if (color === 'red') {
+    const ts = monsIn(88); if (!ts.length) { toast('ไม่มีมอนอยู่ใกล้ๆ'); return; }
+    ts.forEach(m => attackMon(m, 1.8)); fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 92, t: 0, dur: .45, c: '#FF8A2A' });
+  } else if (color === 'blue') {
+    me.shieldT = 6; monsIn(66).forEach(m => attackMon(m, 1)); fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 70, t: 0, dur: .4, c: '#4A9DFF' });
+  } else if (color === 'yellow') {
+    const ex = new Set(), ts = [];
+    for (let i = 0; i < 3; i++) { const m = nearestMon(150, ex); if (!m) break; ex.add(m.id); ts.push(m); }
+    if (!ts.length) { toast('ไม่มีมอนอยู่ใกล้ๆ'); return; }
+    let px = me.x, py = me.y - 10;
+    ts.forEach(m => { attackMon(m, 1.3, { sure: true }); fx.push({ type: 'bolt', x: px, y: py, x2: m.rx, y2: m.ry - 10, t: 0, dur: .3 }); px = m.rx; py = m.ry - 10; });
+  } else if (color === 'brown') {
+    const g = Math.round(maxHp() * .4); healMe(g); monsIn(60).forEach(m => attackMon(m, .8));
+    fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 64, t: 0, dur: .45, c: '#A8744A' });
+  } else if (color === 'green') {
+    const m = nearestMon(100); if (!m) { toast('ไม่มีมอนอยู่ใกล้ๆ'); return; }
+    const d = attackMon(m, 1.6, { critBonus: 40 }); if (d > 0) healMe(Math.max(1, Math.round(d * .5)));
+    fx.push({ type: 'emoji', e: '🍃', x: m.rx, y: m.ry - 16, t: 0, dur: .5 });
+  }
+  P.mp -= c.skill.cost; me.skillCd = 4; me.swing = .25; me.atkCount++; sfx('skill');
+  fx.push({ type: 'emoji', e: c.skill.icon, x: me.x, y: me.y - 40, t: 0, dur: .6 });
+}
+function healMe(n) { const b = P.hp; P.hp = Math.min(maxHp(), P.hp + n); const g = Math.round(P.hp - b); if (g > 0) floatAt(me.x, me.y - 30, '+' + g, '#7BE39A', 18); sfx('heal'); return g; }
+function usePotion(kind) {
+  kind = kind || 'potion';
+  if (!started || me.dead) return;
+  if (!(P.items[kind] > 0)) { toast(`ไม่มี${CONSUME[kind].name}แล้ว ซื้อได้ที่ร้านป้าแมวเหมียวในเมือง`); return; }
+  if (kind === 'potion') { if (me.potCd > 0) return; if (P.hp >= maxHp()) { toast('HP เต็มอยู่แล้ว'); return; } healMe(Math.max(30, Math.round(maxHp() * .4))); me.potCd = 1; }
+  else if (kind === 'ether') { if (P.mp >= maxMp()) { toast('MP เต็มอยู่แล้ว'); return; } P.mp = Math.min(maxMp(), P.mp + 15); floatAt(me.x, me.y - 30, '+15 MP', '#9CC2FF', 16); sfx('heal'); }
+  else { P.hp = maxHp(); P.mp = maxMp(); floatAt(me.x, me.y - 30, 'เต็ม!', '#7BE39A', 20); sfx('lvl'); }
+  P.items[kind]--; save();
+}
+function receiveHit(atk, mult, spd) {
+  if (!started || me.dead) return;
+  const big = mult > 1;
+  const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5, 0, 35);
+  if (Math.random() * 100 < dodge) { floatAt(me.x, me.y - 30, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return; }
+  let d = dmgCalc(atk, st('def'), mult);
+  if (me.shieldT > 0) d = Math.max(1, Math.round(d * .4));
+  P.hp = Math.max(0, P.hp - d); me.lastHurt = nowS(); me.hurtT = .3;
+  floatAt(me.x, me.y - 30, d, big ? '#FFD23F' : '#FF8391', big ? 24 : 18);
+  sfx('hurt'); buzz(big ? 70 : 25);
+  if (P.hp <= 0) die();
+}
+function die() {
+  me.dead = true; me.deadT = 3.5; sfx('die'); buzz([60, 60, 120]);
+  const lost = Math.floor(P.gold * .1); P.gold -= lost;
+  $('#dead').hidden = false; $('#deadT').textContent = lost ? `ทองหล่นหาย ${lost} เหรียญ · กำลังพากลับเมือง` : 'กำลังพากลับเมือง';
+  save();
+}
+function respawn() {
+  me.dead = false; me.x = SPAWN.x; me.y = SPAWN.y; P.hp = maxHp(); P.mp = maxMp(); $('#dead').hidden = true; save();
+}
+function onKill(k) {
+  const [id, t, lv, x, y] = k; if (!FOE_KEYS[t]) return;
+  const s = foeStats(t, lv);
+  fx.push({ type: 'poof', x, y, t: 0, dur: .45 });
+  if (s.boss) chatLine('', `${s.name} ถูกปราบแล้ว!`, true);
+  const hitAt = myHits.get(id);
+  if (hitAt == null || nowS() - hitAt > 30 || rewarded.has(id)) return;
+  rewarded.add(id); myHits.delete(id);
+  reward(s, x, y);
+}
+function reward(s, x, y) {
+  P.kills++; if (s.boss) P.bossKills++;
+  sfx('kill');
+  const luk = st('luk');
+  dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * (1 + luk / 100) * rnd(.8, 1.2))));
+  if (Math.random() * 100 < 9 + luk * .2) dropLoot('potion', x, y, 1);
+  if (Math.random() * 100 < 4 + luk * .1) dropLoot('ether', x, y, 1);
+  const tier = s.zi;
+  if (s.boss) { dropLoot('item', x, y, makeItem(tier, 2)); dropLoot('item', x, y, makeItem(tier, 1)); if (Math.random() < .5) dropLoot('elixir', x, y, 1); }
+  else if (Math.random() * 100 < 20 + luk * .3) dropLoot('item', x, y, makeItem(tier, 0));
+  floatAt(x, y - 44, `+${s.xp} EXP`, '#FFE08A', 14);
+  gainXp(s.xp);
+  save();
+}
+function gainXp(x) {
+  P.xp += x;
+  let up = false, evolved = 0;
+  while (P.xp >= xpNeed(P.lv)) {
+    P.xp -= xpNeed(P.lv); const before = stageOf(P.lv); P.lv++; up = true;
+    for (const k of STATS) { const g = GROW[k] * (k === col().main ? 2 : 1); P.base[k] += Math.floor(g) + (Math.random() < g % 1 ? 1 : 0); }
+    P.points += 2;
+    if (stageOf(P.lv) > before) evolved = stageOf(P.lv);
+  }
+  if (up) {
+    P.hp = maxHp(); P.mp = maxMp(); sfx('lvl');
+    fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 80, t: 0, dur: .7, c: '#FFD23F' });
+    if (evolved) { banner(`วิวัฒนาการเป็น${STAGE_NAME[evolved]}!`, `Lv ${P.lv} · ได้แต้มสถานะเพิ่ม`); hudStatic(); }
+    else banner(`เลเวลอัป! Lv ${P.lv}`, 'แจกแต้มสถานะได้ที่ 🐣');
+  }
+}
+function pickupLoot(dt) {
+  const t0 = nowS();
+  for (let i = loot.length - 1; i >= 0; i--) {
+    const l = loot[i];
+    l.x += l.vx * dt; l.y += l.vy * dt; l.vx *= Math.pow(.02, dt); l.vy *= Math.pow(.02, dt);
+    l.vz -= 320 * dt; l.z = Math.max(0, l.z + l.vz * dt); if (l.z === 0) l.vz = 0;
+    if (solid(l.x, l.y)) { l.vx = -l.vx; l.vy = -l.vy; }
+    if (t0 - l.t > 90) { loot.splice(i, 1); continue; }
+    if (me.dead || t0 - l.t < .45) continue;
+    const d = Math.hypot(l.x - me.x, l.y - me.y);
+    if (d < 70 && l.kind === 'gold') { l.x += (me.x - l.x) * Math.min(1, dt * 8); l.y += (me.y - l.y) * Math.min(1, dt * 8); }
+    if (d > 26) continue;
+    if (l.kind === 'gold') { P.gold += l.val; floatAt(me.x, me.y - 40, `+${l.val} ทอง`, '#FFD877', 14); sfx('coin'); }
+    else if (l.kind === 'item') {
+      if (P.bag.length >= BAG_MAX) { if (!l.warned) { toast('กระเป๋าเต็ม! ขายของใน 🎒 ก่อน'); l.warned = 1; } continue; }
+      P.bag.push(l.val); const it = l.val;
+      floatAt(me.x, me.y - 44, itemName(it), RAR[it.r].c, 15); sfx(it.r >= 2 ? 'rare' : 'pick');
+      if (it.r >= 3) banner(`ได้ของ${RAR[it.r].th}!`, itemName(it));
+      $('#bBag').innerHTML = '🎒<span class="dot"></span>';
+    } else { P.items[l.kind]++; floatAt(me.x, me.y - 40, CONSUME[l.kind].icon + ' +1', '#fff', 15); sfx('pick'); }
+    loot.splice(i, 1); save();
+  }
 }
 
-async function win() {
-  const f = B.foe, zi = B.zi;
-  await sleep(250);
-  $('#bFoe').classList.add('faint'); sfx('win');
-  $('#bMe').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, mood: 'happy' });
-  const luk = st('luk');
-  const gold = Math.round(f.gold * (1 + luk / 100) * rnd(0.9, 1.1));
-  const drops = [];
-  if (Math.random() * 100 < 10 + luk * 0.5) { const it = Math.random() < 0.7 ? 'potion' : 'ether'; P.items[it]++; drops.push(it); }
-  if (f.boss) { P.items.elixir++; drops.push('elixir'); }
-  P.gold += gold; P.kills++;
-  let firstBoss = false;
-  if (f.boss) { firstBoss = !P.bosses[zi]; P.bosses[zi] = true; if (zi + 1 < ZONES.length) P.unlocked = Math.max(P.unlocked, zi + 1); }
-  else P.wins[zi]++;
-  const ups = gainXp(f.xp);
-  save();
-  await sleep(700);
-  const rewards = `<div class="rewards"><span class="chip">EXP +${f.xp}</span><span class="chip"><span class="coin"></span> +${gold}</span>${drops.map(d => `<span class="chip">${ITEMS[d].icon} ${ITEMS[d].name}</span>`).join('')}</div>`;
-  const bossHint = !f.boss && P.wins[zi] === WINS_FOR_BOSS && !P.bosses[zi] ? `<p><b>บอส ${FOES[ZONES[zi].boss].name} ปรากฏตัวแล้ว!</b> ไปท้าได้ที่แผนที่</p>` : '';
-  const buttons = f.boss ? [{ label: 'กลับแผนที่', value: 'map', primary: true }]
-    : [{ label: 'กลับบ้าน', value: 'home' }, { label: 'สำรวจต่อ', value: 'again', primary: true }];
-  const ch = await modal({
-    title: f.boss ? `ปราบ${f.name}สำเร็จ!` : 'ชนะแล้ว!',
-    art: `<div class="big-emo">${f.e}</div>`,
-    body: `<p>${esc(P.name)} ชนะ ${f.name}</p>${rewards}${ups ? '' : `<p class="muted num">HP ${P.hp}/${maxHp()} · EXP ${P.xp}/${xpNeed(P.lv)}</p>`}${bossHint}`,
-    buttons: ups ? [{ label: 'ต่อไป', value: 'next', primary: true }] : buttons,
-  });
-  let choice = ch;
-  if (ups) {
-    sfx('lvl');
-    const s = stageOf(P.lv), c = col();
-    const gains = `<div class="gains">${STATS.map(k => `<div class="${k === c.main ? 'main' : ''}">${STAT_SHORT[k]}<b>+${ups.gains[k]}</b></div>`).join('')}</div>`;
-    choice = await modal({
-      title: ups.evolved ? `วิวัฒนาการเป็น${STAGE_NAME[ups.evolved]}!` : `เลเวลอัป! Lv ${ups.to}`,
-      art: `<div class="art bob" style="width:${ups.evolved ? 150 : 120}px">${blobSVG(P.color, s, { shiny: P.shiny, mood: 'happy' })}</div>`,
-      body: `${ups.evolved ? `<p>${esc(P.name)} โตขึ้นแล้ว! ตอนนี้ Lv ${ups.to}</p>` : `<p>Lv ${ups.from} → ${ups.to} · ฟื้น HP/MP เต็ม</p>`}${gains}<p style="margin-top:8px">ได้แต้มสถานะ +${(ups.to - ups.from) * 2} ไปแจกได้ที่หน้า “ตัวละคร”</p>`,
-      buttons,
-    });
+/* ================= input ================= */
+const keys = new Set();
+const joy = { active: false, id: null, ox: 0, oy: 0, dx: 0, dy: 0 };
+let atkHeld = false;
+const typing = () => document.activeElement && document.activeElement.tagName === 'INPUT';
+window.addEventListener('keydown', e => {
+  if (typing() || !started || !$('#s-egg').hidden) { if (e.key === 'Escape' && !$('#chatbar').hidden) closeChat(); return; }
+  if (!$('#modal').hidden) { if (e.key === 'Escape') closeSheet(); return; }
+  const k = e.key.toLowerCase();
+  if (k === 'enter') { e.preventDefault(); openChat(); return; }
+  if (k === ' ') { e.preventDefault(); atkHeld = true; doAttack(); return; }
+  if (k === 'e') { doSkill(); return; }
+  if (k === 'q') { usePotion(); return; }
+  if (k === 'i' || k === 'b') { openBag(); return; }
+  if (k === 'c') { openChar(); return; }
+  keys.add(k);
+});
+window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); keys.delete(k); if (k === ' ') atkHeld = false; });
+window.addEventListener('blur', () => { keys.clear(); atkHeld = false; });
+const cv = $('#cv');
+cv.addEventListener('pointerdown', e => {
+  if (!started || joy.active) return;
+  joy.active = true; joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.dx = joy.dy = 0;
+  const r = $('#app').getBoundingClientRect(), j = $('#joy');
+  j.style.left = (e.clientX - r.left) + 'px'; j.style.top = (e.clientY - r.top) + 'px'; j.hidden = false; $('#joyK').style.transform = '';
+  $('#joyhint').hidden = true;
+  try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  if (AC && AC.state === 'suspended') AC.resume();
+});
+cv.addEventListener('pointermove', e => {
+  if (!joy.active || e.pointerId !== joy.id) return;
+  let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy; const d = Math.hypot(dx, dy), max = 50;
+  if (d > max) { dx = dx / d * max; dy = dy / d * max; }
+  joy.dx = dx / max; joy.dy = dy / max;
+  $('#joyK').style.transform = `translate(${dx}px,${dy}px)`;
+});
+const endJoy = e => { if (e.pointerId !== joy.id) return; joy.active = false; joy.dx = joy.dy = 0; $('#joy').hidden = true; };
+cv.addEventListener('pointerup', endJoy); cv.addEventListener('pointercancel', endJoy);
+function holdBtn(el, onPress, repeat) {
+  let held = false;
+  el.addEventListener('pointerdown', e => { e.preventDefault(); held = true; el.classList.add('held'); onPress(); if (repeat) atkHeld = true; });
+  const up = () => { if (!held) return; held = false; el.classList.remove('held'); if (repeat) atkHeld = false; };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('pointerleave', up);
+  el.addEventListener('click', e => { if (e.detail === 0) onPress(); });
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}
+holdBtn($('#bAtk'), doAttack, true);
+holdBtn($('#bSkill'), doSkill, false);
+holdBtn($('#bPot'), () => usePotion('potion'), false);
+$('#bBag').onclick = () => { sfx('tap'); openBag(); };
+$('#bChar').onclick = () => { sfx('tap'); openChar(); };
+$('#bChat').onclick = () => { sfx('tap'); openChat(); };
+$('#bTalk').onclick = () => { sfx('tap'); openShop(); };
+$('#bMute').onclick = () => { muted = !muted; savePrefs(); $('#bMute').textContent = muted ? '🔇' : '🔊'; if (!muted) sfx('tap'); };
+function openChat() { $('#chatbar').hidden = false; keys.clear(); setTimeout(() => $('#chatIn').focus(), 30); }
+function closeChat() { $('#chatbar').hidden = true; $('#chatIn').blur(); }
+$('#chatX').onclick = closeChat;
+$('#chatbar').addEventListener('submit', e => {
+  e.preventDefault();
+  const t = clean($('#chatIn').value).slice(0, 80); $('#chatIn').value = '';
+  if (t) { me.chat = t; me.chatAt = Date.now(); me.chatT = 6; chatLine(P.name, t); }
+  closeChat();
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); atkHeld = false; save(); } });
+
+/* ================= sheets: bag / character / shop ================= */
+let selItem = null;
+function slotBtn(it, extra = '') {
+  if (!it) return '';
+  return `<button class="slot r${it.r}${extra}" type="button" data-item="${it.id}" aria-label="${esc(itemName(it))}">${itemIcon(it)}<span class="lv">T${it.tier + 1}</span></button>`;
+}
+function findItem(id) { for (const s of SLOTS) if (P.eq[s] && P.eq[s].id === id) return { it: P.eq[s], eq: true }; const it = P.bag.find(i => i.id === id); return it ? { it, eq: false } : null; }
+function openBag() {
+  $('#bBag').textContent = '🎒';
+  selItem = null;
+  openSheet('กระเป๋า', renderBag);
+}
+function renderBag(el) {
+  const sel = selItem && findItem(selItem);
+  let detail = '';
+  if (sel) {
+    const it = sel.it, cur = P.eq[it.slot];
+    const cmp = !sel.eq && cur ? STATS.filter(k => (it.stats[k] || 0) !== (cur.stats[k] || 0)).map(k => { const d = (it.stats[k] || 0) - (cur.stats[k] || 0); return `<span class="${d > 0 ? 'up' : 'down'}">${STAT_SHORT[k]} ${d > 0 ? '+' : ''}${d}</span>`; }).join(' ') : '';
+    detail = `<div class="panel detail">
+      <div class="top"><span class="slot big r${it.r}">${itemIcon(it)}</span><div><b style="font:700 17px var(--f-display);color:${RAR[it.r].c}">${esc(itemName(it))}</b><div class="muted" style="font-size:12px">${SLOT[it.slot].th} · ${RAR[it.r].th} · ขั้น ${it.tier + 1}${sel.eq ? ' · สวมอยู่' : ''}</div></div></div>
+      <div class="statline">${STATS.filter(k => it.stats[k]).map(k => `<span class="chip">${STAT_SHORT[k]} +${it.stats[k]}</span>`).join('')}</div>
+      ${cmp ? `<div style="font-size:13px">เทียบกับที่ใส่อยู่: ${cmp}</div>` : ''}
+      <div class="m-btns">${sel.eq ? `<button class="btn sm" type="button" data-act="unequip">ถอดออก</button>` : `<button class="btn sm primary" type="button" data-act="equip">สวมใส่</button><button class="btn sm" type="button" data-act="sell">ขาย <span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${itemPrice(it)}</button>`}</div>
+    </div>`;
   }
-  if (f.boss && firstBoss) {
-    if (zi + 1 < ZONES.length) {
-      const nz = ZONES[zi + 1];
-      await modal({ title: `เปิดทางสู่${nz.name}!`, art: `<div class="big-emo">🗺️</div>`, body: `<p>${nz.flavor}</p><p class="muted">แนะนำ Lv ${nz.lv} ขึ้นไป</p>`, buttons: [{ label: 'ไปเลย!', value: 'ok', primary: true }] });
-    } else {
-      sfx('lvl');
-      await modal({ title: 'ตำนานแห่งปุ๊กปิ๊ก!', art: `<div class="art bob" style="width:150px">${blobSVG(P.color, stageOf(P.lv), { shiny: true, mood: 'happy' })}</div>`, body: `<p>${esc(P.name)} ปราบจอมมารเงา โลกกลับมาสดใสอีกครั้ง</p><p class="muted">เล่นต่อเพื่อเก็บเลเวลและอุปกรณ์ได้ หรือฟักไข่ใบใหม่เพื่อลองสีอื่น</p>`, buttons: [{ label: 'เย้!', value: 'ok', primary: true }] });
+  const eq = SLOTS.map(s => P.eq[s] ? slotBtn(P.eq[s], selItem === P.eq[s].id ? ' sel' : '') : `<span class="slot empty">${SLOT[s].th}</span>`).join('');
+  const bag = P.bag.map(it => slotBtn(it, selItem === it.id ? ' sel' : '')).join('') + Array.from({ length: Math.max(0, 12 - P.bag.length) }, () => '<span class="slot empty"></span>').join('');
+  const commons = P.bag.filter(i => i.r === 0);
+  el.innerHTML = `${detail}
+    <div><p class="eyebrow" style="margin-bottom:6px">ที่สวมอยู่ · ${STATS.map(k => `${STAT_SHORT[k]} ${st(k)}`).join(' · ')}</p><div class="eq-row">${eq}</div></div>
+    <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><p class="eyebrow">ของในกระเป๋า ${P.bag.length}/${BAG_MAX}</p>${commons.length ? `<button class="btn sm" type="button" data-act="sellcommon" style="min-height:32px;font-size:12px">ขายของธรรมดาทั้งหมด (${commons.reduce((a, i) => a + itemPrice(i), 0)} ทอง)</button>` : ''}</div>
+      ${P.bag.length ? `<div class="bag">${bag}</div>` : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีของ ออกไปตีมอนนอกเมืองแล้วเดินทับของที่ดรอปเพื่อเก็บ</p>'}</div>
+    <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} × ${P.items[k]}</div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div>`;
+}
+function openChar() { openSheet('ตัวละคร', renderChar); }
+function renderChar(el) {
+  const c = col(), s = stageOf(P.lv);
+  el.style.setProperty('--c', c.c[1]); el.style.setProperty('--c-light', c.light);
+  const ref = { hp: Math.max(150, maxHp()), atk: 70, def: 70, spd: 70, luk: 70 };
+  el.innerHTML = `
+    <div class="char-head"><div class="portrait">${blobSVG(P.color, s, { shiny: P.shiny })}</div>
+      <div><p class="eyebrow">${c.species} · ${STAGE_NAME[s]}</p><div style="font:700 21px var(--f-display)">${esc(P.name)}</div>
+        <div class="chips" style="margin-top:4px"><span class="chip">Lv ${P.lv}</span><span class="chip" style="background:${c.light}">สี${c.th}</span>${P.shiny ? '<span class="chip" style="background:#FFF3B0">✦</span>' : ''}</div>
+        <p class="muted" style="margin:6px 0 0;font-size:13px">EXP ${P.xp}/${xpNeed(P.lv)} · ${P.lv < 5 ? 'วิวัฒนาการที่ Lv 5' : P.lv < 12 ? 'ร่างราชาที่ Lv 12' : 'วิวัฒนาการครบแล้ว'}</p></div></div>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><b style="font-family:var(--f-display)">ค่าสถานะ</b><span class="chip" style="${P.points ? 'background:#FFF3B0' : ''}">แต้มว่าง ${P.points}</span></div>
+      ${STATS.map(k => { const b = gearBonus(k); return `<div class="alloc${k === c.main ? ' main' : ''}"><span>${STAT_NAME[k]}${k === c.main ? ' ★' : ''}</span><div class="bar"><i style="width:${clamp(st(k) / Math.max(ref[k], st(k)) * 100, 3, 100)}%"></i></div><span class="val">${st(k)}${b ? `<br><small>+${b}</small>` : ''}</span><button class="btn" type="button" data-alloc="${k}" ${P.points > 0 ? '' : 'disabled'} aria-label="เพิ่ม${STAT_NAME[k]}">+</button></div>`; }).join('')}
+      <p class="muted" style="margin:6px 0 0;font-size:12px">ได้ 2 แต้มทุกเลเวล · 1 แต้ม = HP +${POINT_VALUE.hp} หรือค่าอื่น +1 · ★ ค่าเด่นของสี${c.th} โตเร็วเท่าตัว</p>
+    </div>
+    <div class="skill-card panel"><div class="skill-ico">${c.skill.icon}</div><div><b>${c.skill.name}</b> <span class="muted">· ${c.skill.cost} MP · คูลดาวน์ 4 วิ</span><div class="muted" style="font-size:13px">${c.skill.desc}</div></div></div>
+    <div class="panel records"><div><b>${P.kills}</b><span>ปราบมอน</span></div><div><b>${P.bossKills}</b><span>ปราบบอส</span></div><div><b>${P.bag.length}</b><span>ของในกระเป๋า</span></div></div>
+    <p class="muted" style="margin:0;font-size:12px">คอม: WASD เดิน · Space ตี · E สกิล · Q ยา · I กระเป๋า · C ตัวละคร · Enter แชท</p>
+    <button class="btn block" type="button" data-act="reset" style="background:var(--paper-2)">ฟักไข่ใบใหม่ (ลบตัวนี้ เริ่มใหม่)</button>`;
+}
+function nearShop() { return Math.hypot(me.x - (SHOP.x + 1) * T, me.y - (SHOP.y + 1.3) * T) < 2.6 * T; }
+function openShop() { openSheet('ร้านป้าแมวเหมียว', renderShop); }
+function renderShop(el) {
+  const junk = P.bag.filter(i => i.r === 0);
+  el.innerHTML = `<p class="muted" style="margin:0">“มาแล้วเหรอจ๊ะ ยาดีๆ มีเพียบ ของที่ไม่ใช้ก็เอามาขายได้นะ”</p>
+    <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} <span class="muted" style="font:600 12px var(--f-body)">มี ${P.items[k]}</span></div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-buy="${k}" ${P.gold < c.price ? 'disabled' : ''}><span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${c.price}</button></div>`).join('')}</div>
+    <div class="m-btns"><button class="btn sm" type="button" data-buy5="potion" ${P.gold < 75 ? 'disabled' : ''}>ซื้อยาน้ำผึ้ง ×5 (75)</button>${junk.length ? `<button class="btn sm" type="button" data-act="sellcommon">ขายของธรรมดา ${junk.length} ชิ้น (${junk.reduce((a, i) => a + itemPrice(i), 0)})</button>` : ''}</div>
+    <p class="muted" style="margin:0;font-size:13px">ยืนใกล้น้ำพุกลางเมืองจะฟื้น HP และ MP เร็วมาก</p>`;
+}
+$('#mBody').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  if (b.dataset.item) { selItem = selItem === b.dataset.item ? null : b.dataset.item; sfx('tap'); return refreshSheet(); }
+  if (b.dataset.use) { usePotion(b.dataset.use); return refreshSheet(); }
+  if (b.dataset.alloc) { if (P.points <= 0) return; const k = b.dataset.alloc; P.points--; P.base[k] += POINT_VALUE[k]; if (k === 'hp') P.hp += POINT_VALUE.hp; sfx('tap'); save(); return refreshSheet(); }
+  if (b.dataset.buy || b.dataset.buy5) {
+    const k = b.dataset.buy || b.dataset.buy5, n = b.dataset.buy5 ? 5 : 1, cost = CONSUME[k].price * n; if (P.gold < cost) return;
+    P.gold -= cost; P.items[k] += n; sfx('coin'); toast(`ซื้อ${CONSUME[k].name} ×${n} แล้ว`); save(); return refreshSheet();
+  }
+  const act = b.dataset.act;
+  if (act === 'equip' || act === 'unequip' || act === 'sell') {
+    const f = selItem && findItem(selItem); if (!f) return;
+    const it = f.it, hpFrac = P.hp / maxHp();
+    if (act === 'equip') { const old = P.eq[it.slot]; P.bag = P.bag.filter(i => i !== it); if (old) P.bag.push(old); P.eq[it.slot] = it; sfx('pick'); toast(`สวม ${itemName(it)} แล้ว`); }
+    else if (act === 'unequip') { if (P.bag.length >= BAG_MAX) { toast('กระเป๋าเต็ม'); return; } delete P.eq[it.slot]; P.bag.push(it); selItem = null; sfx('tap'); }
+    else { P.bag = P.bag.filter(i => i !== it); P.gold += itemPrice(it); selItem = null; sfx('coin'); toast(`ขายได้ ${itemPrice(it)} ทอง`); }
+    P.hp = Math.min(maxHp(), Math.max(1, Math.round(hpFrac * maxHp()))); save(); return refreshSheet();
+  }
+  if (act === 'sellcommon') { const j = P.bag.filter(i => i.r === 0), g = j.reduce((a, i) => a + itemPrice(i), 0); P.bag = P.bag.filter(i => i.r !== 0); P.gold += g; selItem = null; sfx('coin'); toast(`ขาย ${j.length} ชิ้น ได้ ${g} ทอง`); save(); return refreshSheet(); }
+  if (act === 'reset') {
+    if (b.dataset.confirm) { try { localStorage.removeItem(SAVE_KEY); } catch (err) {} closeSheet(); started = false; P = null; loot.length = 0; $('#hud').hidden = true; startEgg(); return; }
+    b.dataset.confirm = '1'; b.textContent = 'แตะอีกครั้งเพื่อยืนยัน ตัวละครนี้จะหายไปถาวร'; b.style.background = '#FFD3CF';
+  }
+});
+
+/* ================= main loop ================= */
+const ctx = cv.getContext('2d');
+const mini = $('#mini'), mctx = mini.getContext('2d');
+let DPR = 1, ZOOM = 1, VW = 0, VH = 0;
+function resize() {
+  const r = $('#app').getBoundingClientRect();
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(r.width * DPR); cv.height = Math.round(r.height * DPR);
+  ZOOM = clamp(Math.min(r.width, r.height * 1.1) / (12 * T), .85, 1.7);
+  VW = r.width / ZOOM; VH = r.height / ZOOM;
+}
+window.addEventListener('resize', resize);
+
+const sprites = new Map();
+function sprite(key, w, h, draw) {
+  let c = sprites.get(key); if (c) return c;
+  c = document.createElement('canvas'); c.width = w * 2; c.height = h * 2;
+  const g = c.getContext('2d'); g.scale(2, 2); g.lineJoin = 'round'; g.lineCap = 'round'; draw(g); sprites.set(key, c); return c;
+}
+function emojiSprite(e, size) {
+  return sprite('e' + e + size, size * 1.3, size * 1.3, g => { g.font = `${size}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, size * .65, size * .7); });
+}
+function drawObstacle(o, x, y, g) {
+  const px = x * T, py = y * T;
+  if (o === 1) { const s = sprite('tree', 48, 60, c => { c.fillStyle = '#8A5A3B'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.roundRect(19, 34, 10, 20, 3); c.fill(); c.stroke(); c.fillStyle = '#5CBF5A'; c.beginPath(); c.arc(24, 24, 19, 0, 7); c.fill(); c.stroke(); c.fillStyle = '#86DB7C'; c.beginPath(); c.arc(17, 17, 7, 0, 7); c.fill(); }); ctx.drawImage(s, px - 8, py - 30, 48, 60); }
+  else if (o === 2) { const s = sprite('pine', 44, 64, c => { c.fillStyle = '#7A4E2C'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.roundRect(18, 46, 8, 14, 2); c.fill(); c.stroke(); c.fillStyle = '#2F7D4A'; for (const [yy, w] of [[4, 12], [16, 16], [28, 20]]) { c.beginPath(); c.moveTo(22, yy); c.lineTo(22 + w, yy + 22); c.lineTo(22 - w, yy + 22); c.closePath(); c.fill(); c.stroke(); } }); ctx.drawImage(s, px - 6, py - 34, 44, 64); }
+  else if (o === 3) { const k = g >= 4 ? 'rockD' : 'rock', s = sprite(k, 36, 30, c => { c.fillStyle = g >= 4 ? '#6B4A40' : '#A09AB0'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.moveTo(4, 26); c.quadraticCurveTo(2, 8, 16, 5); c.quadraticCurveTo(32, 4, 32, 26); c.closePath(); c.fill(); c.stroke(); c.fillStyle = 'rgba(255,255,255,.35)'; c.beginPath(); c.ellipse(13, 12, 5, 3, -.5, 0, 7); c.fill(); }); ctx.drawImage(s, px - 2, py + 2, 36, 30); }
+  else if (o === 4) { const s = sprite('crystal', 36, 44, c => { c.fillStyle = '#B58CFF'; c.strokeStyle = INK; c.lineWidth = 2.5; for (const [cx, hh, w] of [[12, 30, 7], [24, 38, 8], [30, 20, 5]]) { c.beginPath(); c.moveTo(cx, 42 - hh); c.lineTo(cx + w, 42 - hh * .7); c.lineTo(cx + w * .8, 42); c.lineTo(cx - w * .8, 42); c.lineTo(cx - w, 42 - hh * .7); c.closePath(); c.fill(); c.stroke(); } c.fillStyle = 'rgba(255,255,255,.55)'; c.fillRect(22, 10, 3, 14); }); ctx.drawImage(s, px - 2, py - 12, 36, 44); }
+  else if (o === 7) { const s = sprite('pillar', 34, 56, c => { c.fillStyle = '#6E6290'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.roundRect(7, 6, 20, 46, 3); c.fill(); c.stroke(); c.fillStyle = '#8E82B2'; c.beginPath(); c.roundRect(3, 2, 28, 8, 3); c.fill(); c.stroke(); c.fillStyle = '#FFB84D'; c.beginPath(); c.arc(17, 22, 3, 0, 7); c.fill(); }); ctx.drawImage(s, px - 1, py - 24, 34, 56); }
+  else if (o === 10) { if (OBJ[y * W + x - 1] === 10) return; const s = sprite('house', 72, 80, c => { c.strokeStyle = INK; c.lineWidth = 2.5; c.fillStyle = '#FFF1DA'; c.beginPath(); c.roundRect(8, 34, 56, 42, 4); c.fill(); c.stroke(); c.fillStyle = '#E86A5A'; c.beginPath(); c.moveTo(2, 38); c.lineTo(36, 6); c.lineTo(70, 38); c.closePath(); c.fill(); c.stroke(); c.fillStyle = '#8A5A3B'; c.beginPath(); c.roundRect(29, 52, 14, 24, 3); c.fill(); c.stroke(); c.fillStyle = '#9ED5F5'; c.beginPath(); c.roundRect(13, 44, 11, 10, 2); c.fill(); c.stroke(); c.beginPath(); c.roundRect(48, 44, 11, 10, 2); c.fill(); c.stroke(); }); ctx.drawImage(s, px - 4, py - 48, 72, 80); }
+  else if (o === 9) { if (OBJ[y * W + x - 1] === 9) return; const s = sprite('stall', 68, 64, c => { c.strokeStyle = INK; c.lineWidth = 2.5; c.fillStyle = '#C48A5A'; c.beginPath(); c.roundRect(4, 36, 60, 22, 3); c.fill(); c.stroke(); c.fillStyle = '#8A5A3B'; c.fillRect(8, 12, 4, 26); c.fillRect(56, 12, 4, 26); for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? '#fff' : '#FF8A45'; c.beginPath(); c.moveTo(2 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 18); c.quadraticCurveTo(7.3 + i * 10.6, 24, 2 + i * 10.6, 18); c.closePath(); c.fill(); } c.strokeRect(2, 6, 64, 12); c.font = '14px sans-serif'; c.fillText('🍯', 14, 50); c.fillText('💧', 30, 50); c.fillText('✨', 46, 50); }); ctx.drawImage(s, px - 2, py - 30, 68, 64); const cat = emojiSprite('🐱', 26); ctx.drawImage(cat, px + 17, py - 34 + Math.sin(nowS() * 2) * 1.5, 34, 34); }
+  else if (o === 8) { if (OBJ[y * W + x - 1] === 8 || OBJ[(y - 1) * W + x] === 8) return; const cx = px + T, cy = py + T; ctx.fillStyle = '#B9B2CC'; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(cx, cy + 4, 30, 22, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#6EC3F5'; ctx.beginPath(); ctx.ellipse(cx, cy + 2, 23, 15, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#B9B2CC'; ctx.beginPath(); ctx.roundRect(cx - 5, cy - 22, 10, 24, 3); ctx.fill(); ctx.stroke(); const tt = nowS(); ctx.fillStyle = 'rgba(255,255,255,.85)'; for (let i = 0; i < 4; i++) { const a = tt * 3 + i * 1.6, r = (tt * 20 + i * 5) % 16; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r, cy - 24 + r * .9 + Math.sin(a) * 2, 2.5, 0, 7); ctx.fill(); } }
+}
+function drawGround(x0, y0, x1, y1) {
+  const tt = nowS();
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    if (x < 0 || y < 0 || x >= W || y >= H) continue;
+    const i = y * W + x, g = GROUND[i], o = OBJ[i], v = (x + y) & 1;
+    let c;
+    if (g === 0) c = v ? '#EAD7A8' : '#E3CE9B';
+    else if (ROAD[i]) c = ZONES[g - 1].road;
+    else c = ZONES[g - 1].g[v];
+    if (o === 5) c = '#5DB6F0'; else if (o === 6) c = '#FF7A2A';
+    ctx.fillStyle = c; ctx.fillRect(x * T, y * T, T + .6, T + .6);
+    const h = hash2(x, y, 9);
+    if (o === 5) { ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(x * T + 6 + Math.sin(tt * 1.5 + x) * 3, y * T + 12 + h * 8, 10, 2.5); }
+    else if (o === 6) { ctx.fillStyle = `rgba(255,214,90,${.35 + .3 * Math.sin(tt * 3 + x * .7 + y)})`; ctx.beginPath(); ctx.arc(x * T + 8 + h * 16, y * T + 10 + h * 12, 5, 0, 7); ctx.fill(); }
+    else if (o === 20) { ctx.fillStyle = ['#FF8FB1', '#FFD23F', '#fff', '#8CCBFF'][Math.floor(h * 4)]; ctx.beginPath(); ctx.arc(x * T + 10 + h * 12, y * T + 12 + h * 10, 3.2, 0, 7); ctx.fill(); }
+    else if (o === 21) { ctx.fillStyle = '#E86A5A'; ctx.beginPath(); ctx.arc(x * T + 16, y * T + 16, 5, Math.PI, 0); ctx.fill(); ctx.fillStyle = '#FFF1DA'; ctx.fillRect(x * T + 14, y * T + 16, 4, 5); }
+    else if (o === 22) { ctx.fillStyle = 'rgba(210,190,255,.7)'; ctx.fillRect(x * T + 8 + h * 14, y * T + 10, 3, 6); }
+    else if (o === 23) { ctx.fillStyle = 'rgba(60,30,25,.4)'; ctx.fillRect(x * T + 6, y * T + 14 + h * 8, 14, 2); }
+    else if (o === 24) { ctx.fillStyle = 'rgba(20,10,40,.35)'; ctx.fillRect(x * T + 8, y * T + 8, 12, 12); }
+    else if (g > 0 && !ROAD[i] && h < .08) { ctx.fillStyle = 'rgba(0,0,0,.08)'; ctx.fillRect(x * T + 10, y * T + 14, 2, 5); ctx.fillRect(x * T + 14, y * T + 12, 2, 7); }
+  }
+}
+function drawName(text, x, y, color, font) {
+  ctx.font = font || '600 11px "IBM Plex Sans Thai",system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(51,40,74,.85)'; ctx.strokeText(text, x, y); ctx.fillStyle = color || '#fff'; ctx.fillText(text, x, y);
+}
+function drawBubble(text, x, y) {
+  ctx.font = '600 12px "IBM Plex Sans Thai",system-ui,sans-serif';
+  const t = text.length > 28 ? text.slice(0, 27) + '…' : text, w = Math.min(200, ctx.measureText(t).width + 16);
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(x - w / 2, y - 22, w, 20, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 8);
+}
+function drawBlob(o) {
+  const size = [0, 40, 46, 52][o.st], im = blobImg(o.color, o.st, o.shiny, o.mood);
+  const t = o.walk, sq = o.moving ? Math.sin(t * 14) * .07 : Math.sin(nowS() * 3 + o.x) * .03;
+  const lift = o.moving ? Math.abs(Math.sin(t * 14)) * 4 : 0;
+  ctx.fillStyle = 'rgba(51,40,74,.2)'; ctx.beginPath(); ctx.ellipse(o.x, o.y + 2, size * .36, size * .1, 0, 0, 7); ctx.fill();
+  if (o.shield) { ctx.fillStyle = 'rgba(120,190,255,.28)'; ctx.strokeStyle = 'rgba(74,157,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(o.x, o.y - size * .4, size * .68, 0, 7); ctx.fill(); ctx.stroke(); }
+  ctx.save(); ctx.translate(o.x + (o.swing > 0 ? o.dir * 6 : 0), o.y - lift); ctx.scale(o.dir * (1 + sq), 1 - sq);
+  if (o.hurt) ctx.filter = 'brightness(1.8)';
+  if (im.complete && im.naturalWidth) ctx.drawImage(im, -size * .65, -size * 1.18, size * 1.3, size * 1.3);
+  ctx.filter = 'none';
+  if (o.wp) { const e = emojiSprite(SLOT.weapon.icons[o.wp - 1], 20); ctx.save(); ctx.translate(size * .45, -size * .35); ctx.rotate(o.swing > 0 ? 1.2 : .35); ctx.drawImage(e, -13, -13, 26, 26); ctx.restore(); }
+  if (o.hat) { const e = emojiSprite(SLOT.hat.icons[o.hat - 1], 22); ctx.drawImage(e, -15, -size * 1.12 - 14, 30, 30); }
+  ctx.restore();
+  const top = o.y - size * 1.05 - (o.hat ? 14 : 0) - lift;
+  drawName(`${o.name} Lv${o.lv}`, o.x, top - 4, o.self ? '#FFE08A' : '#fff');
+  if (o.hpPct < 100) { ctx.fillStyle = INK; ctx.fillRect(o.x - 18, top, 36, 5); ctx.fillStyle = '#FF5C6C'; ctx.fillRect(o.x - 17, top + 1, 34 * o.hpPct / 100, 3); }
+  if (o.bubble) drawBubble(o.bubble, o.x, top - 16);
+}
+function drawMon(m) {
+  const s = foeStats(m.t, m.lv), size = s.boss ? 60 : 38, hp = m.predHp != null && nowS() - m.predT < .8 ? Math.min(m.hp, m.predHp) : m.hp;
+  if (m.charge) { const k = (nowS() * 3) % 1; ctx.fillStyle = `rgba(242,72,91,${.18 + .12 * k})`; ctx.strokeStyle = 'rgba(242,72,91,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(m.rx, m.ry, 78, 0, 7); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(51,40,74,.22)'; ctx.beginPath(); ctx.ellipse(m.rx, m.ry + 2, size * .38, size * .11, 0, 0, 7); ctx.fill();
+  const bob = Math.sin(nowS() * 4 + m.id) * 2, lx = m.lunge > 0 ? m.dir * 6 : 0;
+  ctx.save(); ctx.translate(m.rx + lx, m.ry - size * .5 + bob); ctx.scale(-m.dir, 1);
+  if (m.flash > 0) ctx.filter = 'brightness(2.2) saturate(0)';
+  ctx.drawImage(emojiSprite(s.e, 40), -size * .65, -size * .65, size * 1.3, size * 1.3);
+  ctx.filter = 'none'; ctx.restore();
+  const top = m.ry - size - 4;
+  if (s.boss) { ctx.drawImage(emojiSprite('👑', 20), m.rx - 13, top - 22, 26, 26); drawName(`${s.name} Lv${m.lv}`, m.rx, top - 22, '#FFB0B8', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif'); }
+  if (hp < m.maxHp || s.boss) { const w = s.boss ? 60 : 34; ctx.fillStyle = INK; ctx.fillRect(m.rx - w / 2 - 1, top - 1, w + 2, 6); ctx.fillStyle = '#FF5C6C'; ctx.fillRect(m.rx - w / 2, top, w * clamp(hp / m.maxHp, 0, 1), 4); }
+  else if (Math.hypot(m.rx - me.x, m.ry - me.y) < 150) drawName(`Lv${m.lv}`, m.rx, top + 4, '#fff', '600 10px "IBM Plex Sans Thai",system-ui,sans-serif');
+}
+const LOOT_ICON = { gold: '🪙', potion: '🍯', ether: '💧', elixir: '✨' };
+function drawLoot(l) {
+  const bob = Math.sin(nowS() * 4 + l.t) * 2 - l.z;
+  if (l.kind === 'item') { const c = RAR[l.val.r].c; ctx.fillStyle = c + '55'; ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(l.x, l.y + 2, 14, 5, 0, 0, 7); ctx.fill(); ctx.stroke(); if (l.val.r >= 2) { ctx.fillStyle = c + '30'; ctx.fillRect(l.x - 3, l.y - 60, 6, 60); } }
+  const e = l.kind === 'item' ? itemIcon(l.val) : LOOT_ICON[l.kind];
+  ctx.drawImage(emojiSprite(e, 22), l.x - 13, l.y - 26 + bob, 26, 26);
+}
+function drawMinimap() {
+  if (!drawMinimap.base) {
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'), img = g.createImageData(W, H);
+    const pal = ['#EAD7A8', '#9FD884', '#4F9A63', '#6C679A', '#A05A45', '#4A3F66'];
+    for (let i = 0; i < W * H; i++) {
+      let hex = pal[GROUND[i]]; const o = OBJ[i];
+      if (o === 5) hex = '#5DB6F0'; else if (o === 6) hex = '#FF7A2A'; else if (ROAD[i]) hex = '#E9DDB6'; else if (BLOCK.has(o)) hex = '#3A3152';
+      const n = parseInt(hex.slice(1), 16); img.data[i * 4] = n >> 16; img.data[i * 4 + 1] = (n >> 8) & 255; img.data[i * 4 + 2] = n & 255; img.data[i * 4 + 3] = 255;
     }
+    g.putImageData(img, 0, 0); drawMinimap.base = c;
   }
-  B = null;
-  if (choice === 'again') return explore(zi);
-  enterHub(choice === 'home' ? 'home' : 'map');
+  const mw = mini.width, mh = mini.height, sx = mw / (W * T), sy = mh / (H * T);
+  mctx.imageSmoothingEnabled = false; mctx.drawImage(drawMinimap.base, 0, 0, mw, mh);
+  for (const m of monsterList()) if (m.boss || foeStats(m.t, m.lv).boss) { mctx.font = '16px sans-serif'; mctx.textAlign = 'center'; mctx.fillText('💀', m.rx * sx, m.ry * sy + 5); }
+  for (const r of remotes.values()) { mctx.fillStyle = COLORS[r.c].c[1]; mctx.strokeStyle = '#fff'; mctx.lineWidth = 2; mctx.beginPath(); mctx.arc(r.x * sx, r.y * sy, 4.5, 0, 7); mctx.fill(); mctx.stroke(); }
+  mctx.fillStyle = '#fff'; mctx.strokeStyle = INK; mctx.lineWidth = 2.5; mctx.beginPath(); mctx.arc(me.x * sx, me.y * sy, 5.5, 0, 7); mctx.fill(); mctx.stroke();
 }
-async function lose() {
-  sfx('lose'); buzz([60, 60, 120]);
-  $('#bMe').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, mood: 'hurt' });
-  $('#bMe').classList.add('faint');
-  await sleep(800);
-  const lost = Math.floor(P.gold * 0.3);
-  P.gold -= lost; P.hp = maxHp(); P.mp = maxMp(); save();
-  await modal({ title: 'หมดแรงซะแล้ว…', art: `<div class="art">${blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, mood: 'sleep' })}</div>`,
-    body: `<p>${esc(P.name)} ถูกพากลับบ้านมานอนพัก</p>${lost ? `<p class="muted">ทองหล่นหายระหว่างทาง ${lost} เหรียญ</p>` : ''}<p class="muted">ลองอัปแต้มสถานะ ซื้ออุปกรณ์ หรือเก็บเลเวลก่อนนะ</p>`,
-    buttons: [{ label: 'กลับบ้าน', value: 'home', primary: true }] });
-  $('#bMe').classList.remove('faint');
-  B = null; enterHub('home');
+
+let lastT = performance.now(), miniT = 0, saveT = 0;
+function frame(tms) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(.05, (tms - lastT) / 1000); lastT = tms;
+  if (!started) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#8CC973'; ctx.fillRect(0, 0, cv.width, cv.height); return; }
+  update(dt); render();
+  miniT -= dt; if (miniT <= 0) { miniT = .25; drawMinimap(); updateHud(); }
+  saveT -= dt; if (saveT <= 0) { saveT = 5; save(); }
 }
+function update(dt) {
+  const t0 = nowS();
+  me.atkCd = Math.max(0, me.atkCd - dt); me.skillCd = Math.max(0, me.skillCd - dt); me.potCd = Math.max(0, me.potCd - dt);
+  me.swing = Math.max(0, me.swing - dt); me.shieldT = Math.max(0, me.shieldT - dt); me.hurtT = Math.max(0, me.hurtT - dt); me.chatT = Math.max(0, me.chatT - dt);
+  if (me.dead) { me.deadT -= dt; if (me.deadT <= 0) respawn(); }
+  else {
+    let dx = joy.dx, dy = joy.dy;
+    if (!typing() && $('#modal').hidden) {
+      if (keys.has('a') || keys.has('arrowleft')) dx -= 1; if (keys.has('d') || keys.has('arrowright')) dx += 1;
+      if (keys.has('w') || keys.has('arrowup')) dy -= 1; if (keys.has('s') || keys.has('arrowdown')) dy += 1;
+    }
+    const m = Math.hypot(dx, dy);
+    me.moving = m > .15;
+    if (me.moving) { const k = Math.min(1, m) * moveSpeed() * dt / m; moveBody(me, dx * k, dy * k, 12, solid); if (Math.abs(dx) > .1) me.dir = dx < 0 ? -1 : 1; me.walk += dt; }
+    if (atkHeld) doAttack();
+    // regen
+    const nearFountain = Math.hypot(me.x - (TOWN.x + 1) * T, me.y - (TOWN.y + 1) * T) < 3.2 * T;
+    if (nearFountain) { if (P.hp < maxHp() || P.mp < maxMp()) { P.hp = Math.min(maxHp(), P.hp + maxHp() * .25 * dt); P.mp = Math.min(maxMp(), P.mp + maxMp() * .25 * dt); } }
+    else { if (t0 - me.lastHurt > 6) P.hp = Math.min(maxHp(), P.hp + maxHp() * .015 * dt); P.mp = Math.min(maxMp(), P.mp + .7 * dt); }
+    const z = zoneAt(me.x, me.y);
+    if (z !== me.zone) { me.zone = z; if (z === 0) banner('เมืองปุ๊กปิ๊ก', 'เขตปลอดภัย · ร้านค้าและน้ำพุฟื้นพลัง'); else { const zz = ZONES[z - 1]; banner(zz.name, `แนะนำ Lv ${zz.lv}+${P.lv + 3 < zz.lv ? ' · อันตราย!' : ''}`); } }
+    $('#bTalk').hidden = !nearShop();
+  }
+  if (hosting) simTick(dt);
+  for (const v of views.values()) { const k = Math.min(1, dt * 10); v.rx += (v.x - v.rx) * k; v.ry += (v.y - v.ry) * k; v.flash = Math.max(0, v.flash - dt); v.lunge = Math.max(0, v.lunge - dt); if (Math.hypot(v.x - v.rx, v.y - v.ry) > 6 * T) { v.rx = v.x; v.ry = v.y; } }
+  for (const r of remotes.values()) { const k = Math.min(1, dt * 12); r.x += (r.tx - r.x) * k; r.y += (r.ty - r.y) * k; if (r.mv || Math.hypot(r.tx - r.x, r.ty - r.y) > 1) r.walk += dt; r.swing = Math.max(0, r.swing - dt); r.bubbleT = Math.max(0, r.bubbleT - dt); }
+  pickupLoot(dt);
+  for (let i = fx.length - 1; i >= 0; i--) { fx[i].t += dt; if (fx[i].t > fx[i].dur) fx.splice(i, 1); }
+  for (let i = floaters.length - 1; i >= 0; i--) { floaters[i].t += dt; if (floaters[i].t > .9) floaters.splice(i, 1); }
+  // cooldown overlays
+  $('#atkCd').style.setProperty('--p', (me.atkCd / atkCooldown() * 100) + '%');
+  $('#skillCd').style.setProperty('--p', (me.skillCd / 4 * 100) + '%');
+  $('#potCd').style.setProperty('--p', (me.potCd * 100) + '%');
+  $('#bSkill').disabled = P.mp < col().skill.cost;
+}
+function render() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const s = DPR * ZOOM;
+  let cx = clamp(me.x, VW / 2, W * T - VW / 2), cy = clamp(me.y - 20, VH / 2, H * T - VH / 2);
+  const ox = Math.round((cx - VW / 2) * s) / s, oy = Math.round((cy - VH / 2) * s) / s;
+  ctx.setTransform(s, 0, 0, s, -ox * s, -oy * s);
+  const x0 = Math.floor(ox / T) - 1, y0 = Math.floor(oy / T) - 1, x1 = Math.ceil((ox + VW) / T) + 1, y1 = Math.ceil((oy + VH) / T) + 2;
+  drawGround(x0, y0, x1, y1);
+  // target ring
+  const tgt = !me.dead && nearestMon(200);
+  if (tgt) { const inR = Math.hypot(tgt.rx - me.x, tgt.ry - me.y) < 62; ctx.strokeStyle = inR ? '#FFD23F' : 'rgba(255,255,255,.7)'; ctx.lineWidth = 2.5; ctx.setLineDash(inR ? [] : [5, 5]); ctx.beginPath(); ctx.ellipse(tgt.rx, tgt.ry + 2, 22, 8, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+  const ents = [];
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { if (x < 0 || y < 0 || x >= W || y >= H) continue; const o = OBJ[y * W + x]; if (o && o < 20 && o !== 5 && o !== 6) ents.push({ y: (y + 1) * T - (o === 8 ? -T : 0), d: () => drawObstacle(o, x, y, GROUND[y * W + x]) }); }
+  const inView = (x, y) => x > ox - 80 && x < ox + VW + 80 && y > oy - 80 && y < oy + VH + 120;
+  for (const l of loot) if (inView(l.x, l.y)) ents.push({ y: l.y - 8, d: () => drawLoot(l) });
+  for (const m of monsterList()) if (inView(m.rx, m.ry)) ents.push({ y: m.ry, d: () => drawMon(m) });
+  for (const r of remotes.values()) if (inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
+  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0, self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, bubble: me.chatT > 0 ? me.chat : '' }) });
+  ents.sort((a, b) => a.y - b.y);
+  for (const e of ents) e.d();
+  for (const f of fx) {
+    const k = f.t / f.dur;
+    if (f.type === 'ring') { ctx.strokeStyle = f.c; ctx.globalAlpha = 1 - k; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(f.x, f.y - 10, f.r0 + (f.r1 - f.r0) * k, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
+    else if (f.type === 'slash') { ctx.strokeStyle = `rgba(255,255,255,${1 - k})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(f.x, f.y, 18, f.dir > 0 ? -1.3 + k : Math.PI + 1.3 - k, f.dir > 0 ? .4 + k : Math.PI - .4 - k, f.dir < 0); ctx.stroke(); }
+    else if (f.type === 'bolt') { ctx.strokeStyle = `rgba(255,225,74,${1 - k})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(f.x, f.y); const n = 5; for (let i = 1; i <= n; i++) ctx.lineTo(f.x + (f.x2 - f.x) * i / n + (i < n ? rnd(-8, 8) : 0), f.y + (f.y2 - f.y) * i / n + (i < n ? rnd(-8, 8) : 0)); ctx.stroke(); }
+    else if (f.type === 'emoji') { ctx.globalAlpha = 1 - k; ctx.drawImage(emojiSprite(f.e, 30), f.x - 20, f.y - 20 - k * 20, 40, 40); ctx.globalAlpha = 1; }
+    else if (f.type === 'poof') { ctx.fillStyle = `rgba(255,255,255,${.8 * (1 - k)})`; for (let i = 0; i < 6; i++) { const a = i * 1.05; ctx.beginPath(); ctx.arc(f.x + Math.cos(a) * 24 * k, f.y - 16 + Math.sin(a) * 18 * k, 8 * (1 - k) + 2, 0, 7); ctx.fill(); } }
+  }
+  for (const f of floaters) { ctx.globalAlpha = 1 - Math.max(0, f.t - .5) / .4; drawName(f.text, f.x, f.y - f.t * 40, f.color, `700 ${f.size}px "Mali","IBM Plex Sans Thai",system-ui,sans-serif`); ctx.globalAlpha = 1; }
+}
+requestAnimationFrame(frame);
 
 /* ================= boot ================= */
-function start() {
-  if (started) return; started = true;
-  loadPrefs();
-  const s = load();
-  if (valid(s)) { P = s; enterHub('home'); } else startEgg();
-}
-start();
+loadPrefs(); resize();
+const saved = migrate(load());
+if (saved) {
+  P = saved;
+  me.x = num(P.x, SPAWN.x); me.y = num(P.y, SPAWN.y);
+  if (solid(me.x, me.y)) { me.x = SPAWN.x; me.y = SPAWN.y; }
+  enterWorld();
+} else startEgg();
+window.addEventListener('pagehide', save);
 })();
 </script>
