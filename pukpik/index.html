@@ -23,8 +23,7 @@ body{height:100%;margin:0;font:15px/1.5 var(--f-body);color:var(--ink);backgroun
 button{font-family:inherit;color:inherit}
 input{font-family:inherit}
 #app{position:relative;height:100%;overflow:hidden}
-#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;image-rendering:pixelated;image-rendering:crisp-edges}
-#tv{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
 /* ---------- shared ---------- */
 .btn{appearance:none;font:700 16px/1.2 var(--f-display);color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);min-height:48px;padding:10px 16px;cursor:pointer;transition:transform .06s,box-shadow .06s}
@@ -308,7 +307,6 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 
 <div id="app">
   <canvas id="cv"></canvas>
-  <canvas id="tv" aria-hidden="true"></canvas>
 
   <div id="hud" hidden>
     <div class="me-card" id="meCard">
@@ -3764,18 +3762,12 @@ $('#mBody').addEventListener('click', e => {
 
 /* ================= main loop ================= */
 const ctx = cv.getContext('2d');
-// Pixel-art look: the world is drawn onto a low-resolution canvas and scaled up with hard pixel edges;
-// names, numbers and chat bubbles go on a full-resolution layer above it so Thai text stays sharp.
-const tv = $('#tv'), tctx = tv.getContext('2d');
-let PIX = 3;
 const mini = $('#mini'), mctx = mini.getContext('2d');
 let DPR = 1, ZOOM = 1, VW = 0, VH = 0;
 function resize() {
   const r = $('#app').getBoundingClientRect();
   DPR = Math.min(2, window.devicePixelRatio || 1);
-  PIX = r.width >= 700 ? 3 : 2.5;
-  cv.width = Math.max(1, Math.round(r.width / PIX)); cv.height = Math.max(1, Math.round(r.height / PIX));
-  tv.width = Math.round(r.width * DPR); tv.height = Math.round(r.height * DPR);
+  cv.width = Math.round(r.width * DPR); cv.height = Math.round(r.height * DPR);
   ZOOM = clamp(Math.min(r.width, r.height * 1.1) / (12 * T), .85, 1.7) * (typeof zoomMul === 'number' ? zoomMul : 1);
   VW = r.width / ZOOM; VH = r.height / ZOOM;
 }
@@ -3809,15 +3801,6 @@ function drawObstacle(o, x, y, g) {
   else if (o === 9) { if (OBJ[y * W + x - 1] === 9) return; const s = sprite('stall', 68, 64, c => { c.strokeStyle = INK; c.lineWidth = 2.5; c.fillStyle = '#C48A5A'; c.beginPath(); c.roundRect(4, 36, 60, 22, 3); c.fill(); c.stroke(); c.fillStyle = '#8A5A3B'; c.fillRect(8, 12, 4, 26); c.fillRect(56, 12, 4, 26); for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? '#fff' : '#FF8A45'; c.beginPath(); c.moveTo(2 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 18); c.quadraticCurveTo(7.3 + i * 10.6, 24, 2 + i * 10.6, 18); c.closePath(); c.fill(); } c.strokeRect(2, 6, 64, 12); c.font = '14px sans-serif'; c.fillText('🍯', 14, 50); c.fillText('💧', 30, 50); c.fillText('✨', 46, 50); }); ctx.drawImage(s, px - 2, py - 30, 68, 64); const cat = emojiSprite('🐱', 26); ctx.drawImage(cat, px + 17, py - 34 + Math.sin(nowS() * 2) * 1.5, 34, 34); }
   else if (o === 8) { if (OBJ[y * W + x - 1] === 8 || OBJ[(y - 1) * W + x] === 8) return; const cx = px + T, cy = py + T; ctx.fillStyle = '#B9B2CC'; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(cx, cy + 4, 30, 22, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#6EC3F5'; ctx.beginPath(); ctx.ellipse(cx, cy + 2, 23, 15, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#B9B2CC'; ctx.beginPath(); ctx.roundRect(cx - 5, cy - 22, 10, 24, 3); ctx.fill(); ctx.stroke(); const tt = nowS(); ctx.fillStyle = 'rgba(255,255,255,.85)'; for (let i = 0; i < 4; i++) { const a = tt * 3 + i * 1.6, r = (tt * 20 + i * 5) % 16; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r, cy - 24 + r * .9 + Math.sin(a) * 2, 2.5, 0, 7); ctx.fill(); } }
 }
-// Pixel texture for a ground tile: a few darker and lighter pixels in fixed spots (grass tufts in green lands).
-const shadeCache = new Map();
-const shade = (c, k) => { const key = c + k; let v = shadeCache.get(key); if (!v) { v = k < 0 ? hexMix(c, '#241a33', -k) : hexMix(c, '#ffffff', k); shadeCache.set(key, v); } return v; };
-function pixTex(x, y, c, g) {
-  if (c[0] !== '#' || c.length !== 7) return;
-  const px = x * T, py = y * T, d = shade(c, -.14), l = shade(c, .16);
-  for (let k = 0; k < 4; k++) { const hx = hash2(x, y, 11 + k), hy = hash2(x, y, 23 + k); ctx.fillStyle = k < 3 ? d : l; ctx.fillRect(px + Math.floor(hx * 10) * 3, py + Math.floor(hy * 10) * 3, 3, 3); }
-  if ((g === 1 || g === 2 || g === 11 || g === 15) && hash2(x, y, 41) < .45) { const tx = px + 6 + Math.floor(hash2(x, y, 43) * 6) * 3, ty = py + 9 + Math.floor(hash2(x, y, 47) * 5) * 3; ctx.fillStyle = d; ctx.fillRect(tx, ty, 3, 6); ctx.fillRect(tx - 3, ty + 3, 3, 3); ctx.fillRect(tx + 3, ty + 3, 3, 3); }
-}
 function drawGround(x0, y0, x1, y1) {
   const tt = nowS(), cz = DG ? -1 : zoneAt(me.x, me.y);
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
@@ -3832,7 +3815,6 @@ function drawGround(x0, y0, x1, y1) {
     else c = ZONES[g - 1].g[v];
     if (o === 5) c = g === 7 ? '#A9DDF5' : g === 8 ? '#6B8F5A' : '#5DB6F0'; else if (o === 6) c = '#FF7A2A'; else if (o === 18) c = '#6B2FD0';
     ctx.fillStyle = c; ctx.fillRect(x * T, y * T, T + .6, T + .6);
-    if (o !== 5 && o !== 6 && o !== 18) pixTex(x, y, c, g);
     const h = hash2(x, y, 9);
     if (o === 5) { ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(x * T + 6 + Math.sin(tt * 1.5 + x) * 3, y * T + 12 + h * 8, 10, 2.5); }
     else if (o === 6) { ctx.fillStyle = `rgba(255,214,90,${.35 + .3 * Math.sin(tt * 3 + x * .7 + y)})`; ctx.beginPath(); ctx.arc(x * T + 8 + h * 16, y * T + 10 + h * 12, 5, 0, 7); ctx.fill(); }
@@ -3854,16 +3836,15 @@ function drawGround(x0, y0, x1, y1) {
   }
 }
 function drawName(text, x, y, color, font) {
-  const g = tctx; g.globalAlpha = ctx.globalAlpha;
-  g.font = font || '600 11px "IBM Plex Sans Thai",system-ui,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-  g.lineWidth = 3; g.lineJoin = 'round'; g.strokeStyle = 'rgba(51,40,74,.85)'; g.strokeText(text, x, y); g.fillStyle = color || '#fff'; g.fillText(text, x, y); g.globalAlpha = 1;
+  ctx.font = font || '600 11px "IBM Plex Sans Thai",system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(51,40,74,.85)'; ctx.strokeText(text, x, y); ctx.fillStyle = color || '#fff'; ctx.fillText(text, x, y);
 }
 function drawBubble(text, x, y) {
-  const g = tctx; g.font = '600 12px "IBM Plex Sans Thai",system-ui,sans-serif';
-  const t = text.length > 28 ? text.slice(0, 27) + '…' : text, w = Math.min(200, g.measureText(t).width + 16);
-  g.fillStyle = '#fff'; g.strokeStyle = INK; g.lineWidth = 2;
-  g.beginPath(); g.rect(x - w / 2, y - 22, w, 20); g.fill(); g.stroke();
-  g.fillStyle = INK; g.textAlign = 'center'; g.fillText(t, x, y - 8);
+  ctx.font = '600 12px "IBM Plex Sans Thai",system-ui,sans-serif';
+  const t = text.length > 28 ? text.slice(0, 27) + '…' : text, w = Math.min(200, ctx.measureText(t).width + 16);
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(x - w / 2, y - 22, w, 20, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 8);
 }
 function drawBlob(o) {
   const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form, o.ft, o.rk, o.fb, o.fs, o.race);
@@ -4038,7 +4019,7 @@ let lastT = performance.now(), miniT = 0, saveT = 0, titleT = 2;
 function frame(tms) {
   requestAnimationFrame(frame);
   const dt = Math.min(.05, (tms - lastT) / 1000); lastT = tms;
-  if (!started) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#8CC973'; ctx.fillRect(0, 0, cv.width, cv.height); tctx.setTransform(1, 0, 0, 1, 0, 0); tctx.clearRect(0, 0, tv.width, tv.height); return; }
+  if (!started) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#8CC973'; ctx.fillRect(0, 0, cv.width, cv.height); return; }
   update(dt); render();
   miniT -= dt; if (miniT <= 0) { miniT = .25; drawMinimap(); updateHud(); const di = $('#dgInfo'); di.hidden = !DG; if (DG) di.textContent = DG.clear ? 'ผ่านดันเจี้ยนแล้ว!' : DG.bossUp ? `บอส · ${DG.d.name}` : `คลื่น ${DG.wave}/${DG.d.waves.length} · เหลือ ${DG.mons.size}`; }
   saveT -= dt; if (saveT <= 0) { saveT = 5; save(); }
@@ -4125,15 +4106,13 @@ function update(dt) {
   });
 }
 function render() {
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false;
-  tctx.setTransform(1, 0, 0, 1, 0, 0); tctx.clearRect(0, 0, tv.width, tv.height);
-  const s = ZOOM / PIX, ts = DPR * ZOOM;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const s = DPR * ZOOM;
   const zb = ZB[zoneAt(me.x, me.y)] || { x0: 0, y0: 0, x1: W - 1, y1: HW - 1 };
   const bx0 = DG ? (DG.a.x0 - 1) * T : (zb.x0 - 1) * T, bx1 = DG ? (DG.a.x0 + DG.a.w + 1) * T : (zb.x1 + 2) * T, by0 = DG ? (DG.a.y0 - 2) * T : (zb.y0 - 1) * T, by1 = DG ? (DG.a.y0 + DG.a.h + 1) * T : (zb.y1 + 2) * T;
   const cx = bx1 - bx0 <= VW ? (bx0 + bx1) / 2 : clamp(me.x, bx0 + VW / 2, bx1 - VW / 2), cy = by1 - by0 <= VH ? (by0 + by1) / 2 : clamp(me.y - 20, by0 + VH / 2, by1 - VH / 2);
   const ox = Math.round((cx - VW / 2) * s) / s, oy = Math.round((cy - VH / 2) * s) / s;
   ctx.setTransform(s, 0, 0, s, -ox * s, -oy * s);
-  tctx.setTransform(ts, 0, 0, ts, -ox * ts, -oy * ts);
   cam.ox = ox; cam.oy = oy;
   const x0 = Math.floor(ox / T) - 1, y0 = Math.floor(oy / T) - 1, x1 = Math.ceil((ox + VW) / T) + 1, y1 = Math.ceil((oy + VH) / T) + 2;
   drawGround(x0, y0, x1, y1);
