@@ -186,6 +186,8 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .adm .row2 .btn{min-height:34px;font-size:12.5px;padding:4px 10px;box-shadow:0 2px 0 var(--ink)}
 .oddbar{height:6px;width:100%;border-radius:99px;background:#EEE8F4;overflow:hidden}
 .oddbar i{display:block;height:100%;background:var(--accent)}
+.story p{margin:0 0 10px;font:500 15px/1.7 var(--f-body)}
+.story p:last-child{font-weight:700;color:#7B4FD8}
 .talk.enc{bottom:330px;background:#FF6B6B;color:#fff;animation:rise .2s ease, pulse 1s infinite alternate}
 @keyframes pulse{to{transform:scale(1.06)}}
 .talk{position:absolute;right:var(--gr);bottom:282px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
@@ -1141,17 +1143,110 @@ Object.assign(FOES, {
   nightwolf: genFoe('จักรพรรดิหมาป่าราตรี', '🐺', 30, 3, 1.4, 1.2, 1.4, 1, { lv: 30, tier: 9, uniq: 1 }),
   tombguard: genFoe('ผู้เฝ้าสุสานนิรันดร์', '💀', 30, 3.4, 1.3, 1.5, .9, 1, { lv: 30, tier: 9, uniq: 1 }),
   deepwhale: genFoe('วาฬมหาสมุทรลึก', '🐋', 30, 4, 1.2, 1.3, .9, 1, { lv: 30, tier: 9, uniq: 1 }),
+  forgegolem: genFoe('ยักษ์เตาหลอมนิรันดร์', '🔨', 45, 3.6, 1.4, 1.6, .8, 1, { lv: 45, tier: 9, uniq: 1 }),
+  shadowcat:  genFoe('แมวดำพันชีวิต', '🐈‍⬛', 25, 2.6, 1.3, 1, 1.8, 1, { lv: 25, tier: 9, uniq: 1 }),
+  fallenstar: genFoe('ดาวตกผู้หลงทาง', '💫', 50, 2.8, 1.6, 1.1, 1.4, 1, { lv: 50, tier: 9, uniq: 1 }),
+  sandworm:   genFoe('หนอนทรายราชันย์', '🪱', 35, 4.2, 1.3, 1.3, .9, 1, { lv: 35, tier: 9, uniq: 1 }),
+  frostqueen: genFoe('ราชินีหิมะนิรันดร์', '❄️', 40, 3.2, 1.4, 1.3, 1.1, 1, { lv: 40, tier: 9, uniq: 1 }),
+  doppel:     genFoe('เงาสะท้อนของคุณ', '🪞', 60, 3, 1.5, 1.2, 1.3, 1, { lv: 60, tier: 9, uniq: 1 }),
+  clockking:  genFoe('ผู้หยุดกาลเวลา', '⏱️', 110, 3.6, 1.5, 1.4, 1.2, 1, { lv: 110, tier: 15, uniq: 1 }),
 });
 const UNIQUE_MON = {
   nightwolf: { th: 'จักรพรรดิหมาป่าราตรี', curse: 'ตราราตรี', cfx: { atkP: .15, spdP: .15, crit: 5 }, noSlot: ['armor', 'hat'], cdesc: 'ATK/SPD +15% คริ +5% แต่ใส่เกราะและหมวกไม่ได้', honor: 'ผู้ล้มจักรพรรดิราตรี' },
   tombguard: { th: 'ผู้เฝ้าสุสานนิรันดร์', curse: 'ตราสุสาน', cfx: { hpP: -.25, steal: .05, skill: .15 }, noSlot: [], cdesc: 'HP −25% แต่ดูดเลือด 5% สกิลแรงขึ้น 15%', honor: 'ผู้ปลุกสุสาน' },
+  forgegolem: { th: 'ยักษ์เตาหลอมนิรันดร์', curse: 'ตราเตาหลอม', cfx: { atkP: .2, defP: -.1 }, noSlot: [], cdesc: 'ATK +20% แต่ DEF −10%', honor: 'ผู้คืนค้อนบรรพชน' },
+  shadowcat:  { th: 'แมวดำพันชีวิต', curse: 'ตราเก้าชีวิต', cfx: { hpP: -.2, dodge: 8, lukP: .1 }, noSlot: [], cdesc: 'HP −20% แต่หลบ +8% LUK +10%', honor: 'เพื่อนของแมวดำ' },
+  fallenstar: { th: 'ดาวตกผู้หลงทาง', curse: 'ตราดาวตก', cfx: { crit: 8, defP: -.15 }, noSlot: [], cdesc: 'คริ +8% แต่ DEF −15%', honor: 'ผู้ส่งดาวกลับฟ้า' },
+  sandworm:   { th: 'หนอนทรายราชันย์', curse: 'ตราผืนทราย', cfx: { gold: .3, move: -.1 }, noSlot: [], cdesc: 'ทองดรอป +30% แต่เดินช้าลง 10%', honor: 'เจ้าของขุมทรัพย์' },
+  frostqueen: { th: 'ราชินีหิมะนิรันดร์', curse: 'ตราน้ำแข็ง', cfx: { spdP: -.1, defP: .15, block: 5 }, noSlot: [], cdesc: 'SPD −10% แต่ DEF +15% กันดาเมจ +5%', honor: 'ผู้ละลายหัวใจน้ำแข็ง' },
+  doppel:     { th: 'เงาสะท้อนของคุณ', curse: 'ตราเงาสะท้อน', cfx: { atkP: .1, hpP: -.1, steal: .03 }, noSlot: [], cdesc: 'ATK +10% ดูดเลือด 3% แต่ HP −10%', honor: 'ผู้ชนะตัวเอง' },
+  clockking:  { th: 'ผู้หยุดกาลเวลา', curse: 'ตรากาลเวลา', cfx: { cdr: .15, xp: -.2 }, noSlot: [], cdesc: 'ลดคูลดาวน์ 15% แต่ EXP −20%', honor: 'ผู้ทำให้เวลาเดินต่อ' },
   deepwhale: { th: 'วาฬมหาสมุทรลึก', curse: 'ตรามหาสมุทร', cfx: { move: -.15, defP: .2, regen: .8 }, noSlot: [], cdesc: 'เดินช้าลง 15% แต่ DEF +20% ฟื้น HP เร็ว', honor: 'ผู้ฟังเพลงวาฬ' },
 };
-// Unique scenarios: started by hidden conditions, then a vague hint leads to where the unique monster waits.
+// Unique scenarios: each is its own short story. A hidden condition starts it, then a chain of different steps
+// (travel, hunt, prove yourself through actions, talk to someone, sometimes only at night) leads to its unique monster.
+const BP = zi => () => BOSS_POS[zi], FOUNTAIN_SPOT = () => ({ x: (TOWN.x + 1) * T, y: (TOWN.y + 2.4) * T });
 const SCENARIOS = {
-  wolf:  { th: 'หอนแห่งราตรีกาล', mon: 'nightwolf', hint: 'เสียงหอนดังมาจากส่วนลึกของป่าลึกลับ… ตรงที่บอสของป่าเคยยืนอยู่', spot: () => BOSS_POS[1] },
-  tomb:  { th: 'หลุมศพไร้ชื่อ', mon: 'tombguard', hint: 'คุณยายเล่าถึงหลุมศพเก่าที่ปลายสุดฝั่งตะวันตกของถ้ำคริสตัล', spot: () => TOMB_SPOT },
-  whale: { th: 'เพลงของวาฬ', mon: 'deepwhale', hint: 'ได้ยินเพลงแผ่วๆ มาจากแหล่งน้ำในทุ่งหญ้าสดใส', spot: () => WATER_SPOT },
+  wolf: { th: 'หอนแห่งราตรีกาล', icon: '🐺', mon: 'nightwolf',
+    intro: ['คืนนั้นในป่าลึกลับ เสียงหอนยาวดังก้องไปทั้งป่า…', 'หมาป่าเงาทุกตัวหันหน้าไปทางเดียวกัน ราวกับกำลังรอคำสั่ง', 'มีบางอย่างกำลังเรียกหาคุณ'],
+    steps: [
+      { t: 'goto', spot: BP(1), night: 1, hint: 'ไปใจกลางป่าลึกลับ ตรงที่บอสเคยยืน', story: 'รอยกรงเล็บขนาดยักษ์ถูกทิ้งไว้บนต้นไม้ มันกำลังทดสอบคุณ' },
+      { t: 'kill', foe: 'wolf', n: 25, night: 1, hint: 'ปราบหมาป่าเงา 25 ตัว', story: 'ฝูงหมาป่าคือสายตาของมัน ถ้าอยากให้มันออกมา ต้องทำลายฝูงก่อน' },
+      { t: 'act', a: 'dodge', n: 20, hint: 'หลบการโจมตี 20 ครั้ง', story: 'มันเฝ้าดูการเคลื่อนไหวของคุณ… ต้องพิสูจน์ว่าคุณคู่ควร' },
+      { t: 'fight', spot: BP(1), night: 1, hint: 'กลับไปใจกลางป่า', story: 'จักรพรรดิหมาป่าราตรีปรากฏตัว ดวงตาสีเงินจ้องมาที่คุณ' }],
+    end: ['หมาป่ายักษ์ล้มลง แสงจันทร์ส่องผ่านร่างที่ค่อยๆ สลายไป', '“เจ้า… คู่ควร” เสียงสุดท้ายก้องอยู่ในหัวคุณ'] },
+  tomb: { th: 'หลุมศพไร้ชื่อ', icon: '⚰️', mon: 'tombguard',
+    intro: ['คุณยายวางถ้วยชาลง แล้วมองคุณนิ่งๆ', '“หลานล้มมาหลายครั้งแล้วสินะ… ยายเคยรู้จักนักผจญภัยคนหนึ่งที่ล้มแล้วไม่เคยลุกขึ้นอีก”', '“หลุมศพของเขาอยู่ปลายสุดฝั่งตะวันตกของถ้ำคริสตัล ไม่มีใครจำชื่อเขาได้แล้ว”'],
+    steps: [
+      { t: 'goto', spot: () => TOMB_SPOT, hint: 'ไปหลุมศพปลายสุดฝั่งตะวันตกของถ้ำคริสตัล', story: 'หลุมศพเก่าไร้ชื่อ มีดาบหักปักอยู่ วิญญาณในถ้ำร้องไห้ไม่หยุด' },
+      { t: 'kill', foe: 'ghost', n: 20, hint: 'ปลดปล่อยวิญญาณถ้ำ 20 ดวง', story: 'วิญญาณเหล่านี้คือความทรงจำที่หลงทาง ปล่อยพวกมันไปเถอะ' },
+      { t: 'talk', npc: 'pets', hint: 'กลับไปเล่าให้คุณยายฟัง', story: '“ดาบหักงั้นเหรอ…” คุณยายน้ำตาคลอ “เขาคงยังรอใครสักคนอยู่ที่นั่น”' },
+      { t: 'fight', spot: () => TOMB_SPOT, hint: 'กลับไปที่หลุมศพ', story: 'พื้นดินแยกออก ผู้เฝ้าสุสานนิรันดร์ลุกขึ้นพร้อมดาบหักในมือ' }],
+    end: ['ผู้เฝ้าสุสานคุกเข่าลง แล้วยื่นดาบหักให้คุณ', 'คุณยายคงอยากรู้ว่าในที่สุดเขาก็ได้พักแล้ว'] },
+  whale: { th: 'เพลงของวาฬ', icon: '🐋', mon: 'deepwhale',
+    intro: ['ขณะยืนนิ่งอยู่ที่น้ำพุ คุณได้ยินเพลงแผ่วๆ ลอยมากับสายน้ำ', 'เป็นเพลงที่เศร้าและยาวนาน… ราวกับมาจากที่ที่ลึกมาก', 'สัตว์เลี้ยงของคุณหันหน้าไปทางทุ่งหญ้า'],
+    steps: [
+      { t: 'goto', spot: () => WATER_SPOT, hint: 'ตามเพลงไปที่แหล่งน้ำในทุ่งหญ้าสดใส', story: 'บ่อน้ำลึกกว่าที่ควรจะเป็นมาก มีเงาใหญ่ว่ายวนอยู่ข้างใต้' },
+      { t: 'act', a: 'feed', n: 10, hint: 'ให้อาหารสัตว์เลี้ยงอีก 10 ครั้ง', story: 'เพลงเปลี่ยนเป็นทำนองอ่อนโยน… มันจำความใจดีของคุณได้' },
+      { t: 'act', a: 'potion', n: 5, hint: 'ดื่มยา 5 ขวด เตรียมตัวดำน้ำ', story: 'คุณเตรียมใจลงไปในความลึก' },
+      { t: 'fight', spot: () => WATER_SPOT, hint: 'กลับไปที่บ่อน้ำ', story: 'วาฬมหาสมุทรลึกโผล่ขึ้นมา มันไม่ได้โกรธ… มันแค่อยากรู้ว่าคุณแข็งแกร่งพอจะฟังเพลงจนจบไหม' }],
+    end: ['วาฬร้องเพลงท่อนสุดท้าย แล้วดำหายไป', 'หลังจากวันนี้ คุณจะได้ยินเพลงนั้นทุกครั้งที่อยู่ใกล้น้ำ'] },
+  smith: { th: 'ค้อนที่หายไป', icon: '🔨', mon: 'forgegolem',
+    intro: ['ลุงเม่นเกาหัวแกรกๆ “เฮ้อ… ค้อนของบรรพบุรุษข้าหายไปตั้งแต่เตาหลอมใหญ่ในภูเขาไฟดับ”', '“เจ้าดูแกร่งพอแล้ว ช่วยตามหามันทีนะ”'],
+    steps: [
+      { t: 'kill', foe: 'golem', n: 1, hint: 'ปราบยักษ์หินคริสตัล (บอสถ้ำคริสตัล)', story: 'ในร่างยักษ์หินมีเศษเหล็กเก่าติดอยู่… เป็นเศษของด้ามค้อน!' },
+      { t: 'kill', foe: 'dragon', n: 1, hint: 'ปราบมังกรลาวาแห่งภูเขาไฟ', story: 'มังกรคายเปลวไฟสีทองก่อนตาย เปลวไฟนั้นชี้ไปทางเตาหลอมเก่า' },
+      { t: 'talk', npc: 'smith', hint: 'นำเศษด้ามค้อนกลับไปให้ลุงเม่น', story: '“นี่มัน… ใช่แล้ว! แต่หัวค้อนยังอยู่กับ ‘มัน’ ผู้เฝ้าเตาหลอม”' },
+      { t: 'fight', spot: BP(3), hint: 'ไปยังเตาหลอมเก่าในภูเขาไฟ (จุดบอส)', story: 'เตาหลอมลุกโชนขึ้นเอง ยักษ์ที่ทำจากเหล็กหลอมเหลวก้าวออกมา' }],
+    end: ['หัวค้อนหลุดออกจากร่างยักษ์ที่เย็นลง', 'ลุงเม่นคงดีใจจนร้องไห้'] },
+  cat: { th: 'แมวดำของป้า', icon: '🐈‍⬛', mon: 'shadowcat',
+    intro: ['ป้าแมวเหมียวยืนเหม่อมองท้องฟ้ามืด', '“คืนแบบนี้แหละที่เจ้าดำเคยหายไป… มันไปที่ปราสาทมืดทุกครั้ง แล้วก็ไม่กลับมาอีกเลย”'],
+    steps: [
+      { t: 'goto', spot: BP(4), night: 1, hint: 'ไปปราสาทมืด (จุดบอส)', story: 'มีรอยเท้าแมวเล็กๆ นำเข้าไปในปราสาท… แต่รอยเท้าใหญ่ขึ้นเรื่อยๆ' },
+      { t: 'kill', foe: 'vamp', n: 12, hint: 'ปราบแวมไพร์ 12 ตัว', story: 'แวมไพร์พูดถึง “นายหญิงเก้าชีวิต” ก่อนสลายเป็นเถ้า' },
+      { t: 'act', a: 'night', n: 30, hint: 'ปราบมอนยามค่ำคืนอีก 30 ตัว', story: 'เงาแมวตามคุณมาตลอดทาง มันกำลังนับว่าคุณจะอยู่รอดได้กี่คืน' },
+      { t: 'fight', spot: BP(4), night: 1, hint: 'กลับไปปราสาทมืด', story: 'แมวดำตัวใหญ่เท่าบ้านกระโดดลงจากหอคอย มันยังใส่ปลอกคอที่ป้าเคยใส่ให้' }],
+    end: ['แมวดำหดตัวเล็กลงจนเท่าแมวธรรมดา แล้ววิ่งหายไปในความมืด', 'บางทีสักวันมันอาจกลับไปหาป้า'] },
+  star: { th: 'ดาวที่ตกลงมา', icon: '💫', mon: 'fallenstar',
+    intro: ['ดาวดวงหนึ่งตกลงกลางแดนสวรรค์ลอยฟ้า แสงของมันแหลมคมเหมือนการโจมตีที่แม่นยำของคุณ', 'ภูตพรายต่างพากันร้องไห้'],
+    steps: [
+      { t: 'goto', spot: BP(8), hint: 'ไปจุดที่ดาวตกในแดนสวรรค์ลอยฟ้า', story: 'หลุมอุกกาบาตยังร้อนอยู่ แต่ดาวไม่อยู่ที่นี่แล้ว' },
+      { t: 'kill', foe: 'fairy', n: 20, hint: 'ปราบภูตพรายที่คลั่ง 20 ตน', story: 'ภูตพรายคลั่งเพราะแสงดาว… ดาวกำลังดูดพลังทุกอย่างรอบตัว' },
+      { t: 'act', a: 'crit', n: 100, hint: 'ตีคริ 100 ครั้ง ให้ดาวยอมรับ', story: 'ดาวจะยอมรับแค่ผู้ที่เล็งได้แม่นเท่ามัน' },
+      { t: 'fight', spot: BP(8), hint: 'กลับไปหลุมอุกกาบาต', story: 'ดาวตกผู้หลงทางลอยขึ้นจากหลุม มันอยากกลับบ้านบนฟ้า… โดยผ่านตัวคุณ' }],
+    end: ['ดาวพุ่งกลับขึ้นฟ้าเป็นเส้นแสง', 'ทิ้งเศษแสงไว้ในมือคุณ'] },
+  desert: { th: 'ขุมทรัพย์ใต้ผืนทราย', icon: '🗺️', mon: 'sandworm',
+    intro: ['เหรียญทองเหรียญหนึ่งที่คุณเก็บได้มีตราประหลาด… มันคือแผนที่ขุมทรัพย์!', 'จุดหมายอยู่กลางทะเลทรายต้องสาป'],
+    steps: [
+      { t: 'kill', foe: 'djinn', n: 15, hint: 'ปราบจินนี่ทราย 15 ตน เพื่อหาคำไข', story: 'จินนี่ตนสุดท้ายกระซิบว่า “ขุมทรัพย์มีเจ้าของ… และมันหิว”' },
+      { t: 'act', a: 'gold', n: 200, hint: 'เก็บทองอีก 200 ครั้ง เป็นเหยื่อล่อ', story: 'ทรายเริ่มสั่นทุกครั้งที่ทองกระทบกัน' },
+      { t: 'goto', spot: BP(5), hint: 'ไปใจกลางทะเลทราย (จุดบอส)', story: 'ผืนทรายยุบตัวลงเป็นวังวน!' },
+      { t: 'fight', hint: 'ลงไปในวังวนทราย!', story: 'หนอนทรายราชันย์พุ่งขึ้นมา ในปากเต็มไปด้วยทองคำ' }],
+    end: ['หนอนยักษ์จมหายไป ทิ้งทองกองโตไว้', 'ขุมทรัพย์ที่แท้จริงคือความกล้าของคุณ… แต่ทองนี่ก็ของคุณด้วย'], gold: 20000 },
+  ice: { th: 'หัวใจน้ำแข็ง', icon: '❄️', mon: 'frostqueen',
+    intro: ['คุณล้มลงกลางหิมะ… ความหนาวเกาะกุมหัวใจ', 'ในความฝัน มีเสียงผู้หญิงเย็นเยียบพูดว่า “อยู่กับข้าตลอดไปเถอะ”'],
+    steps: [
+      { t: 'goto', spot: BP(6), hint: 'ไปใจกลางทุ่งน้ำแข็งนิรันดร์', story: 'มีรูปปั้นน้ำแข็งของนักผจญภัยหลายคนตั้งเรียงกัน… ใบหน้าของพวกเขายิ้ม' },
+      { t: 'kill', foe: 'yeti', n: 15, hint: 'ปราบมนุษย์หิมะ 15 ตัว', story: 'มนุษย์หิมะคือผู้รับใช้ของราชินี' },
+      { t: 'act', a: 'potion', n: 10, hint: 'ดื่มยา 10 ขวดเพื่อต้านความหนาว', story: 'ความอบอุ่นในตัวคุณทำให้ราชินีโกรธ' },
+      { t: 'fight', spot: BP(6), hint: 'กลับไปใจกลางทุ่งน้ำแข็ง', story: 'ราชินีหิมะนิรันดร์ลอยลงมา “ทำไมถึงอยากจากไป… ที่นี่ไม่มีความเจ็บปวด”' }],
+    end: ['หัวใจน้ำแข็งของราชินีแตกออก รูปปั้นทั้งหมดละลาย', 'นักผจญภัยที่ถูกแช่แข็งได้พักเสียที'] },
+  mirror: { th: 'เงาของตัวเอง', icon: '🪞', mon: 'doppel',
+    intro: ['คุณรอดจากความตายมานับครั้งไม่ถ้วน', 'แต่คืนนี้ เงาของคุณไม่ขยับตามคุณ…'],
+    steps: [
+      { t: 'act', a: 'dodge', n: 50, hint: 'หลบการโจมตี 50 ครั้ง ขณะที่เงาเฝ้าดู', story: 'เงาเลียนแบบท่าทางของคุณ… ได้ดีขึ้นทุกที' },
+      { t: 'act', a: 'skill', n: 100, hint: 'ใช้สกิล 100 ครั้ง', story: 'เงาเริ่มใช้สกิลของคุณได้แล้ว' },
+      { t: 'goto', spot: FOUNTAIN_SPOT, night: 1, hint: 'ไปที่น้ำพุกลางเมือง', story: 'ในผิวน้ำไม่มีเงาสะท้อนของคุณ' },
+      { t: 'fight', spot: FOUNTAIN_SPOT, night: 1, hint: 'รอเงาที่น้ำพุ', story: 'เงาสะท้อนก้าวออกมาจากน้ำ ใช้ร่างและสกิลเหมือนคุณทุกอย่าง' }],
+    end: ['เงากลับเข้าไปอยู่ใต้เท้าคุณ', 'ตอนนี้คุณรู้แล้วว่าศัตรูที่น่ากลัวที่สุดคือใคร'] },
+  time: { th: 'นาฬิกาที่หยุดเดิน', icon: '⏱️', mon: 'clockking',
+    intro: ['คุณเดินทางมาไกลจนถึงปลายสุดของกาลเวลา', 'แต่ทุกอย่างรอบตัวหยุดนิ่ง… แม้แต่ใบไม้ที่กำลังร่วง'],
+    steps: [
+      { t: 'kill', foe: 'madclock', n: 12, hint: 'ปราบนาฬิกาคลั่ง 12 เรือน', story: 'เข็มนาฬิกาทุกเรือนชี้ไปที่เดียวกัน' },
+      { t: 'act', a: 'walk', n: 50, hint: 'เดินทางต่อไปขณะที่เวลาหยุด', story: 'ยิ่งเดิน เวลายิ่งเริ่มไหลอีกครั้ง… และมีใครบางคนไม่พอใจ' },
+      { t: 'goto', spot: BP(23), hint: 'ไปใจกลางปลายสุดของกาลเวลา', story: 'นาฬิกาขนาดยักษ์ลอยอยู่กลางอากาศ เข็มสุดท้ายกำลังจะหยุด' },
+      { t: 'fight', spot: BP(23), hint: 'หยุดผู้หยุดกาลเวลา', story: '“เวลาของเจ้า… จบแล้ว”' }],
+    end: ['เข็มนาฬิกาเดินต่อ ใบไม้ร่วงลงพื้น', 'โลกหายใจอีกครั้ง'] },
 };
 let WATER_SPOT = null;
 function hiddenFx() {
@@ -1176,6 +1271,7 @@ function rollSubjob() {
 function act(k, n = 1) {
   if (!P || !started) return;
   P.act = P.act || {}; P.act[k] = (P.act[k] || 0) + n;
+  scenAct(k); if (k === 'gold' || k === 'clutch' || k === 'walk' || k === 'death') checkScenarios(k);
   const t = TRAITS[k]; if (!t) return;
   P.traits = P.traits || {};
   const x = P.traits[k];
@@ -1189,19 +1285,62 @@ function act(k, n = 1) {
     chatLine('', `${P.name}: «${t.th}» วิวัฒน์เป็น «${t.evo[x.evo][0]}»`, true); save();
   }
 }
+// P.scen[key] = { s: step index, b: counter baseline, n: kills so far, done }
+const scenOf = k => { const v = P.scen && P.scen[k]; return v && typeof v === 'object' ? v : null; };
+const scenStep = k => { const v = scenOf(k); return v && !v.done ? SCENARIOS[k].steps[v.s] : null; };
+function showStory(title, lines, icon) {
+  openSheet(`${icon || '📜'} ${title}`, el => { el.innerHTML = `<div class="story">${lines.map(l => `<p>${esc(l)}</p>`).join('')}</div><button class="btn primary block" type="button" data-act="closestory">ไปต่อ</button>`; });
+}
+function stepBegin(k) {
+  const v = scenOf(k), st0 = SCENARIOS[k].steps[v.s];
+  v.n = 0; v.b = st0.t === 'act' ? (P.act[st0.a] || 0) : 0;
+  if (st0.t === 'fight' && !st0.spot) setTimeout(() => offerEncounter(SCENARIOS[k].mon), 1200);
+}
 function startScenario(key) {
   P.scen = P.scen || {}; if (P.scen[key]) return;
-  P.scen[key] = 1; const sc = SCENARIOS[key];
-  setTimeout(() => { sfx('boss'); banner(`Unique Scenario เริ่มต้น!`, `「${sc.th}」`); chatLine('', `📜 ${sc.hint}`, true); }, 600);
+  const sc = SCENARIOS[key]; P.scen[key] = { s: 0 }; stepBegin(key);
+  sfx('boss'); banner('Unique Scenario เริ่มต้น!', `「${sc.th}」`);
+  setTimeout(() => showStory(`「${sc.th}」`, [...sc.intro, `▶ ${sc.steps[0].hint}`], sc.icon), 700);
+  chatLine('', `📜 Unique Scenario 「${sc.th}」 เริ่มต้น`, true); save();
+}
+function stepDone(k) {
+  const v = scenOf(k), sc = SCENARIOS[k], done = sc.steps[v.s];
+  v.s++; stepBegin(k); const nx = sc.steps[v.s];
+  sfx('rare'); banner(`「${sc.th}」 ${v.s}/${sc.steps.length}`, nx.hint);
+  chatLine('', `📜 ${nx.story}`, true);
+  if (done.t === 'talk') showStory(`「${sc.th}」`, [done.story, nx.story, `▶ ${nx.hint}${nx.night ? ' (ยามค่ำคืน)' : ''}`], sc.icon);
   save();
 }
+// Progress hooks called from kills, actions, talking and walking.
+function scenKill(foe) { for (const k in SCENARIOS) { const st0 = scenStep(k); if (st0 && st0.t === 'kill' && st0.foe === foe && (!st0.night || isNight())) { const v = scenOf(k); v.n++; if (v.n >= st0.n) stepDone(k); else if (v.n % 5 === 0) toast(`「${SCENARIOS[k].th}」 ${v.n}/${st0.n}`); } } }
+function scenAct(a) { for (const k in SCENARIOS) { const st0 = scenStep(k); if (st0 && st0.t === 'act' && st0.a === a && (P.act[a] || 0) - scenOf(k).b >= st0.n) stepDone(k); } }
+function scenTalk(npc) { let hit = false; for (const k in SCENARIOS) { const st0 = scenStep(k); if (st0 && st0.t === 'talk' && st0.npc === npc) { stepDone(k); hit = true; } } return hit; }
+function scenWalkTick() {
+  if (DG || !P.scen) return;
+  for (const k in SCENARIOS) {
+    const st0 = scenStep(k); if (!st0 || !st0.spot || (st0.night && !isNight())) continue;
+    const sp = st0.spot(); if (!sp || Math.hypot(me.x - sp.x, me.y - sp.y) > 2.5 * T) continue;
+    if (st0.t === 'goto') { chatLine('', `📜 ${st0.story}`, true); stepDone(k); }
+    else if (st0.t === 'fight' && !encounterOffer) { banner(`「${SCENARIOS[k].th}」`, st0.story); offerEncounter(SCENARIOS[k].mon); }
+  }
+}
+// Hidden starting conditions.
 function checkScenarios(ev) {
   if (!P) return;
-  const sc = P.scen || {};
-  if (ev === 'kill' && !sc.wolf && isNight() && zoneAt(me.x, me.y) === 2 && Math.random() < .005) startScenario('wolf');
-  if (ev === 'grandma' && !sc.tomb && (P.act.death || 0) >= 3) { startScenario('tomb'); return true; }
-  if (ev === 'fountain' && !sc.whale && (P.act.feed || 0) >= 30) startScenario('whale');
-  if (ev === 'kill' && Math.random() < 1 / 3000) { const k = pick(Object.keys(UNIQUE_MON)); setTimeout(() => { banner('รอยเท้าขนาดยักษ์…', `มีบางอย่างกำลังตามคุณอยู่ · ${UNIQUE_MON[k].th}`); offerEncounter(k); }, 800); }
+  const sc = P.scen || {}, z = zoneAt(me.x, me.y), a = P.act || {};
+  if (ev === 'kill') {
+    if (!sc.wolf && isNight() && z === 2 && Math.random() < .005) startScenario('wolf');
+    if (!sc.star && z === 9 && (a.crit || 0) >= 500 && Math.random() < .01) startScenario('star');
+    if (Math.random() < 1 / 3000) { const k = pick(Object.keys(UNIQUE_MON)); setTimeout(() => { banner('รอยเท้าขนาดยักษ์…', `มีบางอย่างกำลังตามคุณอยู่ · ${UNIQUE_MON[k].th}`); offerEncounter(k); }, 800); }
+  }
+  if (ev === 'pets' && !sc.tomb && (a.death || 0) >= 3) { startScenario('tomb'); return true; }
+  if (ev === 'smith' && !sc.smith && P.lv >= 40 && Math.random() < .15) { startScenario('smith'); return true; }
+  if (ev === 'shop' && !sc.cat && isNight() && P.lv >= 20) { startScenario('cat'); return true; }
+  if (ev === 'fountain' && !sc.whale && (a.feed || 0) >= 30) startScenario('whale');
+  if (ev === 'gold' && !sc.desert && z === 6 && (a.gold || 0) >= 1000 && Math.random() < .01) startScenario('desert');
+  if (ev === 'death' && !sc.ice && z === 7 && Math.random() < .3) setTimeout(() => startScenario('ice'), 4000);
+  if (ev === 'clutch' && !sc.mirror && P.kills >= 2000 && Math.random() < .1) startScenario('mirror');
+  if (ev === 'walk' && !sc.time && P.lv >= 100 && z === 24 && Math.random() < .05) startScenario('time');
 }
 let encounterOffer = null;
 function offerEncounter(k) { encounterOffer = { k, until: nowS() + 20 }; toast('แตะปุ่ม ⚠️ เพื่อเข้าสู้ ภายใน 20 วินาที'); updateEncBtn(); }
@@ -1220,7 +1359,7 @@ function uniqueWin(k) {
   gearDirty(); sfx('rare'); buzz([60, 40, 60, 40, 150]);
   setTimeout(() => banner(`ปราบ Unique Monster!`, `ได้เกียรติ «${u.honor}» · ทุกค่า +5% ถาวร`), 500);
   chatLine('', `🏆 ${P.name} ปราบ ${u.th} สำเร็จ!`, true);
-  for (const sc in SCENARIOS) if (SCENARIOS[sc].mon === k && P.scen && P.scen[sc]) P.scen[sc] = 2;
+  for (const sc in SCENARIOS) { const v = scenOf(sc); if (SCENARIOS[sc].mon === k && v && !v.done && SCENARIOS[sc].steps[v.s].t === 'fight') { v.done = true; if (SCENARIOS[sc].gold) P.gold += SCENARIOS[sc].gold; setTimeout(() => showStory(`「${SCENARIOS[sc].th}」 จบ`, [...SCENARIOS[sc].end, `🏆 Unique Scenario สำเร็จ${SCENARIOS[sc].gold ? ` · ได้ทอง ${SCENARIOS[sc].gold.toLocaleString()}` : ''}`], SCENARIOS[sc].icon), 2500); } }
   const cx = (DG.a.x0 + DG.a.w / 2) * T, cy = (DG.a.y0 + DG.a.h / 2) * T;
   for (let i = 0; i < 2; i++) dropLoot('item', cx, cy, makeItem(DG.d.tier, 4)); dropLoot('rune', cx, cy, pick(RUNE_KEYS) + 5);
 }
@@ -1736,7 +1875,7 @@ function migrate(s) {
   s.pets = Array.isArray(s.pets) ? s.pets.filter(pt => pt && PET_FORMS[pt.sp] && PET_PERS[pt.pers]) : [];
   s.petItems = Object.assign({ food: {}, stone: {}, acc: [], eggs: 0 }, s.petItems || {});
   s.runes = s.runes && typeof s.runes === 'object' ? s.runes : {};
-  s.act = s.act && typeof s.act === 'object' ? s.act : {}; s.traits = s.traits && typeof s.traits === 'object' ? s.traits : {}; s.scen = s.scen && typeof s.scen === 'object' ? s.scen : {};
+  s.act = s.act && typeof s.act === 'object' ? s.act : {}; s.traits = s.traits && typeof s.traits === 'object' ? s.traits : {}; s.scen = s.scen && typeof s.scen === 'object' ? s.scen : {}; for (const k in s.scen) if (typeof s.scen[k] === 'number') s.scen[k] = s.scen[k] === 2 ? { s: 3, done: true } : { s: 3, n: 0, b: 0 };
   s.curses = Array.isArray(s.curses) ? s.curses : []; s.uwins = Array.isArray(s.uwins) ? s.uwins : []; if (!s.latent || !LATENT[s.latent.k]) s.latent = rollLatent();
   for (const it of [...(s.bag || []), ...Object.values(s.eq || {})]) if (it && !Array.isArray(it.opts)) { if (it.uq) { it.opts = [rollOpt(9), rollOpt(9)]; it.sock = [null, null, null]; } else rollOpts(it); }
   s.kills = s.kills || 0; s.bossKills = s.bossKills || 0; s.points = s.points || 0; s.gold = s.gold || 0; s.xp = s.xp || 0;
@@ -2540,7 +2679,7 @@ function onKill(k) {
 }
 function reward(s, x, y, mlv, tierOverride) {
   P.kills++; if (s.boss) P.bossKills++;
-  act('kill'); if (s.boss) act('boss'); if (P.hp < maxHp() * .25) act('clutch'); if (isNight()) act('night'); if (!DG) checkScenarios('kill');
+  act('kill'); if (s.boss) act('boss'); if (P.hp < maxHp() * .25) act('clutch'); if (isNight()) act('night'); if (!DG) { checkScenarios('kill'); scenKill(s.key); }
   if (P.latent && !P.latent.shown && (P.kills >= 500 || P.lv >= 50)) { P.latent.shown = true; setTimeout(() => banner('สถานะแฝงตื่นขึ้น!', `«${LATENT[P.latent.k].th}» ${fmtFx(LATENT[P.latent.k].fx)}`), 900); }
   if (s.sec) {
     const q = SECRETS.find(e => e.key === s.key);
@@ -3071,7 +3210,7 @@ function hatchPetEgg() {
   petMsg = `🥚💥 ฟักออกมาเป็น <b>${PET_FORMS[pt.sp].name}</b> ${PET_FORMS[pt.sp].e} นิสัย${petPers(pt).th}!`;
   sfx('hatch'); banner(`ได้${PET_FORMS[pt.sp].name}!`, `นิสัย${petPers(pt).th} ${petPers(pt).emo}`);
 }
-function openPetShop() { openSheet('ร้านสัตว์เลี้ยงคุณยาย', renderPetShop, 'petshop'); if (checkScenarios('grandma')) toast('คุณยายมองหน้าคุณนิ่งๆ แล้วเริ่มเล่าเรื่องเก่า…'); }
+function openPetShop() { openSheet('ร้านสัตว์เลี้ยงคุณยาย', renderPetShop, 'petshop'); scenTalk('pets') || checkScenarios('pets'); }
 function renderPetShop(el) {
   const free = !P.petFree;
   const row = (icon, name, desc, price, attrs) => `<div class="row"><span class="ico">${icon}</span><div><div class="nm">${name}</div><div class="ds">${desc}</div></div><button class="btn sm" type="button" ${attrs} ${P.gold < price ? 'disabled' : ''}>${price ? `<span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${price.toLocaleString()}` : 'รับฟรี'}</button></div>`;
@@ -3202,14 +3341,14 @@ function renderHidden(el) {
     <div class="panel"><b>สถานะแฝง</b> <div>${P.latent && P.latent.shown ? `🧬 <b>${LATENT[P.latent.k].th}</b> <span class="muted">${fmtFx(LATENT[P.latent.k].fx)}</span>` : '<span class="muted">??? · มีบางอย่างซ่อนอยู่ในตัวคุณ</span>'}</div></div>
     <div class="panel rows"><b>ทักษะแฝง</b>${tr.map(k => { const t = TRAITS[k], x = P.traits[k], l = traitLv(x); return `<div class="row"><span class="ico">${t.icon}</span><div><div class="nm" style="${x.evo === 2 ? 'color:#B8860B' : x.evo != null ? 'color:#7B4FD8' : ''}">${traitName(k)}${x.evo == null ? ` Lv ${l}` : ' (วิวัฒน์แล้ว)'}</div><div class="ds">${fmtFx(traitFx(k))}${x.evo == null ? ` · ${l < 5 ? `ฝึกต่อด้วยการ${t.on} ${x.xp}/${TRAIT_LV[l + 1]}` : 'ใกล้วิวัฒน์… ทำต่อไป'}` : ''}</div></div></div>`; }).join('')}
       <p class="muted" style="margin:6px 0 0;font-size:12px">ยังมีทักษะที่ยังไม่ค้นพบอีก ${unk} อย่าง · ทักษะจะงอกเองจากสิ่งที่คุณทำบ่อยๆ</p></div>
-    <div class="panel rows"><b>Unique Scenario</b>${Object.entries(SCENARIOS).filter(([k]) => P.scen[k]).map(([k, sc]) => `<div class="row"><span class="ico">📜</span><div><div class="nm">「${sc.th}」${P.scen[k] === 2 ? ' ✓' : ''}</div><div class="ds">${P.scen[k] === 2 ? 'สำเร็จแล้ว' : sc.hint}</div></div></div>`).join('') || '<p class="muted" style="margin:4px 0;font-size:13px">ยังไม่พบ… บางเงื่อนไขซ่อนอยู่ในเวลา สถานที่ หรือคำพูดของใครบางคน</p>'}</div>
+    <div class="panel rows"><b>Unique Scenario</b> <span class="muted" style="font-size:12px">พบแล้ว ${Object.keys(SCENARIOS).filter(k => scenOf(k)).length}/${Object.keys(SCENARIOS).length}</span>${Object.entries(SCENARIOS).filter(([k]) => scenOf(k)).map(([k, sc]) => { const v = scenOf(k), st0 = !v.done && sc.steps[v.s]; return `<div class="row"><span class="ico">${sc.icon}</span><div><div class="nm">「${sc.th}」${v.done ? ' ✓' : ` ${v.s + 1}/${sc.steps.length}`}</div><div class="ds">${v.done ? 'สำเร็จแล้ว' : `${st0.hint}${st0.night ? ' (ยามค่ำคืน)' : ''}${st0.t === 'kill' ? ` · ${v.n || 0}/${st0.n}` : st0.t === 'act' ? ` · ${Math.min(st0.n, (P.act[st0.a] || 0) - (v.b || 0))}/${st0.n}` : ''}`}</div></div><button class="btn sm" type="button" data-story="${k}">อ่าน</button>${st0 && st0.t === 'fight' && !st0.spot ? `<button class="btn sm primary" type="button" data-encs="${k}">สู้</button>` : ''}</div>`; }).join('') || '<p class="muted" style="margin:4px 0;font-size:13px">ยังไม่พบ… บางเงื่อนไขซ่อนอยู่ในเวลา สถานที่ หรือคำพูดของใครบางคน</p>'}</div>
     ${(P.curses || []).length || (P.uwins || []).length ? `<div class="panel rows"><b>คำสาปและเกียรติยศ</b>${(P.curses || []).map(c => `<div class="row"><span class="ico">☠️</span><div><div class="nm" style="color:#C0223A">${UNIQUE_MON[c].curse}</div><div class="ds">${UNIQUE_MON[c].cdesc} · ปราบ${UNIQUE_MON[c].th}เพื่อลบคำสาป</div></div></div>`).join('')}${(P.uwins || []).map(c => `<div class="row"><span class="ico">🏆</span><div><div class="nm" style="color:#B8860B">«${UNIQUE_MON[c].honor}»</div><div class="ds">ทุกค่า +5% ถาวร</div></div></div>`).join('')}</div>` : ''}`;
 }
-function openShop() { openSheet('ร้านป้าแมวเหมียว', renderShop); }
+function openShop() { openSheet('ร้านป้าแมวเหมียว', renderShop); scenTalk('shop') || checkScenarios('shop'); }
 let smithTier = -1;
 const maxShopTier = () => Math.max(0, ZONES.filter(z => z.lv <= P.lv).length - 1);
 const smithPrice = t => Math.round((6 + t * t * 14 + t * 10) * 1.8 * 5);
-function openSmith() { smithTier = maxShopTier(); openSheet('ร้านตีเหล็กลุงเม่น', renderSmith, 'smith'); }
+function openSmith() { smithTier = maxShopTier(); openSheet('ร้านตีเหล็กลุงเม่น', renderSmith, 'smith'); scenTalk('smith') || checkScenarios('smith'); }
 function renderSmith(el) {
   const mt = maxShopTier(); smithTier = clamp(smithTier, 0, mt);
   const eqRows = SLOTS.map(sl => { const it = P.eq[sl]; if (!it) return `<div class="row"><span class="ico" style="opacity:.4">${SLOT[sl].icons[0]}</span><div><div class="nm muted">${SLOT[sl].th}</div><div class="ds">ยังไม่ได้สวม</div></div><span></span></div>`;
@@ -3310,11 +3449,14 @@ $('#mBody').addEventListener('click', e => {
     else { const i = +b.dataset.unsock, id = it.sock[i]; if (!id) return; it.sock[i] = null; addRune(id); sfx('tap'); toast(`ถอด${runeName(id)}คืนถุงแล้ว`); }
     gearDirty(); P.hp = Math.min(P.hp, maxHp()); save(); hudStatic(); return refreshSheet();
   }
+  if (b.dataset.story) { const k = b.dataset.story, sc = SCENARIOS[k], v = scenOf(k); if (!v) return; const lines = [...sc.intro, ...sc.steps.slice(0, v.done ? sc.steps.length : v.s + 1).map(x => x.story), ...(v.done ? sc.end : [`▶ ${sc.steps[v.s].hint}`])]; showStory(`「${sc.th}」`, lines, sc.icon); return; }
+  if (b.dataset.encs) { enterEncounter(SCENARIOS[b.dataset.encs].mon); return; }
   if (b.dataset.job) { const k = b.dataset.job; if (!JOBS[k] || P.lv < 15) return; if (P.job) { if (P.gold < 5000) { toast('ต้องใช้ 5,000 ทอง'); return; } P.gold -= 5000; } P.job = k; gearDirty(); sfx('lvl'); banner(`อาชีพ: ${JOBS[k].th}`, fmtFx(JOBS[k].fx)); save(); hudStatic(); return refreshSheet(); }
   if (b.dataset.fuse) { const id = b.dataset.fuse, q = runeOf(id); if (!q || q.g >= 5 || (P.runes[id] || 0) < 3) return; addRune(id, -3); const nid = q.t + (q.g + 1); addRune(nid); sfx('lvl'); banner('รวมรูนสำเร็จ!', runeName(nid)); save(); return refreshSheet(); }
   const act = b.dataset.act;
   if (act === 'runes') { openRunes(); return; }
   if (act === 'hidden') { openHidden(); return; }
+  if (act === 'closestory') { closeSheet(); return; }
   if (act === 'runebag') { if (P.gold < 600) return; P.gold -= 600; const id = pick(RUNE_KEYS) + (Math.random() < .15 ? 2 : 1); addRune(id); sfx('rare'); toast(`ได้${runeName(id)}!`); save(); return refreshSheet(); }
   if (act === 'reroll') {
     const f = selItem && findItem(selItem); if (!f) return; const it = f.it, cost = rerollCost(it); if (P.gold < cost) return;
@@ -3563,7 +3705,7 @@ function update(dt) {
     // regen
     const nearFountain = Math.hypot(me.x - (TOWN.x + 1) * T, me.y - (TOWN.y + 1) * T) < 3.2 * T;
     if (nearFountain && !me.moving) { me.still = (me.still || 0) + dt; if (me.still > 20) { me.still = 0; checkScenarios('fountain'); } } else me.still = 0;
-    if (!DG && P.scen) for (const k in SCENARIOS) { if (P.scen[k] !== 1) continue; const sp = SCENARIOS[k].spot(); if (sp && Math.hypot(me.x - sp.x, me.y - sp.y) < 2.5 * T && !encounterOffer) { banner(`「${SCENARIOS[k].th}」`, 'มีบางอย่างรออยู่ที่นี่…'); offerEncounter(SCENARIOS[k].mon); } }
+    if ((me.scenT = (me.scenT || 0) + dt) > .5) { me.scenT = 0; scenWalkTick(); }
     if (encounterOffer && encounterOffer.until < t0) { encounterOffer = null; updateEncBtn(); }
     if (nearFountain) { if (P.hp < maxHp() || P.mp < maxMp()) { P.hp = Math.min(maxHp(), P.hp + maxHp() * .25 * dt); P.mp = Math.min(maxMp(), P.mp + maxMp() * .25 * dt); } }
     else { if (t0 - me.lastHurt > 6) P.hp = Math.min(maxHp(), P.hp + maxHp() * .015 * (1 + (arch() && arch().regen ? (arch().regen - 1) * tierF() : 0) + uqFx('regen')) * dt); P.mp = Math.min(maxMp(), P.mp + .7 * dt); }
