@@ -556,7 +556,45 @@ const SUB = {
        n('ผู้ทอจักรวาล', 'ผู้ทอจักรวาล', 'ทอจักรวาล', ['def', 'hp'], { mul: { hp: 1.06, atk: 1.06, def: 1.06, spd: 1.06, luk: 1.06 } }, ['aura', '#FF8FE8']),
        n('ดาวเหนือนำทาง', 'ดาวเหนือนำทาง', 'ดาวเหนือ', ['luk', 'atk'], { mul: { luk: 1.15 }, crit: 10 }, ['coins', '#FFFFFF'])],
 };
-const cleanSub = (fb, sub) => { sub = String(sub || '').replace(/[^0-2]/g, '').slice(0, 2); return BRANCH[fb] ? sub : ''; };
+
+// Every split also hides a 1% unique path (index 3), stronger than the other three.
+const ALLM = v => ({ hp: v, atk: v, def: v, spd: v, luk: v });
+const U = (th, ep, skEp, m, fx, art) => n(th, ep, skEp, [], Object.assign({ mul: ALLM(m), unique: true }, fx), art);
+const SUB_UNIQUE = .01;
+SUB.a.push(U('ยูนิค·อสูรสงคราม', 'อสูรสงครามอมตะ', 'แห่งสงครามนิรันดร์', 1.1, { crit: 5, skMult: 1.25, steal: .03 }, ['horns', '#FFD23F']));
+SUB.b.push(U('ยูนิค·ป้อมจักรวาล', 'ป้อมปราการจักรวาล', 'แห่งจักรวาลคุ้มภัย', 1.1, { skShield: .5, heal: .15 }, ['aura', '#FFE98A']));
+SUB.c.push(U('ยูนิค·วายุสวรรค์', 'จ้าววายุสวรรค์', 'แห่งวายุสวรรค์', 1.1, { crit: 5, cdMul: .8, nAdd: 2 }, ['wings', '#FFB3F0']));
+SUB.u.push(U('ยูนิค·อนันตกาล', 'อนันตกาล', 'แห่งอนันตกาล', 1.1, { crit: 5, rMul: 1.2, heal: .2, steal: .03 }, ['halo', '#FF8FE8']));
+SUB.a0.push(U('ยูนิค·ราชาโลกันตร์', 'ราชาโลกันตร์นิรันดร์', 'โลกันตร์ดับสูญ', 1.12, { crit: 6, skMult: 1.35 }, ['flames', '#FFE14D']));
+SUB.a1.push(U('ยูนิค·บรมราชาโลหิต', 'บรมราชาโลหิต', 'โลหิตอมตะ', 1.12, { crit: 6, skMult: 1.2, steal: .05 }, ['wings', '#FF3355']));
+SUB.a2.push(U('ยูนิค·เงาจักรวาล', 'เงาจักรวาลไร้ตัวตน', 'เงาจักรวาล', 1.12, { crit: 8, skMult: 1.2, cdMul: .8 }, ['blades', '#FFFFFF']));
+SUB.b0.push(U('ยูนิค·กำแพงนิรันดร์', 'กำแพงนิรันดร์กาล', 'กำแพงนิรันดร์', 1.12, { skMult: 1.2, skShield: .7 }, ['crystal', '#FFE98A']));
+SUB.b1.push(U('ยูนิค·ต้นกำเนิดชีวิต', 'ต้นกำเนิดชีวิต', 'ต้นกำเนิดชีวิต', 1.12, { skMult: 1.2, heal: .3 }, ['leaves', '#FFD23F']));
+SUB.b2.push(U('ยูนิค·มังกรหนามทอง', 'มังกรหนามทองคำ', 'หนามทองคำ', 1.12, { crit: 6, skMult: 1.3, nAdd: 3 }, ['spikes', '#FFD23F']));
+SUB.c0.push(U('ยูนิค·เทพอัสนี', 'เทพอัสนีบาต', 'อัสนีเทวะ', 1.12, { crit: 6, skMult: 1.2, nAdd: 4 }, ['bolts', '#FFFFFF']));
+SUB.c1.push(U('ยูนิค·ผู้ลิขิตโชคชะตา', 'ผู้ลิขิตโชคชะตา', 'ลิขิตสวรรค์', 1.12, { crit: 12, skMult: 1.25 }, ['coins', '#FF8FE8']));
+SUB.c2.push(U('ยูนิค·พายุจักรวาล', 'พายุจักรวาล', 'พายุจักรวาล', 1.12, { crit: 6, skMult: 1.2, rMul: 1.35 }, ['aura', '#B8F0FF']));
+SUB.u0.push(U('ยูนิค·ตะวันไม่มีวันดับ', 'ตะวันไม่มีวันดับ', 'ตะวันนิรันดร์กาล', 1.12, { crit: 6, skMult: 1.3, rMul: 1.3 }, ['halo', '#FFFFFF']));
+SUB.u1.push(U('ยูนิค·จันทร์ไม่มีวันลับ', 'จันทร์ไม่มีวันลับ', 'จันทร์นิรันดร์กาล', 1.12, { skMult: 1.2, heal: .3, skShield: .5 }, ['moon', '#FFD23F']));
+SUB.u2.push(U('ยูนิค·ดาราไม่มีวันดับ', 'ดาราไม่มีวันดับ', 'ดารานิรันดร์กาล', 1.12, { crit: 10, skMult: 1.2, nAdd: 4 }, ['orbs', '#FFFFFF']));
+// Form-5 paths that follow a form-4 unique: 3 stronger paths plus one more 1% unique.
+SUB.a3 = [n('เทพสงครามเพลิง', 'เทพสงครามเพลิงกัลป์', 'เพลิงกัลป์', ['atk'], { mul: { atk: 1.15 }, skMult: 1.25 }, ['flames', '#FF3B1F']),
+  n('เทพสงครามโลหิต', 'เทพสงครามโลหิต', 'โลหิตสงคราม', ['hp'], { mul: { hp: 1.15 }, steal: .05 }, ['wings', '#8A0F2A']),
+  n('เทพสงครามเงา', 'เทพสงครามเงา', 'เงาสงคราม', ['spd', 'luk'], { mul: { spd: 1.12 }, crit: 8, cdMul: .85 }, ['blades', '#3A2A6E']),
+  U('ยูนิค·จักรพรรดิสงคราม', 'จักรพรรดิสงครามอนันต์', 'สงครามอนันต์', 1.15, { crit: 8, skMult: 1.35, steal: .04 }, ['crystal', '#FFD23F'])];
+SUB.b3 = [n('ปราการสุริยะ', 'ปราการสุริยะ', 'สุริยะคุ้มภัย', ['def'], { mul: { def: 1.15 }, skShield: .6 }, ['halo', '#FFB02E']),
+  n('ปราการชีวา', 'ปราการชีวานิรันดร์', 'ชีวานิรันดร์', ['hp'], { mul: { hp: 1.15 }, heal: .25 }, ['leaves', '#7BE08A']),
+  n('ปราการหนามทิพย์', 'ปราการหนามทิพย์', 'หนามทิพย์', ['atk'], { mul: { atk: 1.12 }, skMult: 1.2 }, ['spikes', '#FFE98A']),
+  U('ยูนิค·ป้อมไร้พ่าย', 'ป้อมจักรวาลไร้พ่าย', 'จักรวาลไร้พ่าย', 1.15, { skShield: .75, heal: .2 }, ['wings', '#FFD23F'])];
+SUB.c3 = [n('วายุทองคำ', 'วายุทองคำ', 'วายุทองคำ', ['luk'], { mul: { luk: 1.15 }, crit: 8 }, ['coins', '#FFD23F']),
+  n('วายุสายฟ้า', 'วายุสายฟ้าสวรรค์', 'สายฟ้าสวรรค์', ['spd'], { mul: { spd: 1.15 }, nAdd: 3 }, ['bolts', '#FFF07A']),
+  n('วายุไร้ขอบฟ้า', 'วายุไร้ขอบฟ้า', 'ไร้ขอบฟ้า', ['hp', 'def'], { mul: { hp: 1.1 }, rMul: 1.3 }, ['aura', '#BDF2FF']),
+  U('ยูนิค·เทพวายุ', 'เทพวายุเหนือกาลเวลา', 'เหนือกาลเวลา', 1.15, { cdMul: .7, nAdd: 3 }, ['tail', '#FFB3F0'])];
+SUB.u3 = [n('อนันต์สุริยะ', 'อนันต์สุริยะ', 'อนันต์สุริยะ', ['atk'], { mul: { atk: 1.15 }, rMul: 1.25 }, ['flames', '#FFD23F']),
+  n('อนันต์จันทรา', 'อนันต์จันทรา', 'อนันต์จันทรา', ['def', 'hp'], { mul: { def: 1.12, hp: 1.12 }, skShield: .6 }, ['moon', '#E8EEFF']),
+  n('อนันต์ดารา', 'อนันต์ดารา', 'อนันต์ดารา', ['spd', 'luk'], { mul: { spd: 1.12, luk: 1.12 }, crit: 8 }, ['orbs', '#B8A6FF']),
+  U('ยูนิค·ต้นกำเนิดจักรวาล', 'ต้นกำเนิดจักรวาล', 'กำเนิดจักรวาล', 1.2, { crit: 10, skMult: 1.4, heal: .25, steal: .05 }, ['wings', '#FFFFFF'])];
+const cleanSub = (fb, sub) => { sub = String(sub || '').replace(/[^0-3]/g, '').slice(0, 2); return BRANCH[fb] ? sub : ''; };
 // The chain of nodes a character has reached: [line, form-4 sub-line, form-5 sub-line].
 function pathNodes(fb, sub, t) {
   if (!(t >= 3) || !BRANCH[fb]) return [];
@@ -586,15 +624,15 @@ function fxDesc(x) {
   if (x.crit) out.push(`คริ +${x.crit}%`); if (x.steal) out.push(`ดูดเลือด ${Math.round(x.steal * 100)}%`);
   if (x.skMult) out.push(`สกิลร่างแรงขึ้น ${Math.round((x.skMult - 1) * 100)}%`); if (x.skShield) out.push(`สกิลร่างให้โล่ ${Math.round(x.skShield * 100)}%`);
   if (x.heal) out.push(`สกิลร่างฟื้น HP ${Math.round(x.heal * 100)}%`); if (x.cdMul) out.push(`คูลดาวน์สกิลร่าง −${Math.round((1 - x.cdMul) * 100)}%`);
-  if (x.rMul) out.push(`วงสกิลกว้างขึ้น ${Math.round((x.rMul - 1) * 100)}%`); if (x.nAdd) out.push(`ยิงเพิ่ม ${x.nAdd} ลูก`); if (x.bonusBuff) out.push('ได้บัฟ ATK');
+  if (x.rMul) out.push(`วงสกิลกว้างขึ้น ${Math.round((x.rMul - 1) * 100)}%`); if (x.nAdd) out.push(`ยิงเพิ่ม ${x.nAdd} ลูก`); if (x.bonusBuff || x.unique) out.push('ได้บัฟ ATK');
   return out.join(' · ');
 }
 // Which sub-line the next evolution leads to: stats named in each option's w raise its odds (cubed, like forms).
 function subOdds(fb, sub) {
   const opts = SUB[fb + cleanSub(fb, sub)]; if (!opts) return null;
   const ref = k => BASE[k] + GROW[k] * (P.lv - 1), r = k => Math.max(.2, P.base[k] / ref(k));
-  const w = opts.map(x => Math.pow(x.w.reduce((a, k) => a + r(k), 0) / x.w.length, 3)), sum = w.reduce((a, b) => a + b, 0);
-  return w.map(v => v / sum);
+  const w = opts.map(x => x.unique ? 0 : Math.pow(x.w.reduce((a, k) => a + r(k), 0) / x.w.length, 3)), sum = w.reduce((a, b) => a + b, 0);
+  return opts.map((x, i) => x.unique ? SUB_UNIQUE : w[i] / sum * (1 - SUB_UNIQUE));
 }
 function rollSub(fb, sub) { const o = subOdds(fb, sub); if (!o) return ''; let r = Math.random(); for (let i = 0; i < o.length; i++) if ((r -= o[i]) <= 0) return String(i); return '0'; }
 // Makes sure the saved path is as long as the form tier needs (older saves, admin jumps).
@@ -629,14 +667,14 @@ function subArt(shape, col) {
 function pathArt(fb, sub, t, c) {
   let back = '', front = '';
   const [bb, bf] = branchArt(fb, c); back += bb; front += bf;
-  pathNodes(fb, sub, t).slice(1).forEach((x, i) => { const [pb, pf] = subArt(x.art[0], x.art[1]); back = pb + back; front += pf; if (i === 1) back = `<ellipse cx="60" cy="64" rx="59" ry="56" fill="none" stroke="${x.art[1]}" stroke-width="4" opacity=".75"/>` + back; });
+  pathNodes(fb, sub, t).slice(1).forEach((x, i) => { const [pb, pf] = subArt(x.art[0], x.art[1]); back = pb + back; front += pf; if (x.unique) { back = `<ellipse cx="60" cy="64" rx="58" ry="55" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="64" rx="53" ry="50" fill="none" stroke="${x.art[1]}" stroke-width="3"/>` + back; front += STAR(8, 12, 5, '') + STAR(112, 12, 5, 'b'); } if (i === 1) back = `<ellipse cx="60" cy="64" rx="59" ry="56" fill="none" stroke="${x.art[1]}" stroke-width="4" opacity=".75"/>` + back; });
   return [back, front];
 }
 // At form 3 and 4: the 3 sub-lines the next evolution can split into, with odds.
 function subCards() {
   const t = P.formTier || 2, sub = cleanSub(P.formBranch, P.formSub); if (t < 3 || t >= 5 || sub.length !== t - 3) return '';
   const opts = SUB[P.formBranch + sub], o = subOdds(P.formBranch, sub);
-  return `<p style="margin:8px 0 4px;font-size:13px"><b>ตอนขึ้นร่าง ${t + 1} จะแตกแขนงเป็น 1 ใน 3 ทาง</b> <span class="muted">โอกาสขึ้นกับค่าสถานะ</span></p><div class="forms">${opts.map((x, i) => `<div class="fcard"><div class="pic">${blobSVG(P.color, 3, { form: P.form, ft: t + 1, fb: P.formBranch, fs: sub + i, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div><b>${fullFormName(P.form, t + 1, P.formBranch, sub + i)}</b><span class="arch">${x.th}</span><span class="odds">${Math.round(o[i] * 100)}%<small> โอกาส</small></span><span class="muted" style="font-size:11px">${fxDesc(x)}</span></div>`).join('')}</div>`;
+  return `<p style="margin:8px 0 4px;font-size:13px"><b>ตอนขึ้นร่าง ${t + 1} จะแตกแขนงเป็น 1 ใน 3 ทาง (หรือร่างยูนิค 1%)</b> <span class="muted">โอกาสขึ้นกับค่าสถานะ</span></p><div class="forms">${opts.map((x, i) => `<div class="fcard${x.unique ? ' secret' : ''}"><div class="pic">${blobSVG(P.color, 3, { form: P.form, ft: t + 1, fb: P.formBranch, fs: sub + i, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div><b>${x.unique ? '???' : fullFormName(P.form, t + 1, P.formBranch, sub + i)}</b><span class="arch">${x.unique ? 'ร่างยูนิค' : x.th}</span><span class="odds">${Math.round(o[i] * 100)}%<small> โอกาส</small></span><span class="muted" style="font-size:11px">${x.unique ? 'ยังไม่มีใครรู้' : fxDesc(x)}</span></div>`).join('')}</div>`;
 }
 function formSkillFor(color, form, t, fb, sub) {
   t = t || 2;
@@ -1415,6 +1453,7 @@ function evolveForm() {
   if (!canEvolve()) return;
   if ((P.formTier || 2) === 2 || !BRANCH[P.formBranch]) { P.formBranch = rollBranch(); P.formSub = ''; }
   P.formTier = (P.formTier || 2) + 1; fillPath(); P.hp = maxHp(); P.mp = maxMp();
+  if (P.formTier >= 4 && branchOn() && branchOn().last.unique) setTimeout(() => { banner('✦ ร่างยูนิค!! ✦', `${fullFormName()} · โอกาส 1%`); sfx('rare'); me.chat = `✦ วิวัฒน์เป็นร่างยูนิค ${fullFormName()}!`; me.chatAt = Date.now(); me.chatT = 6; chatLine('', `✦ ${P.name} ได้ร่างยูนิค ${fullFormName()}!`, true); }, 1500);
   if (P.formTier === 3 && P.formBranch === 'u') setTimeout(() => { banner('✦ ร่างยูนิค!! ✦', `${fullFormName()} · โอกาส 1%`); sfx('rare'); me.chat = `✦ วิวัฒน์เป็นร่างยูนิค ${fullFormName()}!`; me.chatAt = Date.now(); me.chatT = 6; }, 2800);
   const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 900);
   sfx('lvl'); buzz([40, 40, 80]); save(); hudStatic(); updateHud(true);
