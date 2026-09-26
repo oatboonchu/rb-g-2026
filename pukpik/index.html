@@ -94,6 +94,15 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .field input:focus,.chatbar input:focus{outline:3px solid var(--mp);outline-offset:1px}
 .id-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.sk-row{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:2px dashed var(--line)}
+.sk-row:last-child{border-bottom:0}
+.sk-row.locked{opacity:.55}
+.sk-row .skill-ico{width:48px;height:48px;font-size:24px}
+.sk-row .nm{font:700 16px var(--f-display)}
+.sk-row .ds{font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+.pips{display:inline-flex;gap:3px;vertical-align:1px;margin-left:4px}
+.pips i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink);background:#fff}
+.pips i.on{background:var(--accent)}
 .skill-card{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
 .skill-ico{width:44px;height:44px;border-radius:14px;border:2px solid var(--ink);display:grid;place-items:center;font-size:22px;background:var(--c-light)}
 .how{text-align:left;font-size:13px;color:var(--ink-soft);margin:0;padding-left:18px}
@@ -125,21 +134,26 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .banner b{display:block;font:700 26px var(--f-display)}
 .banner span{font:600 14px var(--f-body)}
 @keyframes banner{0%{opacity:0;transform:translate(-50%,10px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
-.chatlog{position:absolute;left:var(--gl);bottom:196px;width:min(64vw,320px);display:flex;flex-direction:column;gap:2px;pointer-events:none!important}
+.chatlog{position:absolute;left:var(--gl);bottom:284px;width:min(64vw,320px);display:flex;flex-direction:column;gap:2px;pointer-events:none!important}
 .chatlog p{margin:0;font:600 13px/1.35 var(--f-body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8),0 0 2px rgba(0,0,0,.7);overflow-wrap:anywhere;animation:rise .2s ease}
 .chatlog p b{color:#FFE08A}
 .chatlog p.sys{color:#E6F3FF;font-weight:500}
-.acts{position:absolute;right:var(--gr);bottom:18px;width:190px;height:190px}
+.acts{position:absolute;right:var(--gr);bottom:18px;width:250px;height:250px;pointer-events:none!important}
+.acts>*{pointer-events:auto}
 .abtn{position:absolute;border-radius:50%;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;overflow:hidden;touch-action:none}
 .abtn:active,.abtn.held{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .abtn .cd{position:absolute;inset:0;background:conic-gradient(rgba(51,40,74,.55) var(--p,0%),transparent 0);pointer-events:none}
 .abtn small{position:absolute;bottom:4px;left:0;right:0;text-align:center;font:700 10px var(--f-body);color:var(--ink)}
 .abtn.atk{right:0;bottom:0;width:92px;height:92px;background:#FFC2AE;font-size:36px}
-.abtn.skl{right:100px;bottom:8px;width:68px;height:68px;background:var(--c-light,#FFE08A);font-size:28px}
-.abtn.pot{right:14px;bottom:104px;width:58px;height:58px;background:#FFE3A1;font-size:24px}
+.abtn.skl{width:54px;height:54px;background:var(--c-light,#FFE08A);font-size:24px}
+.abtn.skl.s0{right:135px;bottom:21px}.abtn.skl.s1{right:119px;bottom:78px}.abtn.skl.s2{right:77px;bottom:119px}.abtn.skl.s3{right:19px;bottom:135px}
+.abtn.skl.lock{background:#E6E0EE;font-size:18px}
+.abtn.skl.lock small{color:var(--ink-soft)}
+.abtn.skl.nomp{filter:grayscale(.8);opacity:.75}
+.abtn.pot{right:170px;bottom:150px;width:50px;height:50px;background:#FFE3A1;font-size:21px}
 .abtn.pot b{position:absolute;top:2px;right:8px;font:700 12px var(--f-display)}
 .abtn:disabled{filter:grayscale(.7);opacity:.7}
-.talk{position:absolute;right:var(--gr);bottom:222px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
+.talk{position:absolute;right:var(--gr);bottom:282px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
 .joy{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);background:rgba(51,40,74,.18);pointer-events:none!important;z-index:6}
 .joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.9);border:2.5px solid var(--ink)}
 .kb{display:none;position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font:700 10px/1 var(--f-body);color:var(--paper);background:var(--ink);border-radius:6px;padding:3px 5px;white-space:nowrap;pointer-events:none}
@@ -147,7 +161,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .desk .abtn .kb{bottom:auto;top:-10px}
 .desk .abtn small{display:none}
 .desk .abtn.atk{width:80px;height:80px;font-size:32px}
-.desk .abtn.skl{right:90px;width:62px;height:62px}
+
 .desk #cv{cursor:crosshair}
 .desk #cv.over-mon{cursor:pointer}
 .keys{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font-size:14px}
@@ -198,7 +212,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .records span{font-size:12px;color:var(--ink-soft)}
 .toast{position:absolute;left:50%;top:170px;transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font:600 14px var(--f-display);padding:8px 16px;border-radius:99px;animation:rise .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 @media (max-width:380px){.ibtn{width:38px;height:38px;font-size:17px}.menu-row{gap:6px}}
-@media (max-height:560px){.acts{transform:scale(.85);transform-origin:100% 100%}.chatlog{bottom:120px}.talk{bottom:180px}}
+@media (max-height:560px){.acts{transform:scale(.85);transform-origin:100% 100%}.chatlog{bottom:150px;width:min(40vw,320px)}.talk{bottom:240px}}
 @media (min-width:900px){.acts{bottom:28px;right:28px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
@@ -222,7 +236,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
       <button class="ibtn" type="button" id="bBag" aria-label="กระเป๋า">🎒<kbd class="kb">I</kbd></button>
       <button class="ibtn" type="button" id="bChar" aria-label="ตัวละคร">🐣<kbd class="kb">C</kbd></button>
       <button class="ibtn" type="button" id="bChat" aria-label="แชท">💬<kbd class="kb">Enter</kbd></button>
-      <button class="ibtn" type="button" id="bMute" aria-label="เปิดหรือปิดเสียง">🔊</button>
+      <button class="ibtn" type="button" id="bSkills" aria-label="สกิล">📜<kbd class="kb">K</kbd></button>
       <button class="ibtn" type="button" id="bHelp" aria-label="วิธีเล่น">❓<kbd class="kb">H</kbd></button>
     </div>
     <div class="side">
@@ -235,7 +249,10 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
     <button class="talk" type="button" id="bTalk" hidden>🛒 คุยกับป้าแมวเหมียว</button>
     <div class="acts">
       <button class="abtn pot" type="button" id="bPot" aria-label="ดื่มยา">🍯<b id="potN">0</b><span class="cd" id="potCd"></span><kbd class="kb">Q</kbd></button>
-      <button class="abtn skl" type="button" id="bSkill" aria-label="ใช้สกิล"><span id="skillIco">🔥</span><span class="cd" id="skillCd"></span><small id="skillMp"></small><kbd class="kb">E</kbd></button>
+      <button class="abtn skl s0" type="button" id="bS0" data-sk="0" aria-label="สกิล 1"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">1</kbd></button>
+      <button class="abtn skl s1" type="button" id="bS1" data-sk="1" aria-label="สกิล 2"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">2</kbd></button>
+      <button class="abtn skl s2" type="button" id="bS2" data-sk="2" aria-label="สกิล 3"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">3</kbd></button>
+      <button class="abtn skl s3" type="button" id="bS3" data-sk="3" aria-label="สกิล 4"><span class="si"></span><span class="cd"></span><small></small><kbd class="kb">4</kbd></button>
       <button class="abtn atk" type="button" id="bAtk" aria-label="โจมตี">⚔️<span class="cd" id="atkCd"></span><kbd class="kb">Space</kbd></button>
     </div>
     <div class="dead" id="dead" hidden><div><b>หมดแรงซะแล้ว…</b><span id="deadT">กำลังพากลับเมือง</span></div></div>
@@ -307,6 +324,40 @@ const COLORS = {
             skill: { name: 'ใบไม้ดูดพลัง', icon: '🍃', cost: 6, desc: 'ตีตัวใกล้สุด ×1.6 คริง่าย ดูดเลือด 50%' } },
 };
 const COLOR_KEYS = Object.keys(COLORS);
+// Four skills per colour, unlocked by level. Each can be raised to Lv 5 with skill points (1 per level).
+const SKILLS = {
+  red: [
+    { id: 'r1', name: 'ระเบิดเพลิง', icon: '🔥', unlock: 1, cost: 8, cd: 4, type: 'nova', mult: 1.8, r: 88, c: '#FF8A2A', desc: 'ระเบิดไฟรอบตัว ตีทุกตัวที่อยู่ใกล้' },
+    { id: 'r2', name: 'หมัดลาวา', icon: '👊', unlock: 3, cost: 6, cd: 3, type: 'strike', mult: 2.6, range: 80, desc: 'ต่อยตัวเดียวแรงมาก' },
+    { id: 'r3', name: 'คลั่งเพลิง', icon: '😤', unlock: 7, cost: 12, cd: 16, type: 'buff', buff: 'atk', amt: .35, dur: 8, desc: 'พลังโจมตีเพิ่มขึ้นชั่วคราว' },
+    { id: 'r4', name: 'อุกกาบาต', icon: '☄️', unlock: 12, cost: 20, cd: 14, type: 'meteor', mult: 3.5, r: 100, desc: 'เรียกอุกกาบาตถล่มจุดที่มอนอยู่ (ตกลงมาใน 0.6 วิ)' },
+  ],
+  blue: [
+    { id: 'b1', name: 'โล่วารี', icon: '💧', unlock: 1, cost: 6, cd: 5, type: 'shield', amt: .6, dur: 6, mult: 1, r: 66, c: '#4A9DFF', desc: 'โล่น้ำลดดาเมจที่ได้รับ และกระแทกรอบตัว' },
+    { id: 'b2', name: 'คลื่นซัด', icon: '🌊', unlock: 3, cost: 8, cd: 4, type: 'nova', mult: 1.5, r: 100, c: '#4A9DFF', desc: 'คลื่นน้ำซัดทุกตัวรอบตัว' },
+    { id: 'b3', name: 'น้ำพุชีวิต', icon: '⛲', unlock: 7, cost: 12, cd: 12, type: 'heal', amt: .35, desc: 'ฟื้น HP ทันที' },
+    { id: 'b4', name: 'สึนามิ', icon: '🌀', unlock: 12, cost: 20, cd: 14, type: 'nova', mult: 3, r: 150, c: '#2360BF', shield: .5, dur: 4, desc: 'คลื่นยักษ์ถล่มวงกว้าง แล้วได้โล่' },
+  ],
+  yellow: [
+    { id: 'y1', name: 'สายฟ้าลูกโซ่', icon: '⚡', unlock: 1, cost: 7, cd: 4, type: 'chain', n: 3, mult: 1.3, range: 150, desc: 'ฟาดสายฟ้าใส่ 3 ตัว ไม่มีพลาด' },
+    { id: 'y2', name: 'พุ่งสายฟ้า', icon: '💨', unlock: 3, cost: 6, cd: 3.5, type: 'dash', mult: 1.6, dist: 140, desc: 'พุ่งไปข้างหน้า ชนทุกตัวที่ขวางทาง' },
+    { id: 'y3', name: 'เร่งเครื่อง', icon: '🏃', unlock: 7, cost: 10, cd: 16, type: 'buff', buff: 'haste', amt: .4, dur: 8, desc: 'ตีเร็วขึ้นและเดินเร็วขึ้นชั่วคราว' },
+    { id: 'y4', name: 'พายุฟ้าคำราม', icon: '🌩️', unlock: 12, cost: 20, cd: 14, type: 'chain', n: 8, mult: 2.2, range: 230, desc: 'สายฟ้าฟาดมอนรอบตัวสูงสุด 8 ตัว' },
+  ],
+  brown: [
+    { id: 'n1', name: 'ดินฟื้นฟู', icon: '🌰', unlock: 1, cost: 8, cd: 5, type: 'heal', amt: .4, mult: .8, r: 60, c: '#A8744A', desc: 'ฟื้น HP และกระแทกพื้นรอบตัว' },
+    { id: 'n2', name: 'ทุบพื้น', icon: '🔨', unlock: 3, cost: 7, cd: 4, type: 'nova', mult: 1.6, r: 92, c: '#A8744A', desc: 'ทุบพื้นให้สั่นสะเทือนรอบตัว' },
+    { id: 'n3', name: 'ผิวหิน', icon: '🪨', unlock: 7, cost: 10, cd: 15, type: 'shield', amt: .5, dur: 8, desc: 'ผิวแข็งเหมือนหิน ลดดาเมจที่ได้รับ' },
+    { id: 'n4', name: 'แผ่นดินไหว', icon: '🌋', unlock: 12, cost: 20, cd: 14, type: 'nova', mult: 2.8, r: 150, c: '#6E4424', heal: .3, desc: 'แผ่นดินไหววงกว้าง แล้วฟื้น HP' },
+  ],
+  green: [
+    { id: 'g1', name: 'ใบไม้ดูดพลัง', icon: '🍃', unlock: 1, cost: 6, cd: 4, type: 'strike', mult: 1.6, range: 100, crit: 40, steal: .5, desc: 'ตีแรง คริง่าย ดูดเลือดกลับมา' },
+    { id: 'g2', name: 'ดอกไม้บาน', icon: '🌸', unlock: 3, cost: 8, cd: 4, type: 'nova', mult: 1.2, r: 92, c: '#FF8FB1', steal: .3, desc: 'กลีบดอกไม้ฟาดรอบตัว ดูดเลือด' },
+    { id: 'g3', name: 'โคลเวอร์นำโชค', icon: '🍀', unlock: 7, cost: 10, cd: 16, type: 'buff', buff: 'crit', amt: 30, dur: 8, desc: 'โอกาสคริติคอลเพิ่มขึ้นชั่วคราว' },
+    { id: 'g4', name: 'พายุใบไม้', icon: '🌪️', unlock: 12, cost: 20, cd: 14, type: 'chain', n: 6, mult: 1.8, range: 200, crit: 30, steal: .3, desc: 'พายุใบไม้ฟาดหลายตัว ดูดเลือด' },
+  ],
+};
+const SKILL_MAX = 5;
 const BASE = { hp: 42, atk: 9, def: 7, spd: 7, luk: 6 };
 const BONUS = { hp: 28, atk: 5, def: 5, spd: 5, luk: 6 };
 const GROW = { hp: 7, atk: 2, def: 1.6, spd: 1.4, luk: 1.2 };
@@ -506,7 +557,7 @@ const SPAWN = { x: (TOWN.x + 1) * T, y: (TOWN.y + 3) * T };
 
 /* ================= player save ================= */
 let P = null;
-const me = { x: SPAWN.x, y: SPAWN.y, dir: 1, moving: false, walk: 0, atkCd: 0, skillCd: 0, potCd: 0, swing: 0, atkCount: 0, lastHurt: -99, dead: false, deadT: 0, shieldT: 0, hurtT: 0, zone: -1, chat: '', chatT: 0, chatAt: 0 };
+const me = { cds: {}, buffs: {}, meteors: [], shieldAmt: 0, x: SPAWN.x, y: SPAWN.y, dir: 1, moving: false, walk: 0, atkCd: 0, skillCd: 0, potCd: 0, swing: 0, atkCount: 0, lastHurt: -99, dead: false, deadT: 0, shieldT: 0, hurtT: 0, zone: -1, chat: '', chatT: 0, chatAt: 0 };
 function save() { if (!P) return; P.x = Math.round(me.x); P.y = Math.round(me.y); try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) {} }
 function load() { try { const s = localStorage.getItem(SAVE_KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
 function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify({ muted })); } catch (e) {} }
@@ -519,6 +570,8 @@ function migrate(s) {
   s.eq = s.eq || {};
   for (const k of Object.keys(s.eq)) if (!SLOT[k] || !s.eq[k]) delete s.eq[k];
   s.items = Object.assign({ potion: 0, ether: 0, elixir: 0 }, s.items);
+  if (typeof s.sp !== 'number') s.sp = Math.max(0, s.lv - 1);
+  s.skills = s.skills && typeof s.skills === 'object' ? s.skills : {};
   s.kills = s.kills || 0; s.bossKills = s.bossKills || 0; s.points = s.points || 0; s.gold = s.gold || 0; s.xp = s.xp || 0;
   return s;
 }
@@ -526,7 +579,7 @@ function makePlayer(color, shiny) {
   const main = COLORS[color].main, base = {};
   for (const k of STATS) base[k] = BASE[k] + (k === 'hp' ? ri(0, 6) : ri(0, 2)) + (k === main ? BONUS[k] : 0) + (shiny ? (k === 'hp' ? 8 : 2) : 0);
   return { v: 2, name: COLORS[color].species, color, shiny, lv: 1, xp: 0, base, points: 0, gold: 20, hp: base.hp, mp: 20,
-    items: { potion: 3, ether: 1, elixir: 0 }, bag: [], eq: {}, kills: 0, bossKills: 0, born: Date.now() };
+    items: { potion: 3, ether: 1, elixir: 0 }, bag: [], eq: {}, sp: 0, skills: {}, kills: 0, bossKills: 0, born: Date.now() };
 }
 const col = () => COLORS[P.color];
 function gearBonus(k) { let v = 0; for (const s of SLOTS) { const it = P.eq[s]; if (it) v += it.stats[k] || 0; } return v; }
@@ -535,8 +588,14 @@ const maxHp = () => st('hp');
 const maxMp = () => 20 + (P.lv - 1) * 3;
 const xpNeed = lv => Math.round(14 * Math.pow(lv, 1.55));
 const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
-const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75);
-const moveSpeed = () => Math.min(230, 118 + st('spd') * 1.3);
+const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
+const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste'));
+const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75));
+const mySkills = () => SKILLS[P.color];
+const skLv = sk => (P.lv >= sk.unlock ? clamp(P.skills[sk.id] || 1, 1, SKILL_MAX) : 0);
+const skPow = L => 1 + .15 * (L - 1);
+const skCd = (sk, L) => sk.cd * (1 - .05 * (Math.max(1, L) - 1));
+const skDur = (sk, L) => sk.dur + .5 * (Math.max(1, L) - 1);
 function itemName(it) { return SLOT[it.slot].names[it.tier]; }
 function itemIcon(it) { return SLOT[it.slot].icons[it.tier]; }
 function itemPrice(it) { return Math.round((6 + it.tier * it.tier * 14 + it.tier * 10) * (1 + it.r * 0.8)); }
@@ -636,7 +695,7 @@ async function hatch() {
     <label class="field" for="nameInput">ตั้งชื่อ (คนอื่นในโลกจะเห็นชื่อนี้)
       <input id="nameInput" maxlength="14" autocomplete="off" value="${esc(c.species)}">
     </label>
-    <ul class="how"><li>มือถือ: ลากนิ้วเพื่อเดิน แตะมอนเพื่อตี · คอม: คลิกพื้นเพื่อเดิน คลิกมอนเพื่อตี หรือใช้ WASD + Space</li><li>สกิลกดปุ่มสี (E) ยากดปุ่ม 🍯 (Q) ดูปุ่มทั้งหมดได้ที่ ❓</li><li>เดินทับของที่ดรอปเพื่อเก็บ แล้วเปิด 🎒 เพื่อสวมใส่</li></ul>
+    <ul class="how"><li>มือถือ: ลากนิ้วเพื่อเดิน แตะมอนเพื่อตี · คอม: คลิกพื้นเพื่อเดิน คลิกมอนเพื่อตี หรือใช้ WASD + Space</li><li>มีสกิล 4 ช่อง ปลดล็อกเพิ่มที่ Lv 3, 7, 12 อัปเลเวลสกิลได้ที่ 📜 · ยากดปุ่ม 🍯 · ดูปุ่มทั้งหมดได้ที่ ❓</li><li>เดินทับของที่ดรอปเพื่อเก็บ แล้วเปิด 🎒 เพื่อสวมใส่</li></ul>
     <button class="btn primary block" id="startBtn" type="button" style="min-height:56px;font-size:19px">เข้าสู่โลก!</button>`;
   rv.hidden = false;
   $('#startBtn').onclick = () => {
@@ -661,13 +720,11 @@ function hudStatic() {
   const c = col();
   $('#app').style.setProperty('--c-light', c.light); $('#app').style.setProperty('--c', c.c[1]);
   $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, noShadow: true });
-  $('#skillIco').textContent = c.skill.icon;
-  $('#skillMp').textContent = c.skill.cost + ' MP';
-  $('#bMute').textContent = muted ? '🔇' : '🔊';
+  updateSkillBar();
 }
 let hudKey = '';
 function updateHud(force) {
-  const k = [P.hp, maxHp(), P.mp, maxMp(), P.xp, P.lv, P.gold, P.items.potion, P.points, P.name].join('|');
+  const k = [P.hp, maxHp(), P.mp, maxMp(), P.xp, P.lv, P.gold, P.items.potion, P.points, P.sp, P.name].join('|');
   if (!force && k === hudKey) return; hudKey = k;
   $('#hudName').textContent = P.name; $('#hudLv').textContent = 'Lv ' + P.lv;
   $('#hudHp').style.width = (P.hp / maxHp() * 100) + '%'; $('#hudHpT').textContent = `${Math.ceil(P.hp)}/${maxHp()}`;
@@ -676,6 +733,7 @@ function updateHud(force) {
   $('#hudGold').textContent = P.gold.toLocaleString();
   $('#potN').textContent = P.items.potion;
   $('#bChar').innerHTML = '🐣' + (P.points > 0 ? '<span class="dot"></span>' : '') + '<kbd class="kb">C</kbd>';
+  $('#bSkills').innerHTML = '📜' + (P.sp > 0 && mySkills().some(sk => skLv(sk) && skLv(sk) < SKILL_MAX) ? '<span class="dot"></span>' : '') + '<kbd class="kb">K</kbd>';
 }
 
 /* ================= multiplayer: room presence ================= */
@@ -939,8 +997,8 @@ function attackMon(m, mult, o = {}) {
   myHits.set(m.id, t0);
   const dodge = o.sure ? 0 : clamp(3 + (m.spd - st('spd')) * 1.5, 0, 30);
   if (Math.random() * 100 < dodge) { floatAt(m.rx, m.ry - 26, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return 0; }
-  let d = dmgCalc(st('atk'), m.def, mult);
-  const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0), 0, 75);
+  let d = dmgCalc(st('atk') * (1 + buff('atk')), m.def, mult);
+  const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0) + buff('crit'), 0, 85);
   if (crit) d = Math.round(d * 1.75);
   floatAt(m.rx, m.ry - 26, crit ? d + '!' : d, crit ? '#FFD23F' : '#fff', crit ? 24 : 19);
   sfx(crit ? 'crit' : 'hit');
@@ -959,32 +1017,79 @@ function doAttack(pref) {
   else sfx('swing');
   fx.push({ type: 'slash', x: me.x + me.dir * 20, y: me.y - 8, dir: me.dir, t: 0, dur: .2 });
 }
-function doSkill() {
-  if (!started || me.dead || me.skillCd > 0) return;
-  const c = col();
-  if (P.mp < c.skill.cost) { toast('MP ไม่พอ'); return; }
-  const color = P.color;
-  if (color === 'red') {
-    const ts = monsIn(88); if (!ts.length) { toast('ไม่มีมอนอยู่ใกล้ๆ'); return; }
-    ts.forEach(m => attackMon(m, 1.8)); fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 92, t: 0, dur: .45, c: '#FF8A2A' });
-  } else if (color === 'blue') {
-    me.shieldT = 6; monsIn(66).forEach(m => attackMon(m, 1)); fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 70, t: 0, dur: .4, c: '#4A9DFF' });
-  } else if (color === 'yellow') {
-    const ex = new Set(), ts = [];
-    for (let i = 0; i < 3; i++) { const m = nearestMon(150, ex); if (!m) break; ex.add(m.id); ts.push(m); }
-    if (!ts.length) { toast('ไม่มีมอนอยู่ใกล้ๆ'); return; }
+function preferTarget(range) {
+  const t = me.targetId != null && getMon(me.targetId);
+  return t && t.hp > 0 && Math.hypot(t.rx - me.x, t.ry - me.y) < range ? t : nearestMon(range);
+}
+function ringFx(x, y, r, c) { fx.push({ type: 'ring', x, y, r0: 10, r1: r, t: 0, dur: .45, c: c || '#fff' }); }
+function addShield(amt, dur) { me.shieldAmt = Math.max(me.shieldT > 0 ? me.shieldAmt : 0, amt); me.shieldT = Math.max(me.shieldT, dur); }
+function castSkill(i) {
+  if (!started || me.dead) return;
+  const sk = mySkills()[i]; if (!sk) return;
+  const L = skLv(sk);
+  if (!L) { toast(`${sk.name} ปลดล็อกที่ Lv ${sk.unlock}`); return; }
+  if ((me.cds[sk.id] || 0) > 0) return;
+  if (P.mp < sk.cost) { toast('MP ไม่พอ ดื่มน้ำค้างมานา (R) หรือรอให้ MP ฟื้น'); return; }
+  const pw = skPow(L), none = () => { toast('ไม่มีมอนอยู่ใกล้ๆ'); return false; };
+  let dealt = 0;
+  const hit = (m, o = {}) => { const d = attackMon(m, sk.mult * pw, { critBonus: sk.crit || 0, ...o }); dealt += d; return d; };
+  if (sk.type === 'nova') {
+    const ts = monsIn(sk.r);
+    if (!ts.length && !sk.heal && !sk.shield) return none();
+    ts.forEach(m => hit(m)); ringFx(me.x, me.y, sk.r, sk.c);
+    if (sk.heal) healMe(Math.round(maxHp() * sk.heal * (1 + .1 * (L - 1))));
+    if (sk.shield) addShield(sk.shield, skDur(sk, L));
+  } else if (sk.type === 'strike') {
+    const m = preferTarget(sk.range); if (!m) return none();
+    me.dir = m.rx < me.x ? -1 : 1; hit(m); fx.push({ type: 'emoji', e: sk.icon, x: m.rx, y: m.ry - 20, t: 0, dur: .5 });
+  } else if (sk.type === 'chain') {
+    const ex = new Set(), ts = [], first = preferTarget(sk.range);
+    if (first) { ex.add(first.id); ts.push(first); }
+    while (ts.length < sk.n) { const m = nearestMon(sk.range, ex); if (!m) break; ex.add(m.id); ts.push(m); }
+    if (!ts.length) return none();
     let px = me.x, py = me.y - 10;
-    ts.forEach(m => { attackMon(m, 1.3, { sure: true }); fx.push({ type: 'bolt', x: px, y: py, x2: m.rx, y2: m.ry - 10, t: 0, dur: .3 }); px = m.rx; py = m.ry - 10; });
-  } else if (color === 'brown') {
-    const g = Math.round(maxHp() * .4); healMe(g); monsIn(60).forEach(m => attackMon(m, .8));
-    fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 64, t: 0, dur: .45, c: '#A8744A' });
-  } else if (color === 'green') {
-    const m = nearestMon(100); if (!m) { toast('ไม่มีมอนอยู่ใกล้ๆ'); return; }
-    const d = attackMon(m, 1.6, { critBonus: 40 }); if (d > 0) healMe(Math.max(1, Math.round(d * .5)));
-    fx.push({ type: 'emoji', e: '🍃', x: m.rx, y: m.ry - 16, t: 0, dur: .5 });
+    ts.forEach(m => { hit(m, { sure: true }); fx.push({ type: 'bolt', x: px, y: py, x2: m.rx, y2: m.ry - 10, t: 0, dur: .3 }); px = m.rx; py = m.ry - 10; });
+  } else if (sk.type === 'heal') {
+    healMe(Math.round(maxHp() * sk.amt * (1 + .1 * (L - 1))));
+    if (sk.mult) monsIn(sk.r).forEach(m => hit(m));
+    ringFx(me.x, me.y, sk.r || 60, sk.c || '#7BE39A');
+  } else if (sk.type === 'shield') {
+    addShield(sk.amt, skDur(sk, L));
+    if (sk.mult) monsIn(sk.r).forEach(m => hit(m));
+    ringFx(me.x, me.y, sk.r || 60, sk.c || '#A09AB0');
+  } else if (sk.type === 'buff') {
+    me.buffs[sk.buff] = { amt: sk.amt * pw, until: nowS() + skDur(sk, L) };
+    ringFx(me.x, me.y, 70, '#FFD23F');
+  } else if (sk.type === 'dash') {
+    const t = preferTarget(sk.dist + 40);
+    let vx = me.dir, vy = 0;
+    if (Math.hypot(joy.dx, joy.dy) > .2) { const d = Math.hypot(joy.dx, joy.dy); vx = joy.dx / d; vy = joy.dy / d; }
+    else if (t) { const d = Math.hypot(t.rx - me.x, t.ry - me.y) || 1; vx = (t.rx - me.x) / d; vy = (t.ry - me.y) / d; }
+    const sx = me.x, sy = me.y, hitSet = new Set();
+    for (let k = 0; k < sk.dist; k += 8) {
+      moveBody(me, vx * 8, vy * 8, 12, solid);
+      for (const m of monsterList()) if (m.hp > 0 && !hitSet.has(m.id) && Math.hypot(m.rx - me.x, m.ry - me.y) < 40) { hitSet.add(m.id); hit(m, { sure: true }); }
+    }
+    if (Math.abs(vx) > .1) me.dir = vx < 0 ? -1 : 1;
+    fx.push({ type: 'trail', x: sx, y: sy - 12, x2: me.x, y2: me.y - 12, t: 0, dur: .35 });
+    me.goal = null;
+  } else if (sk.type === 'meteor') {
+    const m = preferTarget(260);
+    const x = m ? m.rx : me.x + me.dir * 110, y = m ? m.ry : me.y;
+    me.meteors.push({ x, y, t: .6, mult: sk.mult * pw, r: sk.r });
   }
-  P.mp -= c.skill.cost; me.skillCd = 4; me.swing = .25; me.atkCount++; sfx('skill');
-  fx.push({ type: 'emoji', e: c.skill.icon, x: me.x, y: me.y - 40, t: 0, dur: .6 });
+  if (sk.steal && dealt > 0) healMe(Math.max(1, Math.round(dealt * sk.steal)));
+  P.mp -= sk.cost; me.cds[sk.id] = skCd(sk, L); me.swing = .25; me.atkCount++; sfx('skill');
+  fx.push({ type: 'emoji', e: sk.icon, x: me.x, y: me.y - 44, t: 0, dur: .6 });
+}
+function updateSkillBar() {
+  mySkills().forEach((sk, i) => {
+    const b = $('#bS' + i), L = skLv(sk);
+    b.classList.toggle('lock', !L);
+    b.querySelector('.si').textContent = L ? sk.icon : '🔒';
+    b.querySelector('small').textContent = L ? sk.cost + ' MP' : 'Lv ' + sk.unlock;
+    b.setAttribute('aria-label', L ? `${sk.name} (${sk.cost} MP)` : `${sk.name} ปลดล็อกที่ Lv ${sk.unlock}`);
+  });
 }
 function healMe(n) { const b = P.hp; P.hp = Math.min(maxHp(), P.hp + n); const g = Math.round(P.hp - b); if (g > 0) floatAt(me.x, me.y - 30, '+' + g, '#7BE39A', 18); sfx('heal'); return g; }
 function usePotion(kind) {
@@ -1002,7 +1107,7 @@ function receiveHit(atk, mult, spd) {
   const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5, 0, 35);
   if (Math.random() * 100 < dodge) { floatAt(me.x, me.y - 30, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return; }
   let d = dmgCalc(atk, st('def'), mult);
-  if (me.shieldT > 0) d = Math.max(1, Math.round(d * .4));
+  if (me.shieldT > 0) d = Math.max(1, Math.round(d * (1 - me.shieldAmt)));
   P.hp = Math.max(0, P.hp - d); me.lastHurt = nowS(); me.hurtT = .3;
   floatAt(me.x, me.y - 30, d, big ? '#FFD23F' : '#FF8391', big ? 24 : 18);
   sfx('hurt'); buzz(big ? 70 : 25);
@@ -1047,14 +1152,16 @@ function gainXp(x) {
   while (P.xp >= xpNeed(P.lv)) {
     P.xp -= xpNeed(P.lv); const before = stageOf(P.lv); P.lv++; up = true;
     for (const k of STATS) { const g = GROW[k] * (k === col().main ? 2 : 1); P.base[k] += Math.floor(g) + (Math.random() < g % 1 ? 1 : 0); }
-    P.points += 2;
+    P.points += 2; P.sp = (P.sp || 0) + 1;
+    for (const sk of mySkills()) if (sk.unlock === P.lv) setTimeout(() => { banner(`ปลดล็อกสกิลใหม่: ${sk.name}`, `${sk.icon} ${sk.desc}`); sfx('rare'); }, 2800);
     if (stageOf(P.lv) > before) evolved = stageOf(P.lv);
   }
   if (up) {
     P.hp = maxHp(); P.mp = maxMp(); sfx('lvl');
     fx.push({ type: 'ring', x: me.x, y: me.y, r0: 10, r1: 80, t: 0, dur: .7, c: '#FFD23F' });
     if (evolved) { banner(`วิวัฒนาการเป็น${STAGE_NAME[evolved]}!`, `Lv ${P.lv} · ได้แต้มสถานะเพิ่ม`); hudStatic(); }
-    else banner(`เลเวลอัป! Lv ${P.lv}`, 'แจกแต้มสถานะได้ที่ 🐣');
+    else banner(`เลเวลอัป! Lv ${P.lv}`, 'ได้แต้มสถานะ 🐣 และแต้มสกิล 📜');
+    updateSkillBar();
   }
 }
 function pickupLoot(dt) {
@@ -1090,14 +1197,16 @@ window.addEventListener('keydown', e => {
   if (typing() || !started || !$('#s-egg').hidden) { if (e.key === 'Escape' && !$('#chatbar').hidden) closeChat(); return; }
   const k = e.key.toLowerCase();
   setMode('desk');
-  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help')) closeSheet(); return; }
+  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills')) closeSheet(); return; }
   if (k === 'escape') { me.targetId = null; me.goal = null; return; }
   if (k === 'h' || k === '?') { openHelp(); return; }
   if (k === 'r') { usePotion('ether'); return; }
   if (k === 'tab') { e.preventDefault(); const m = nearestMon(8 * T); if (m) setTarget(m); return; }
   if (k === 'enter') { e.preventDefault(); openChat(); return; }
   if (k === ' ') { e.preventDefault(); atkHeld = true; doAttack(); return; }
-  if (k === 'e') { doSkill(); return; }
+  if (k === 'e') { castSkill(0); return; }
+  if (k >= '1' && k <= '4') { castSkill(+k - 1); return; }
+  if (k === 'k') { openSkills(); return; }
   if (k === 'q') { usePotion(); return; }
   if (k === 'i' || k === 'b') { openBag(); return; }
   if (k === 'c') { openChar(); return; }
@@ -1120,7 +1229,7 @@ function monAt(wx, wy) {
   for (const m of monsterList()) {
     if (m.hp <= 0) continue;
     const size = m.boss ? 60 : 38, d = Math.hypot(wx - m.rx, wy - (m.ry - size * .5));
-    if (d < size * .6 + 10 && d < bd) { bd = d; best = m; }
+    if (d < size * .75 + 16 && d < bd) { bd = d; best = m; }
   }
   return best;
 }
@@ -1138,13 +1247,16 @@ cv.addEventListener('pointerdown', e => {
   if (AC && AC.state === 'suspended') AC.resume();
   const mouse = e.pointerType === 'mouse';
   setMode(mouse ? 'desk' : 'touch');
+  if (mouse && e.button === 2) { castSkill(0); return; }
   if (mouse && e.button !== 0) return;
   ptr.id = e.pointerId; ptr.type = e.pointerType; ptr.sx = e.clientX; ptr.sy = e.clientY; ptr.t0 = performance.now(); ptr.moved = false;
   try { cv.setPointerCapture(e.pointerId); } catch (err) {}
   if (mouse) {
     if (me.dead) return;
     const w = toWorld(e.clientX, e.clientY), m = monAt(w.x, w.y);
-    if (m) setTarget(m); else { walkTo(w); ptr.hold = !me.wantShop; }
+    if (m) { setTarget(m); if (Math.hypot(m.rx - me.x, m.ry - me.y) < 62) doAttack(m); }
+    else if (e.shiftKey) { me.goal = null; me.targetId = null; doAttack(); }
+    else { walkTo(w); ptr.hold = !me.wantShop; }
     return;
   }
   joy.active = true; joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.dx = joy.dy = 0;
@@ -1169,7 +1281,7 @@ const endPtr = e => {
   if (e.pointerId !== ptr.id) return;
   if (ptr.type !== 'mouse' && e.type === 'pointerup' && !ptr.moved && performance.now() - ptr.t0 < 300 && !me.dead) {
     const w = toWorld(e.clientX, e.clientY), m = monAt(w.x, w.y);
-    if (m) setTarget(m); else walkTo(w);
+    if (m) { setTarget(m); if (Math.hypot(m.rx - me.x, m.ry - me.y) < 62) doAttack(m); } else walkTo(w);
   }
   ptr.id = null; ptr.hold = false;
   joy.active = false; joy.dx = joy.dy = 0; $('#joy').hidden = true;
@@ -1186,14 +1298,14 @@ function holdBtn(el, onPress, repeat) {
   el.addEventListener('contextmenu', e => e.preventDefault());
 }
 holdBtn($('#bAtk'), doAttack, true);
-holdBtn($('#bSkill'), doSkill, false);
+for (let i = 0; i < 4; i++) holdBtn($('#bS' + i), () => castSkill(i), false);
 holdBtn($('#bPot'), () => usePotion('potion'), false);
 $('#bBag').onclick = () => { sfx('tap'); openBag(); };
 $('#bChar').onclick = () => { sfx('tap'); openChar(); };
 $('#bChat').onclick = () => { sfx('tap'); openChat(); };
 $('#bHelp').onclick = () => { sfx('tap'); openHelp(); };
 $('#bTalk').onclick = () => { sfx('tap'); openShop(); };
-$('#bMute').onclick = () => { muted = !muted; savePrefs(); $('#bMute').textContent = muted ? '🔇' : '🔊'; if (!muted) sfx('tap'); };
+$('#bSkills').onclick = () => { sfx('tap'); openSkills(); };
 function openChat() { $('#chatbar').hidden = false; keys.clear(); setTimeout(() => $('#chatIn').focus(), 30); }
 function closeChat() { $('#chatbar').hidden = true; $('#chatIn').blur(); }
 $('#chatX').onclick = closeChat;
@@ -1240,15 +1352,43 @@ function renderBag(el) {
     <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} × ${P.items[k]}</div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div>`;
 }
 function openChar() { openSheet('ตัวละคร', renderChar, 'char'); }
+function openSkills() { openSheet('สกิล', renderSkills, 'skills'); }
+function skillNumbers(sk, L) {
+  const l = Math.max(1, L), pw = skPow(l), out = [];
+  if (sk.mult) out.push(`ดาเมจ ${Math.round(sk.mult * pw * 100)}%`);
+  if (sk.n) out.push(`${sk.n} ตัว`);
+  if (sk.type === 'heal') out.push(`ฟื้น ${Math.round(sk.amt * (1 + .1 * (l - 1)) * 100)}% HP`);
+  if (sk.heal) out.push(`ฟื้น ${Math.round(sk.heal * (1 + .1 * (l - 1)) * 100)}% HP`);
+  if (sk.type === 'shield' || sk.shield) out.push(`ลดดาเมจ ${Math.round((sk.amt || sk.shield) * 100)}% ${skDur(sk, l)} วิ`);
+  if (sk.type === 'buff') out.push(sk.buff === 'crit' ? `คริ +${Math.round(sk.amt * pw)}% ${skDur(sk, l)} วิ` : `+${Math.round(sk.amt * pw * 100)}% ${skDur(sk, l)} วิ`);
+  if (sk.steal) out.push(`ดูดเลือด ${Math.round(sk.steal * 100)}%`);
+  out.push(`${sk.cost} MP`, `คูลดาวน์ ${skCd(sk, l).toFixed(1)} วิ`);
+  return out.join(' · ');
+}
+function renderSkills(el) {
+  const c = col();
+  el.style.setProperty('--c-light', c.light);
+  el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><p class="muted" style="margin:0;font-size:13px">สกิลของ${c.species} ได้แต้มสกิล 1 แต้มทุกเลเวล</p><span class="chip" style="${P.sp ? 'background:#FFF3B0' : ''}">แต้มสกิล ${P.sp}</span></div>
+    <div class="panel" style="padding:2px 12px">${mySkills().map((sk, i) => {
+      const L = skLv(sk);
+      return `<div class="sk-row${L ? '' : ' locked'}"><span class="skill-ico">${L ? sk.icon : '🔒'}</span>
+        <div><div class="nm">${sk.name}${L ? `<span class="pips">${Array.from({ length: SKILL_MAX }, (_, k) => `<i class="${k < L ? 'on' : ''}"></i>`).join('')}</span>` : ''}</div>
+        <div class="ds">${sk.desc}<br>${L ? skillNumbers(sk, L) : `ปลดล็อกที่ Lv ${sk.unlock}`}${L && L < SKILL_MAX ? `<br><span style="color:var(--good)">เลเวลถัดไป: ${skillNumbers(sk, L + 1).split(' · ').slice(0, 2).join(' · ')}</span>` : ''}</div>
+        <div class="muted" style="font-size:11px;margin-top:2px">ปุ่ม ${i + 1}${i === 0 ? ' / E / คลิกขวา' : ''}</div></div>
+        ${L ? (L < SKILL_MAX ? `<button class="btn sm${P.sp ? ' primary' : ''}" type="button" data-skup="${sk.id}" ${P.sp ? '' : 'disabled'}>อัป +1</button>` : '<span class="chip">สูงสุด</span>') : ''}</div>`;
+    }).join('')}</div>`;
+}
 function openHelp() {
   openSheet('วิธีเล่น', el => {
     el.innerHTML = `<div class="panel"><b style="font-family:var(--f-display)">คอมพิวเตอร์</b><div class="keys" style="margin-top:8px">
       <span><kbd>คลิกพื้น</kbd></span><span>เดินไปตรงนั้น (กดค้างแล้วลากเมาส์ = เดินตามเมาส์)</span>
-      <span><kbd>คลิกมอน</kbd></span><span>เดินไปหาแล้วตีจนกว่ามอนจะตาย</span>
+      <span><kbd>คลิกมอน</kbd></span><span>ตีทันที ถ้าอยู่ไกลจะเดินไปหา แล้วตีต่อจนมอนตาย</span>
       <span><kbd>W A S D</kbd></span><span>เดิน (ปุ่มลูกศรก็ได้)</span>
       <span><kbd>Space</kbd></span><span>ตี (กดค้างเพื่อตีรัว)</span>
       <span><kbd>Tab</kbd></span><span>เล็งมอนที่ใกล้ที่สุด</span>
-      <span><kbd>E</kbd></span><span>ใช้สกิล</span>
+      <span><kbd>คลิกขวา</kbd></span><span>ใช้สกิลที่ 1 · <kbd>Shift</kbd>+คลิก ตีตรงที่ยืน</span>
+      <span><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span>ใช้สกิล (E = สกิลที่ 1)</span>
+      <span><kbd>K</kbd></span><span>หน้าสกิล อัปเลเวลสกิล</span>
       <span><kbd>Q</kbd> <kbd>R</kbd></span><span>ดื่มยา HP / ยา MP</span>
       <span><kbd>I</kbd> <kbd>C</kbd></span><span>กระเป๋า / ตัวละคร</span>
       <span><kbd>Enter</kbd></span><span>แชท</span>
@@ -1259,7 +1399,9 @@ function openHelp() {
       <span><kbd>แตะมอน</kbd></span><span>เดินไปหาแล้วตีอัตโนมัติ</span>
       <span><kbd>แตะพื้น</kbd></span><span>เดินไปตรงนั้น</span>
       <span><kbd>⚔️</kbd></span><span>ตีตัวที่ใกล้ที่สุด (กดค้างเพื่อตีรัว)</span>
-      <span><kbd>สกิล</kbd> <kbd>🍯</kbd></span><span>ใช้สกิล / ดื่มยา</span></div></div>
+      <span><kbd>ปุ่มรอบ ⚔️</kbd></span><span>สกิล 4 ช่อง (ปลดล็อกที่ Lv 1, 3, 7, 12)</span>
+      <span><kbd>🍯</kbd></span><span>ดื่มยา</span></div></div>
+    <button class="btn sm block" type="button" data-act="mute">${muted ? '🔇 เสียงปิดอยู่ · แตะเพื่อเปิด' : '🔊 เสียงเปิดอยู่ · แตะเพื่อปิด'}</button>
     <p class="muted" style="margin:0;font-size:13px">แตะหรือคลิกแผงร้านในเมืองเพื่อเดินไปซื้อของ · ยืนใกล้น้ำพุเพื่อฟื้นพลัง · วงแดงรอบบอสคือท่าทุบพื้น ให้เดินออกก่อน</p>`;
   }, 'help');
 }
@@ -1277,7 +1419,7 @@ function renderChar(el) {
       ${STATS.map(k => { const b = gearBonus(k); return `<div class="alloc${k === c.main ? ' main' : ''}"><span>${STAT_NAME[k]}${k === c.main ? ' ★' : ''}</span><div class="bar"><i style="width:${clamp(st(k) / Math.max(ref[k], st(k)) * 100, 3, 100)}%"></i></div><span class="val">${st(k)}${b ? `<br><small>+${b}</small>` : ''}</span><button class="btn" type="button" data-alloc="${k}" ${P.points > 0 ? '' : 'disabled'} aria-label="เพิ่ม${STAT_NAME[k]}">+</button></div>`; }).join('')}
       <p class="muted" style="margin:6px 0 0;font-size:12px">ได้ 2 แต้มทุกเลเวล · 1 แต้ม = HP +${POINT_VALUE.hp} หรือค่าอื่น +1 · ★ ค่าเด่นของสี${c.th} โตเร็วเท่าตัว</p>
     </div>
-    <div class="skill-card panel"><div class="skill-ico">${c.skill.icon}</div><div><b>${c.skill.name}</b> <span class="muted">· ${c.skill.cost} MP · คูลดาวน์ 4 วิ</span><div class="muted" style="font-size:13px">${c.skill.desc}</div></div></div>
+    <button class="btn block" type="button" data-act="skills">📜 ดูและอัปสกิล (แต้มสกิล ${P.sp})</button>
     <div class="panel records"><div><b>${P.kills}</b><span>ปราบมอน</span></div><div><b>${P.bossKills}</b><span>ปราบบอส</span></div><div><b>${P.bag.length}</b><span>ของในกระเป๋า</span></div></div>
     
     <button class="btn block" type="button" data-act="reset" style="background:var(--paper-2)">ฟักไข่ใบใหม่ (ลบตัวนี้ เริ่มใหม่)</button>`;
@@ -1293,6 +1435,12 @@ function renderShop(el) {
 }
 $('#mBody').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
+  if (b.dataset.skup) {
+    const sk = mySkills().find(k => k.id === b.dataset.skup), L = sk && skLv(sk);
+    if (!sk || !L || L >= SKILL_MAX || P.sp <= 0) return;
+    P.sp--; P.skills[sk.id] = L + 1; sfx('lvl'); toast(`${sk.name} เลเวล ${L + 1}!`); save(); updateHud(true); return refreshSheet();
+  }
+  if (b.dataset.act === 'mute') { muted = !muted; savePrefs(); if (!muted) sfx('tap'); return refreshSheet(); }
   if (b.dataset.item) { selItem = selItem === b.dataset.item ? null : b.dataset.item; sfx('tap'); return refreshSheet(); }
   if (b.dataset.use) { usePotion(b.dataset.use); return refreshSheet(); }
   if (b.dataset.alloc) { if (P.points <= 0) return; const k = b.dataset.alloc; P.points--; P.base[k] += POINT_VALUE[k]; if (k === 'hp') P.hp += POINT_VALUE.hp; sfx('tap'); save(); return refreshSheet(); }
@@ -1310,6 +1458,7 @@ $('#mBody').addEventListener('click', e => {
     P.hp = Math.min(maxHp(), Math.max(1, Math.round(hpFrac * maxHp()))); save(); return refreshSheet();
   }
   if (act === 'sellcommon') { const j = P.bag.filter(i => i.r === 0), g = j.reduce((a, i) => a + itemPrice(i), 0); P.bag = P.bag.filter(i => i.r !== 0); P.gold += g; selItem = null; sfx('coin'); toast(`ขาย ${j.length} ชิ้น ได้ ${g} ทอง`); save(); return refreshSheet(); }
+  if (act === 'skills') { openSkills(); return; }
   if (act === 'reset') {
     if (b.dataset.confirm) { try { localStorage.removeItem(SAVE_KEY); } catch (err) {} closeSheet(); started = false; P = null; loot.length = 0; $('#hud').hidden = true; startEgg(); return; }
     b.dataset.confirm = '1'; b.textContent = 'แตะอีกครั้งเพื่อยืนยัน ตัวละครนี้จะหายไปถาวร'; b.style.background = '#FFD3CF';
@@ -1387,6 +1536,7 @@ function drawBlob(o) {
   const t = o.walk, sq = o.moving ? Math.sin(t * 14) * .07 : Math.sin(nowS() * 3 + o.x) * .03;
   const lift = o.moving ? Math.abs(Math.sin(t * 14)) * 4 : 0;
   ctx.fillStyle = 'rgba(51,40,74,.2)'; ctx.beginPath(); ctx.ellipse(o.x, o.y + 2, size * .36, size * .1, 0, 0, 7); ctx.fill();
+  if (o.aura) { ctx.strokeStyle = o.aura; ctx.globalAlpha = .55 + .3 * Math.sin(nowS() * 8); ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(o.x, o.y + 1, size * .55, size * .18, 0, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
   if (o.shield) { ctx.fillStyle = 'rgba(120,190,255,.28)'; ctx.strokeStyle = 'rgba(74,157,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(o.x, o.y - size * .4, size * .68, 0, 7); ctx.fill(); ctx.stroke(); }
   ctx.save(); ctx.translate(o.x + (o.swing > 0 ? o.dir * 6 : 0), o.y - lift); ctx.scale(o.dir * (1 + sq), 1 - sq);
   if (o.hurt) ctx.filter = 'brightness(1.8)';
@@ -1451,6 +1601,15 @@ function frame(tms) {
 function update(dt) {
   const t0 = nowS();
   me.atkCd = Math.max(0, me.atkCd - dt); me.skillCd = Math.max(0, me.skillCd - dt); me.potCd = Math.max(0, me.potCd - dt);
+  for (const id in me.cds) me.cds[id] = Math.max(0, me.cds[id] - dt);
+  for (let i = me.meteors.length - 1; i >= 0; i--) {
+    const mt = me.meteors[i]; mt.t -= dt;
+    if (mt.t <= 0) {
+      me.meteors.splice(i, 1);
+      for (const m of monsterList()) if (m.hp > 0 && Math.hypot(m.rx - mt.x, m.ry - mt.y) < mt.r) attackMon(m, mt.mult);
+      ringFx(mt.x, mt.y + 10, mt.r, '#FF5A1F'); fx.push({ type: 'emoji', e: '💥', x: mt.x, y: mt.y - 20, t: 0, dur: .5 }); sfx('crit'); buzz(40);
+    }
+  }
   me.swing = Math.max(0, me.swing - dt); me.shieldT = Math.max(0, me.shieldT - dt); me.hurtT = Math.max(0, me.hurtT - dt); me.chatT = Math.max(0, me.chatT - dt);
   if (me.dead) { me.deadT -= dt; if (me.deadT <= 0) respawn(); }
   else {
@@ -1493,9 +1652,12 @@ function update(dt) {
   for (let i = floaters.length - 1; i >= 0; i--) { floaters[i].t += dt; if (floaters[i].t > .9) floaters.splice(i, 1); }
   // cooldown overlays
   $('#atkCd').style.setProperty('--p', (me.atkCd / atkCooldown() * 100) + '%');
-  $('#skillCd').style.setProperty('--p', (me.skillCd / 4 * 100) + '%');
   $('#potCd').style.setProperty('--p', (me.potCd * 100) + '%');
-  $('#bSkill').disabled = P.mp < col().skill.cost;
+  mySkills().forEach((sk, i) => {
+    const L = skLv(sk), b = $('#bS' + i), left = me.cds[sk.id] || 0;
+    b.querySelector('.cd').style.setProperty('--p', (L && left > 0 ? left / skCd(sk, L) * 100 : 0) + '%');
+    b.classList.toggle('nomp', !!L && P.mp < sk.cost);
+  });
 }
 function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1518,11 +1680,13 @@ function render() {
   for (const l of loot) if (inView(l.x, l.y)) ents.push({ y: l.y - 8, d: () => drawLoot(l) });
   for (const m of monsterList()) if (inView(m.rx, m.ry)) ents.push({ y: m.ry, d: () => drawMon(m) });
   for (const r of remotes.values()) if (inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
-  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0, self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, bubble: me.chatT > 0 ? me.chat : '' }) });
+  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: P.eq.hat ? P.eq.hat.tier + 1 : 0, wp: P.eq.weapon ? P.eq.weapon.tier + 1 : 0, self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
   ents.sort((a, b) => a.y - b.y);
   for (const e of ents) e.d();
+  for (const mt of me.meteors) { const k = 1 - mt.t / .6; ctx.fillStyle = `rgba(255,120,40,${.15 + .2 * k})`; ctx.strokeStyle = 'rgba(255,90,31,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mt.x, mt.y, mt.r, 0, 7); ctx.fill(); ctx.stroke(); ctx.drawImage(emojiSprite('☄️', 30), mt.x - 20 + (1 - k) * 60, mt.y - 60 - (1 - k) * 160, 40, 40); }
   for (const f of fx) {
     const k = f.t / f.dur;
+    if (f.type === 'trail') { ctx.strokeStyle = `rgba(255,225,74,${.8 * (1 - k)})`; ctx.lineWidth = 14 * (1 - k) + 2; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x2, f.y2); ctx.stroke(); continue; }
     if (f.type === 'ring') { ctx.strokeStyle = f.c; ctx.globalAlpha = 1 - k; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(f.x, f.y - 10, f.r0 + (f.r1 - f.r0) * k, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
     else if (f.type === 'slash') { ctx.strokeStyle = `rgba(255,255,255,${1 - k})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(f.x, f.y, 18, f.dir > 0 ? -1.3 + k : Math.PI + 1.3 - k, f.dir > 0 ? .4 + k : Math.PI - .4 - k, f.dir < 0); ctx.stroke(); }
     else if (f.type === 'bolt') { ctx.strokeStyle = `rgba(255,225,74,${1 - k})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(f.x, f.y); const n = 5; for (let i = 1; i <= n; i++) ctx.lineTo(f.x + (f.x2 - f.x) * i / n + (i < n ? rnd(-8, 8) : 0), f.y + (f.y2 - f.y) * i / n + (i < n ? rnd(-8, 8) : 0)); ctx.stroke(); }
