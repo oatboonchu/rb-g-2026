@@ -126,6 +126,14 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .mapcv{width:100%;aspect-ratio:1;border:2px solid var(--ink);border-radius:12px;display:block;background:#17112A}
 .maplegend{display:flex;flex-wrap:wrap;gap:4px 12px;font:600 12px var(--f-body);color:var(--ink-soft)}
 .maplegend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.cxtabs{display:flex;flex-wrap:wrap;gap:6px}
+.cxtabs small{font:600 10px var(--f-body);opacity:.8}
+.cxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.cx{border:2px solid var(--ink);border-radius:10px;background:var(--paper);padding:6px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px;box-shadow:0 2px 0 var(--ink)}
+.cx .ce{font-size:30px;line-height:1.1}.cx .cp{width:58px;height:58px;display:block}.cx .cp svg{width:100%;height:100%}
+.cx b{font:700 12px/1.25 var(--f-body)}.cx small{font:600 10px/1.3 var(--f-body);color:var(--ink-soft)}
+.cx.boss{background:#FFF0E8}.cx.sec{background:#FFF8DE}
+.cx.unk{background:#E6E0EE}.cx.unk .ce,.cx.unk .cp{filter:brightness(0) opacity(.35)}
 .mapgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .mcell{position:relative;min-height:62px;border:2px solid var(--ink);border-radius:10px;background:var(--zc);box-shadow:0 2px 0 var(--ink);padding:4px;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;cursor:pointer;overflow:hidden}
 .mcell b,.mcell small{background:rgba(255,255,255,.82);border-radius:5px;padding:0 3px;width:fit-content;max-width:100%}
@@ -1289,6 +1297,7 @@ function hiddenFx() {
   if (P.latent && LATENT[P.latent.k]) add(LATENT[P.latent.k].fx);
   for (const c of P.curses || []) if (UNIQUE_MON[c]) add(UNIQUE_MON[c].cfx);
   for (const w of P.uwins || []) add({ atkP: .05, defP: .05, hpP: .05 });
+  if (P.codex) add(codexFx());
   return o;
 }
 function rollLatent() { return { k: pick(Object.keys(LATENT)), shown: false }; }
@@ -2757,6 +2766,7 @@ function onKill(k) {
 }
 function reward(s, x, y, mlv, tierOverride) {
   P.kills++; if (s.boss) P.bossKills++;
+  if (s.key && FOES[s.key]) codexKill(s.key);
   act('kill'); if (s.boss) act('boss'); if (P.hp < maxHp() * .25) act('clutch'); if (isNight()) act('night'); if (!DG) { checkScenarios('kill'); scenKill(s.key); }
   if (P.latent && !P.latent.shown && (P.kills >= 500 || P.lv >= 50)) { P.latent.shown = true; setTimeout(() => banner('สถานะแฝงตื่นขึ้น!', `«${LATENT[P.latent.k].th}» ${fmtFx(LATENT[P.latent.k].fx)}`), 900); }
   if (s.sec) {
@@ -2852,7 +2862,7 @@ window.addEventListener('keydown', e => {
   if (typing() || !started || !$('#s-egg').hidden) { if (e.key === 'Escape' && !$('#chatbar').hidden) closeChat(); return; }
   const k = e.key.toLowerCase();
   setMode('desk');
-  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills') || (k === 't' && sheetName === 'titles') || (k === 'p' && sheetName === 'pets') || (k === 'm' && sheetName === 'map')) closeSheet(); return; }
+  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills') || (k === 't' && sheetName === 'titles') || (k === 'p' && sheetName === 'pets') || (k === 'm' && sheetName === 'map') || (k === 'j' && sheetName === 'codex')) closeSheet(); return; }
   if (k === 'escape') { me.targetId = null; me.goal = null; return; }
   if (k === 'h' || k === '?') { openHelp(); return; }
   if (k === 'r') { usePotion('ether'); return; }
@@ -2865,6 +2875,7 @@ window.addEventListener('keydown', e => {
   if (k === 't') { openTitles(); return; }
   if (k === 'p') { openPets(); return; }
   if (k === 'm') { openMap(); return; }
+  if (k === 'j') { openCodex(); return; }
   if (k === 'q') { usePotion(); return; }
   if (k === 'i' || k === 'b') { openBag(); return; }
   if (k === 'c') { openChar(); return; }
@@ -3391,6 +3402,7 @@ function renderChar(el) {
     </div>
     ${P.lv >= FORM_LV ? `<button class="btn block${P.form ? '' : ' primary'}" type="button" data-act="form">${P.form ? `✨ ${fullFormName()} · ${FORM_ARCH[P.form].desc}${canEvolve() ? ' · วิวัฒน์ได้!' : ''}` : '✨ เปลี่ยนร่าง (ปลดล็อกแล้ว!)'}</button>` : `<p class="muted" style="margin:0;font-size:13px">✨ เปลี่ยนร่างได้ที่ Lv ${FORM_LV} ร่างที่ได้ขึ้นกับค่าสถานะที่เน้น</p>`}
     <button class="btn block" type="button" data-act="hidden" style="background:#EFE6FF">✨ สถานะแฝง · อาชีพ ${JOBS[P.job] ? JOBS[P.job].icon + JOBS[P.job].th : '-'} · ทักษะ ${Object.keys(P.traits || {}).length}${(P.curses || []).length ? ' · ☠️ ติดคำสาป' : ''}</button>
+    <button class="btn block" type="button" data-act="codex" style="background:#E3F1FF">📖 Codex · มอนสเตอร์ ${Math.round(codexMonPct() * 100)}%${P.mode === 'desk' ? '' : ''} <kbd class="kb" style="position:static;transform:none;display:inline-block">J</kbd></button>
     <button class="btn block" type="button" data-act="titles">🏷️ ฉายา: ${titleName() ? `«${titleName()}»` : 'ยังไม่ได้ใส่'} · ได้แล้ว ${(P.titles || []).length}/${TITLES.length}</button>
     <button class="btn block" type="button" data-act="skills">📜 ดูและอัปสกิล (แต้มสกิล ${P.sp})</button>
     <div class="panel records"><div><b>${P.kills}</b><span>ปราบมอน</span></div><div><b>${P.bossKills}</b><span>ปราบบอส</span></div><div><b>${P.dungeons || 0}</b><span>ผ่านดันเจี้ยน</span></div></div>
@@ -3548,6 +3560,8 @@ $('#mBody').addEventListener('click', e => {
   }
   if (b.dataset.story) { const k = b.dataset.story, sc = SCENARIOS[k], v = scenOf(k); if (!v) return; const lines = [...sc.intro, ...sc.steps.slice(0, v.done ? sc.steps.length : v.s + 1).map(x => x.story), ...(v.done ? sc.end : [`▶ ${sc.steps[v.s].hint}`])]; showStory(`「${sc.th}」`, lines, sc.icon); return; }
   if (b.dataset.encs) { enterEncounter(SCENARIOS[b.dataset.encs].mon); return; }
+  if (b.dataset.cxtab) { codexTab = b.dataset.cxtab; sfx('tap'); return refreshSheet(); }
+  if (b.dataset.act === 'codex') { openCodex(); return; }
   if (b.dataset.mapz != null) { mapSel = +b.dataset.mapz; sfx('tap'); return refreshSheet(); }
   if (b.dataset.job) { const k = b.dataset.job; if (!JOBS[k] || P.lv < 15) return; if (P.job) { if (P.gold < 5000) { toast('ต้องใช้ 5,000 ทอง'); return; } P.gold -= 5000; } P.job = k; gearDirty(); sfx('lvl'); banner(`อาชีพ: ${JOBS[k].th}`, fmtFx(JOBS[k].fx)); save(); hudStatic(); return refreshSheet(); }
   if (b.dataset.fuse) { const id = b.dataset.fuse, q = runeOf(id); if (!q || q.g >= 5 || (P.runes[id] || 0) < 3) return; addRune(id, -3); const nid = q.t + (q.g + 1); addRune(nid); sfx('lvl'); banner('รวมรูนสำเร็จ!', runeName(nid)); save(); return refreshSheet(); }
@@ -3723,6 +3737,53 @@ function zoneCanvas(cz) {
     g.putImageData(img, 0, 0); drawMinimap.zone[cz] = c;
   }
   return drawMinimap.zone[cz];
+}
+
+/* ---------------- Codex (J) ---------------- */
+// A record of everything met in the world. Monsters unlock on the first kill; finishing more of the bestiary grants permanent bonuses.
+const CODEX_MILE = [[.25, { hpP: .03 }, 'HP +3%'], [.5, { atkP: .03 }, 'ATK +3%'], [.75, { defP: .03 }, 'DEF +3%'], [1, { atkP: .05, defP: .05, hpP: .05, spdP: .05, lukP: .05 }, 'ทุกค่า +5%']];
+const codexMonKeys = () => FOE_KEYS.filter(k => !FOES[k].uniq);
+function codexSync() {
+  const c = P.codex = P.codex || { m: {}, pet: [], uq: [] };
+  c.m = c.m || {}; c.pet = c.pet || []; c.uq = c.uq || [];
+  for (const k of P.secretKills || []) if (!c.m[k]) c.m[k] = 1;
+  for (const pt of P.pets || []) if (!c.pet.includes(pt.sp)) c.pet.push(pt.sp);
+  for (const it of [...(P.bag || []), ...Object.values(P.eq || {})]) if (it && it.uq && !c.uq.includes(it.uq)) c.uq.push(it.uq);
+  return c;
+}
+const codexMonPct = () => { const ks = codexMonKeys(), c = P.codex || { m: {} }; return ks.filter(k => (c.m || {})[k]).length / ks.length; };
+function codexFx() { const o = {}, pc = codexMonPct(); for (const [t, f] of CODEX_MILE) if (pc >= t) for (const k in f) o[k] = (o[k] || 0) + f[k]; return o; }
+function codexKill(key) {
+  const c = codexSync(); const first = !c.m[key]; c.m[key] = (c.m[key] || 0) + 1;
+  if (!first) return;
+  const before = codexMonPct() - 1 / codexMonKeys().length;
+  floatAt(me.x, me.y - 70, `📖 Codex: ${FOES[key].name.replace('✦ ', '')}`, '#C9E7FF', 14);
+  for (const [t, , txt] of CODEX_MILE) if (before < t && codexMonPct() >= t) { gearDirty(); setTimeout(() => { banner(`Codex มอนสเตอร์ ${Math.round(t * 100)}%!`, `ได้รับโบนัสถาวร ${txt}`); sfx('rare'); }, 700); }
+}
+let codexTab = 'mon';
+function openCodex() { codexSync(); openSheet('Codex', renderCodex, 'codex'); }
+function renderCodex(el) {
+  const c = codexSync(), mk = codexMonKeys(), got = mk.filter(k => c.m[k]).length;
+  const tabs = [['mon', '👾 มอนสเตอร์', `${got}/${mk.length}`], ['form', '✨ ร่าง', `${ALL_FORMS.filter(f => (P.seen || []).includes(f)).length}/${ALL_FORMS.length}`], ['pet', '🐾 สัตว์เลี้ยง', `${c.pet.length}/${PET_FORM_KEYS.length}`], ['uq', '💎 ของยูนิค', `${c.uq.length}/${UNIQUE_KEYS.length}`], ['umon', '⚠️ ยูนิคมอน', `${(P.uwins || []).length}/${Object.keys(UNIQUE_MON).length}`]];
+  const pc = codexMonPct();
+  let body = '';
+  if (codexTab === 'mon') {
+    const card = k => { const f = FOES[k], n = c.m[k], zi = FOE_ZONE[FOE_KEYS.indexOf(k)], foods = zi >= 0 ? FOOD_ZONE[zi] : [];
+      return `<div class="cx${n ? '' : ' unk'}${f.boss ? ' boss' : ''}${f.sec ? ' sec' : ''}"><span class="ce">${f.e}</span><b>${n ? esc(f.name.replace('✦ ', '')) : '???'}</b><small>${n ? `Lv ${f.lv || (zi >= 0 ? ZONES[zi].lv : '?')}${f.boss ? ' · บอส' : f.sec ? ' · มอนลับ' : ''}` : 'ยังไม่เคยปราบ'}</small>${n ? `<small>ปราบแล้ว ${n.toLocaleString()} ตัว</small>${foods.length && !f.boss ? `<small>ดรอป ${foods.map(q => PET_FOODS[q].icon).join('')}</small>` : ''}` : ''}</div>`; };
+    const groups = ZONES.map((z, zi) => [z.name, mk.filter(k => FOE_ZONE[FOE_KEYS.indexOf(k)] === zi)]);
+    groups.push(['ดันเจี้ยน', mk.filter(k => FOE_ZONE[FOE_KEYS.indexOf(k)] < 0 && !FOES[k].sec)], ['มอนลับ ✦', mk.filter(k => FOES[k].sec)]);
+    body = `<div class="panel" style="font-size:13px"><b>รางวัลสะสม Codex มอนสเตอร์ ${Math.round(pc * 100)}%</b><div class="bar xp" style="margin:6px 0"><i style="width:${pc * 100}%"></i></div>${CODEX_MILE.map(([t, , txt]) => `<span class="chip" style="${pc >= t ? 'background:#DFF5D8' : 'opacity:.6'}">${Math.round(t * 100)}% · ${txt}${pc >= t ? ' ✓' : ''}</span>`).join(' ')}</div>`
+      + groups.filter(([, ks]) => ks.length).map(([name, ks]) => `<p class="eyebrow" style="margin:8px 0 4px">${esc(name)} · ${ks.filter(k => c.m[k]).length}/${ks.length}</p><div class="cxgrid">${ks.map(card).join('')}</div>`).join('');
+  } else if (codexTab === 'form') {
+    body = `<div class="cxgrid">${ALL_FORMS.map(f => { const kn = (P.seen || []).includes(f); return `<div class="cx${kn ? '' : ' unk'}"><span class="cp">${blobSVG(P.color, 3, { form: f, rk: 2, noShadow: true })}</span><b>${kn ? esc(formName(f)) : '???'}</b><small>${kn ? FORM_ARCH[f].th : 'ยังไม่เคยเป็นร่างนี้'}</small></div>`; }).join('')}</div><p class="muted" style="font-size:12px">แสดงร่างของสี${col().species} · ร่างที่เคยได้จะถูกบันทึกไว้</p>`;
+  } else if (codexTab === 'pet') {
+    body = [1, 2, 3].map(stg => `<p class="eyebrow" style="margin:8px 0 4px">ขั้น ${stg}</p><div class="cxgrid">${PET_FORM_KEYS.filter(k => PET_FORMS[k].st === stg).map(k => { const kn = c.pet.includes(k); return `<div class="cx${kn ? '' : ' unk'}"><span class="ce">${PET_FORMS[k].e}</span><b>${kn ? esc(PET_FORMS[k].name) : '???'}</b></div>`; }).join('')}</div>`).join('');
+  } else if (codexTab === 'uq') {
+    body = `<div class="cxgrid">${UNIQUE_KEYS.map(k => { const u = UNIQUES[k], kn = c.uq.includes(k), sq = SECRETS.find(q => q.uq === k); return `<div class="cx${kn ? '' : ' unk'} sec"><span class="ce">${u.icon}</span><b>${kn ? esc(u.name) : '???'}</b><small>${kn ? esc(u.desc) : `ดรอปจาก${sq && c.m[sq.key] ? FOES[sq.key].name.replace('✦ ', '') : 'มอนลับบางตัว'}`}</small></div>`; }).join('')}</div>`;
+  } else {
+    body = `<div class="cxgrid">${Object.entries(UNIQUE_MON).map(([k, u]) => { const w = (P.uwins || []).includes(k), cur = (P.curses || []).includes(k); return `<div class="cx${w || cur ? '' : ' unk'} boss"><span class="ce">${FOES[k].e}</span><b>${w || cur ? esc(u.th) : '???'}</b><small>${w ? `ปราบแล้ว · «${esc(u.honor)}»` : cur ? `☠️ ติด${esc(u.curse)}` : 'ยังไม่เคยพบ'}</small></div>`; }).join('')}</div>`;
+  }
+  el.innerHTML = `<div class="cxtabs">${tabs.map(([k, t, n]) => `<button class="btn sm${codexTab === k ? ' primary' : ''}" type="button" data-cxtab="${k}">${t} <small>${n}</small></button>`).join('')}</div>${body}`;
 }
 /* ---------------- world map (M) ---------------- */
 let mapSel = 0;
