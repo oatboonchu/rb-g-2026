@@ -1741,6 +1741,30 @@ function formTierArt(form, ft, c, SL) {
   return [b, f];
 }
 const TIER_NAME = { 2: '', 3: 'ขั้นตื่นรู้', 4: 'ขั้นตำนาน', 5: 'ขั้นเทพ' };
+// Body silhouette: the round slime until the first transformation, then each form line has its own shape,
+// which grows bigger and less round from form 3 on (broad brute, armoured block, lean runner, giant, cat-eared lucky, ...).
+const BODY_ROUND = 'M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z';
+const BODY_SHAPES = {
+  atk:     ['M60 20C84 20 98 36 100 54L110 62C112 72 106 80 100 82C100 98 86 108 60 108C34 108 20 98 20 82C14 80 8 72 10 62L20 54C22 36 36 20 60 20Z',
+            'M60 18C82 18 96 32 98 50L114 58C116 70 108 78 100 78L92 108H28L20 78C12 78 4 70 6 58L22 50C24 32 38 18 60 18Z'],
+  def:     ['M60 20C88 20 104 30 104 50V92C104 104 94 108 60 108C26 108 16 104 16 92V50C16 30 32 20 60 20Z',
+            'M60 16C86 16 100 26 102 42L112 50V78L104 84V100C104 106 96 110 60 110C24 110 16 106 16 100V84L8 78V50L18 42C20 26 34 16 60 16Z'],
+  spd:     ['M60 18C80 18 94 40 94 66C94 92 82 108 60 108C38 108 26 92 26 66C26 40 40 18 60 18Z',
+            'M60 16C80 16 92 38 92 62C92 80 86 90 80 96L84 110H66L60 100L54 110H36L40 96C34 90 28 80 28 62C28 38 40 16 60 16Z'],
+  hp:      ['M60 22C84 22 98 42 102 62C112 80 110 108 60 108C10 108 8 80 18 62C22 42 36 22 60 22Z',
+            'M60 20C84 20 98 38 102 56C116 70 116 96 104 104L98 112H72V106H48V112H22L16 104C4 96 4 70 18 56C22 38 36 20 60 20Z'],
+  luk:     ['M60 24C74 24 80 12 88 12C94 22 96 34 98 44C104 56 106 66 106 76C106 98 88 108 60 108C32 108 14 98 14 76C14 66 16 56 22 44C24 34 26 22 32 12C40 12 46 24 60 24Z',
+            'M60 24C74 24 80 10 90 10C96 22 97 34 99 44C105 56 106 66 106 78C106 92 104 102 98 110L86 104L73 110L60 104L47 110L34 104L22 110C16 102 14 92 14 78C14 66 15 56 21 44C23 34 24 22 30 10C40 10 46 24 60 24Z'],
+  rainbow: ['M60 14C72 30 104 52 104 72C104 96 86 108 60 108C34 108 16 96 16 72C16 52 48 30 60 14Z',
+            'M60 10C74 28 110 50 108 74C106 90 98 100 90 104L96 112H24L30 104C22 100 14 90 12 74C10 50 46 28 60 10Z'],
+  shadow:  ['M60 20C88 20 104 44 104 70V104L92 96L80 108L68 96L60 108L52 96L40 108L28 96L16 104V70C16 44 32 20 60 20Z',
+            'M60 16C90 16 108 42 108 70V110L96 98L84 112L72 98L60 112L48 98L36 112L24 98L12 110V70C12 42 30 16 60 16Z'],
+  unique:  ['M60 20C84 20 98 36 100 54L108 60L104 72C106 86 108 100 110 108H10C12 100 14 86 16 72L12 60L20 54C22 36 36 20 60 20Z',
+            'M60 18C84 18 98 34 100 52L110 58L104 70C106 84 112 100 116 110H4C8 100 14 84 16 70L10 58L20 52C22 34 36 18 60 18Z'],
+};
+// Evolved bodies also grow each stage (anchored at the feet) so the new silhouette shows past armour and decorations.
+const bodyGrow = (form, ft) => { if (!form || (ft || 2) < 3) return ''; const k = { 3: [1.08, 1.1], 4: [1.12, 1.16], 5: [1.14, 1.18] }[ft] || [1, 1]; return ` transform="translate(60 110) scale(${k[0]} ${k[1]}) translate(-60 -110)"`; };
+const bodyD = (form, ft) => { const b = form && BODY_SHAPES[form]; return b ? b[(ft || 2) >= 3 ? 1 : 0] : BODY_ROUND; };
 function blobSVG(color, st = 1, o = {}) {
   const form = o.form && FORM_ARCH[o.form] ? o.form : null;
   const SL = SECRET_LOOK[color], ft = o.ft || 0, rk = o.rk || 0;
@@ -1777,7 +1801,7 @@ function blobSVG(color, st = 1, o = {}) {
   const sparkle = o.shiny ? STAR(104, 28, 7, '') + STAR(14, 50, 5, 'b') + STAR(100, 92, 4, 'b') : '';
   const shadow = o.noShadow ? '' : `<ellipse cx="60" cy="111" rx="34" ry="5.5" fill="rgba(51,40,74,.18)"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true"><defs>${form === 'rainbow' ? `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${SL.rg.map((cc, k) => `<stop offset="${(k / 5).toFixed(2)}" stop-color="${cc}"/>`).join('')}</linearGradient>` : `<radialGradient id="${id}" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${c[0]}"/><stop offset=".55" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></radialGradient>`}</defs>`
-    + shadow + `<g class="blob-body"${bodyT}>${back}<path d="M60 22C90 22 106 48 106 74C106 98 88 108 60 108C32 108 14 98 14 74C14 48 30 22 60 22Z" fill="url(#${id})" stroke="${rk >= 7 ? '#D4A017' : INK}" stroke-width="${rk >= 7 ? 4 : 3}"/>`
+    + shadow + `<g class="blob-body"${bodyT}>${back}<path d="${bodyD(form, ft)}"${bodyGrow(form, ft)} fill="url(#${id})" stroke="${rk >= 7 ? '#D4A017' : INK}" stroke-width="${rk >= 7 ? 4 : 3}"/>`
     + `<ellipse cx="40" cy="42" rx="11" ry="5.5" fill="#fff" opacity=".6" transform="rotate(-32 40 42)"/>`
     + `${eyes}<ellipse cx="33" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/><ellipse cx="87" cy="81" rx="6.5" ry="3.8" fill="#FF6F91" opacity=".45"/>${mouth}${front}${st >= 3 && !form ? CROWN : ''}${formArt}</g>${sparkle}</svg>`;
 }
