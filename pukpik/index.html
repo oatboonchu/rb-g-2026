@@ -410,6 +410,69 @@ const SKILLS = {
   ],
 };
 const SKILL_MAX = 5;
+// ---------------- Normal skills per form ----------------
+// After transforming, the 4 colour skills become the form's own versions: renamed from the colour's element + the form's
+// theme, with the form's twist on slots 1, 2 and 4, and slot 3 replaced by the form's own support skill.
+// Skill ids stay the same so skill levels carry over.
+const ELEM = { red: 'เพลิง', blue: 'วารี', yellow: 'อัสนี', brown: 'ศิลา', green: 'พฤกษา' };
+const TYPE_NOUN = { nova: ['คลื่น', 'วิบัติ'], strike: ['หมัด', 'ทัณฑ์'], chain: ['สายโซ่', 'พายุ'], heal: ['พร', 'สายธาร'], shield: ['เกราะ', 'ปราการ'], buff: ['พลัง', 'พลัง'], dash: ['พุ่ง', 'ทะลวง'], meteor: ['ดาวตก', 'ดาราถล่ม'] };
+const ARCH_SK = {
+  atk:     { w: 'ทำลาย', note: 'แรงขึ้น 25% วงกว้างขึ้น', m: { mult: 1.25, r: 1.1 }, util: { name: 'โทสะ', icon: '😡', type: 'buff', buff: 'atk', amt: .45, dur: 8, cd: 15, cost: 12, desc: 'ATK เพิ่ม 45% ชั่วคราว' } },
+  def:     { w: 'พิทักษ์', note: 'ใช้แล้วได้โล่ลดดาเมจ 30%', m: { mult: 1.05, shieldAfter: .3 }, util: { name: 'ปราการ', icon: '🏯', type: 'shield', amt: .65, dur: 7, mult: 1.2, r: 90, cd: 14, cost: 12, desc: 'โล่ลดดาเมจ 65% และกระแทกรอบตัว' } },
+  spd:     { w: 'พริบตา', note: 'คูลดาวน์ −25% ระยะไกลขึ้น', m: { cd: .75, dist: 1.3, range: 1.2, n: 1 }, util: { name: 'วายุเร่ง', icon: '🏃', type: 'buff', buff: 'haste', amt: .5, dur: 8, cd: 14, cost: 10, desc: 'ตีเร็วและเดินเร็วขึ้น 50% ชั่วคราว' } },
+  hp:      { w: 'ชีวิต', note: 'ใช้แล้วฟื้น HP 6%', m: { mult: 1.05, healAfter: .06 }, util: { name: 'ธารชีวิต', icon: '💗', type: 'heal', amt: .45, mult: 1, r: 90, cd: 12, cost: 12, desc: 'ฟื้น HP ก้อนใหญ่และกระแทกรอบตัว' } },
+  luk:     { w: 'นำโชค', note: 'คริง่ายขึ้นมาก ยิงเพิ่ม', m: { crit: 30, n: 2 }, util: { name: 'ดาวนำโชค', icon: '🌟', type: 'buff', buff: 'crit', amt: 40, dur: 8, cd: 15, cost: 10, desc: 'โอกาสคริเพิ่ม 40% ชั่วคราว' } },
+  rainbow: { w: 'สายรุ้ง', note: 'แรงขึ้น ฟื้น HP และได้โล่', m: { mult: 1.15, healAfter: .04, shieldAfter: .2 }, util: { name: 'ปาฏิหาริย์', icon: '🌈', type: 'nova', mult: 1.5, r: 120, c: '#FF8FB1', heal: .3, shield: .4, dur: 5, cd: 14, cost: 14, desc: 'คลื่นสายรุ้ง ฟื้น HP และได้โล่' } },
+  shadow:  { w: 'ทมิฬ', note: 'แรงขึ้น 30% ดูดเลือด', m: { mult: 1.3, steal: .1 }, util: { name: 'เงาคลั่ง', icon: '🌑', type: 'buff', buff: 'atk', amt: .6, dur: 7, cd: 16, cost: 12, desc: 'ATK เพิ่ม 60% ชั่วคราว' } },
+  unique:  { w: 'จักรพรรดิ', note: 'แรงขึ้น 30% คริง่าย ฟื้น HP', m: { mult: 1.3, crit: 20, healAfter: .05 }, util: { name: 'บัญชาจักรพรรดิ', icon: '👑', type: 'nova', mult: 2, r: 140, c: '#FFD23F', heal: .3, shield: .5, dur: 5, cd: 14, cost: 16, desc: 'คลื่นพลังจักรพรรดิ ฟื้น HP และได้โล่' } },
+};
+const normSkCache = new Map();
+function normalSkillsFor(color, form, t, fb, sub) {
+  const base = SKILLS[color], A = form && ARCH_SK[form]; if (!A) return base;
+  t = t || 2; const key = [color, form, t, fb || '', sub || ''].join('|');
+  if (normSkCache.has(key)) return normSkCache.get(key);
+  const k = t - 2, fx = pathFx(fb, sub, t), el = ELEM[color], pre = ['', '', '', 'มหา', 'อัคร', 'เทพ'][t];
+  const out = base.map((b, i) => {
+    let sk;
+    if (i === 2) sk = Object.assign({}, A.util, { id: b.id, unlock: b.unlock, name: A.util.name + el });
+    else {
+      sk = Object.assign({}, b, { name: TYPE_NOUN[b.type][i === 3 ? 1 : 0] + el + A.w });
+      const m = A.m;
+      if (m.mult && sk.mult) sk.mult *= m.mult;
+      if (m.r && sk.r) sk.r = Math.round(sk.r * m.r);
+      if (m.cd) sk.cd *= m.cd;
+      if (m.dist && sk.dist) sk.dist = Math.round(sk.dist * m.dist);
+      if (m.range && sk.range) sk.range = Math.round(sk.range * m.range);
+      if (m.n && sk.n) sk.n += m.n;
+      if (m.crit) sk.crit = (sk.crit || 0) + m.crit;
+      if (m.steal) sk.steal = (sk.steal || 0) + m.steal;
+      if (m.shieldAfter && sk.type !== 'shield') sk.shieldAfter = m.shieldAfter;
+      if (m.healAfter && sk.type !== 'heal') sk.healAfter = m.healAfter;
+      sk.desc = b.desc + ` · ร่าง${formName0(color, form)}: ${A.note}`;
+    }
+    // each stage: +8% power, −4% cooldown, bigger reach; the line adds part of its own twist
+    sk.name = pre + sk.name;
+    if (sk.mult) sk.mult *= 1 + .08 * k;
+    if (sk.amt && sk.type !== 'buff') sk.amt = Math.min(.9, sk.amt * (1 + .05 * k));
+    if (sk.type === 'buff') sk.amt *= 1 + .08 * k;
+    sk.cd *= 1 - .04 * k;
+    if (sk.r) sk.r = Math.round(sk.r * (1 + .05 * k));
+    if (fx) {
+      if (sk.mult) sk.mult *= Math.sqrt(fx.skMult);
+      sk.cd *= Math.sqrt(fx.cdMul);
+      if (sk.r) sk.r = Math.round(sk.r * Math.sqrt(fx.rMul));
+      if (sk.n) sk.n += Math.floor(fx.nAdd / 2);
+      if (fx.skShield && !sk.shieldAfter && sk.type !== 'shield') sk.shieldAfter = fx.skShield / 2;
+      if (fx.heal && !sk.healAfter && sk.type !== 'heal') sk.healAfter = fx.heal / 3;
+      if (fx.steal) sk.steal = (sk.steal || 0) + fx.steal;
+      sk.name += '·' + fx.last.th.replace(/^(สาย|ยูนิค·)/, '');
+    }
+    return sk;
+  });
+  normSkCache.set(key, out); return out;
+}
+const formName0 = (color, f) => FORM_NAMES[color][f] || SECRET_NAME[f];
+
 const BASE = { hp: 42, atk: 9, def: 7, spd: 7, luk: 6 };
 const BONUS = { hp: 28, atk: 5, def: 5, spd: 5, luk: 6 };
 const GROW = { hp: 7, atk: 2, def: 1.6, spd: 1.4, luk: 1.2 };
@@ -1507,7 +1570,7 @@ const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
 const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
 const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ap('haste'));
 const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75)) * (1 + uqFx('move'));
-const mySkills = () => { const fs = P.form && formSkillFor(P.color, P.form, P.formTier, P.formBranch, P.formSub); return fs ? [...SKILLS[P.color], fs] : SKILLS[P.color]; };
+const mySkills = () => { const fs = P.form && formSkillFor(P.color, P.form, P.formTier, P.formBranch, P.formSub); const ns = normalSkillsFor(P.color, P.form, P.formTier, P.formBranch, P.formSub); return fs ? [...ns, fs] : ns; };
 const skLv = sk => (P.lv >= sk.unlock ? clamp(P.skills[sk.id] || 1, 1, SKILL_MAX) : 0);
 const skPow = L => 1 + .15 * (L - 1);
 const skCd = (sk, L) => sk.cd * (1 - .05 * (Math.max(1, L) - 1)) * (1 - Math.min(.4, uqFx('cdr')));
