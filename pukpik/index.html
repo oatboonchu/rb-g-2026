@@ -643,7 +643,10 @@ function formOdds() {
 function formName(f) { return FORM_NAMES[P.color][f]; }
 const maxHp = () => st('hp');
 const maxMp = () => 20 + (P.lv - 1) * 3;
-const xpNeed = lv => Math.round(14 * Math.pow(lv, 1.55));
+// Early levels stay quick; the curve steepens after ~Lv 8 (about 3.6x the old cost at Lv 20).
+const xpNeed = lv => Math.round(14 * Math.pow(lv, 1.55) * (1 + lv * lv / 150));
+// Monsters more than 3 levels below you give less EXP (down to 10%).
+const xpScale = mlv => { const d = P.lv - mlv; return d <= 3 ? 1 : Math.max(.1, 1 - .2 * (d - 3)); };
 const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
 const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
 const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ((arch() && arch().haste) || 0));
@@ -879,7 +882,7 @@ function damageMon(m, dmg, byPeer) {
   if (!m.target && byPeer) m.target = byPeer;
   if (m.hp <= 0) {
     sim.mons.delete(m.id);
-    sim.respawn[m.slot] = nowS() + (m.boss ? 75 : rnd(6, 11));
+    sim.respawn[m.slot] = nowS() + (m.boss ? 150 : rnd(6, 11));
     const kill = [m.id, m.t, m.lv, Math.round(m.x), Math.round(m.y)];
     sim.k.push(kill); if (sim.k.length > 12) sim.k.shift();
     onKill(kill);
@@ -1190,9 +1193,9 @@ function onKill(k) {
   const hitAt = myHits.get(id);
   if (hitAt == null || nowS() - hitAt > 30 || rewarded.has(id)) return;
   rewarded.add(id); myHits.delete(id);
-  reward(s, x, y);
+  reward(s, x, y, lv);
 }
-function reward(s, x, y) {
+function reward(s, x, y, mlv) {
   P.kills++; if (s.boss) P.bossKills++;
   sfx('kill');
   const luk = st('luk');
@@ -1202,8 +1205,9 @@ function reward(s, x, y) {
   const tier = s.zi;
   if (s.boss) { dropLoot('item', x, y, makeItem(tier, 2)); dropLoot('item', x, y, makeItem(tier, 1)); if (Math.random() < .5) dropLoot('elixir', x, y, 1); }
   else if (Math.random() * 100 < (20 + luk * .3) * (1 + ((arch() && arch().drop) || 0))) dropLoot('item', x, y, makeItem(tier, 0));
-  floatAt(x, y - 44, `+${s.xp} EXP`, '#FFE08A', 14);
-  gainXp(s.xp);
+  const xp = Math.max(1, Math.round(s.xp * xpScale(mlv)));
+  floatAt(x, y - 44, `+${xp} EXP${xp < s.xp ? ' (มอนเลเวลต่ำ)' : ''}`, xp < s.xp ? '#C9C2D6' : '#FFE08A', 14);
+  gainXp(xp);
   save();
 }
 function gainXp(x) {
@@ -1708,9 +1712,9 @@ function drawMon(m) {
   ctx.drawImage(emojiSprite(s.e, 40), -size * .65, -size * .65, size * 1.3, size * 1.3);
   ctx.filter = 'none'; ctx.restore();
   const top = m.ry - size - 4;
-  if (s.boss) { ctx.drawImage(emojiSprite('👑', 20), m.rx - 13, top - 22, 26, 26); drawName(`${s.name} Lv${m.lv}`, m.rx, top - 22, '#FFB0B8', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif'); }
+  if (s.boss) { ctx.drawImage(emojiSprite('👑', 20), m.rx - 13, top - 22, 26, 26); drawName(`${s.name} Lv${m.lv}`, m.rx, top - 22, xpScale(m.lv) < 1 ? '#C9C2D6' : '#FFB0B8', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif'); }
   if (hp < m.maxHp || s.boss) { const w = s.boss ? 60 : 34; ctx.fillStyle = INK; ctx.fillRect(m.rx - w / 2 - 1, top - 1, w + 2, 6); ctx.fillStyle = '#FF5C6C'; ctx.fillRect(m.rx - w / 2, top, w * clamp(hp / m.maxHp, 0, 1), 4); }
-  else if (Math.hypot(m.rx - me.x, m.ry - me.y) < 150) drawName(`Lv${m.lv}`, m.rx, top + 4, '#fff', '600 10px "IBM Plex Sans Thai",system-ui,sans-serif');
+  else if (Math.hypot(m.rx - me.x, m.ry - me.y) < 150) drawName(`Lv${m.lv}`, m.rx, top + 4, xpScale(m.lv) < 1 ? '#B8B0C8' : m.lv >= P.lv + 3 ? '#FF9AA6' : '#fff', '600 10px "IBM Plex Sans Thai",system-ui,sans-serif');
 }
 const LOOT_ICON = { gold: '🪙', potion: '🍯', ether: '💧', elixir: '✨' };
 function drawLoot(l) {
