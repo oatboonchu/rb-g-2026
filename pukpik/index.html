@@ -126,6 +126,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .mapcv{width:100%;aspect-ratio:1;border:2px solid var(--ink);border-radius:12px;display:block;background:#17112A}
 .maplegend{display:flex;flex-wrap:wrap;gap:4px 12px;font:600 12px var(--f-body);color:var(--ink-soft)}
 .maplegend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.egg-btn{background:linear-gradient(135deg,var(--egg),var(--paper))!important;min-height:34px}
 .cxtabs{display:flex;flex-wrap:wrap;gap:6px}
 .cxtabs small{font:600 10px var(--f-body);opacity:.8}
 .cxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
@@ -1473,6 +1474,26 @@ const PET_STONES = {
   light:   { name: 'ศิลาแสง', icon: '⚪' }, dark: { name: 'ศิลาเงา', icon: '⚫' }, thunder: { name: 'ศิลาอัสนี', icon: '🟡' },
 };
 const STONE_PRICE = 2000, PET_EGG_PRICE = 800, PET_MAX = 6;
+// Egg types: each hatches from its own pool. Monsters drop the egg of their land (rarely); bosses can drop star eggs,
+// secret and unique monsters the legendary egg.
+const PET_EGGS = {
+  normal: { name: 'ไข่สัตว์เลี้ยง', b: '', c: '#FFF4DE', pool: ['chick', 'puppy', 'kitten', 'bunny', 'foxkit', 'froglet'], desc: 'ฟักได้ 1 ใน 6 ชนิดพื้นฐาน' },
+  leaf:   { name: 'ไข่ลายใบไม้', b: '🍃', c: '#BFE8A4', pool: ['bunny', 'froglet', 'fawn'], desc: 'สัตว์แห่งพงไพร' },
+  flame:  { name: 'ไข่เปลวเพลิง', b: '🔥', c: '#FFB38A', pool: ['foxkit', 'dinokit'], desc: 'อุ่นจนร้อนมือ' },
+  wave:   { name: 'ไข่คลื่นทะเล', b: '🌊', c: '#A9DDF5', pool: ['froglet', 'otter'], desc: 'ได้ยินเสียงคลื่นเมื่อแนบหู' },
+  night:  { name: 'ไข่ราตรี', b: '🌙', c: '#8B7BB8', pool: ['kitten', 'batling'], desc: 'เปลือกเรืองแสงตอนกลางคืน' },
+  cloud:  { name: 'ไข่ปุยเมฆ', b: '☁️', c: '#F1EDFF', pool: ['chick', 'cygnet'], desc: 'เบาจนแทบลอยได้' },
+  beast:  { name: 'ไข่ลายเสือ', b: '🐾', c: '#E8C27A', pool: ['puppy', 'cub'], desc: 'ขยับดุ๊กดิ๊กตลอดเวลา' },
+  star:   { name: 'ไข่ดวงดาว', b: '⭐', c: '#FFE98A', pool: ['foal', 'foal', 'fawn', 'otter', 'cygnet', 'cub'], rare: 1, desc: 'หายาก · ดรอปจากบอส' },
+  myth:   { name: 'ไข่ตำนาน', b: '🌈', c: '#FFC8F0', pool: ['kirin'], rare: 2, desc: 'ตำนาน · ดรอปจากมอนลับและยูนิคมอนสเตอร์' },
+};
+const EGG_KEYS = Object.keys(PET_EGGS);
+// Which egg each land's monsters drop (index = land).
+const EGG_ZONE = ['leaf', 'leaf', 'night', 'flame', 'night', 'flame', 'wave', 'wave', 'cloud', 'night', 'beast', 'cloud',
+  'wave', 'beast', 'leaf', 'night', 'wave', 'night', 'leaf', 'beast', 'flame', 'cloud', 'cloud', 'star'];
+const eggN = t => t === 'normal' ? (P.petItems.eggs || 0) : ((P.petItems.eggT || {})[t] || 0);
+function addEgg(t, n = 1) { if (t === 'normal') P.petItems.eggs = (P.petItems.eggs || 0) + n; else { P.petItems.eggT = P.petItems.eggT || {}; P.petItems.eggT[t] = Math.max(0, (P.petItems.eggT[t] || 0) + n); } }
+const eggTotal = () => EGG_KEYS.reduce((a, t) => a + eggN(t), 0);
 const PET_FORMS = {
   chick:   { st: 1, name: 'ลูกเจี๊ยบ', e: '🐣', tags: { sweet: 1, light: 1 } },
   puppy:   { st: 1, name: 'ลูกหมา', e: '🐶', tags: { beast: 1, loyal: 1 } },
@@ -1480,6 +1501,14 @@ const PET_FORMS = {
   bunny:   { st: 1, name: 'กระต่ายน้อย', e: '🐰', tags: { cute: 1, nature: 1 } },
   foxkit:  { st: 1, name: 'จิ้งจอกน้อย', e: '🦊', tags: { sly: 1, fire: 1 } },
   froglet: { st: 1, name: 'กบน้อย', e: '🐸', tags: { water: 1, nature: 1 } },
+  fawn:    { st: 1, name: 'ลูกกวางป่า', e: '🦌', egg: 1, tags: { nature: 1.5, cute: .5 } },
+  dinokit: { st: 1, name: 'ลูกไดโนไฟ', e: '🦖', egg: 1, tags: { fire: 1.5, wild: 1 } },
+  otter:   { st: 1, name: 'ลูกนาก', e: '🦦', egg: 1, tags: { water: 1.5, cute: 1 } },
+  batling: { st: 1, name: 'ลูกค้างคาว', e: '🦇', egg: 1, tags: { dark: 1.5, sly: .5 } },
+  cygnet:  { st: 1, name: 'ลูกหงส์ขาว', e: '🦢', egg: 1, tags: { light: 1.5, cute: .5 } },
+  cub:     { st: 1, name: 'ลูกหมีป่า', e: '🐻', egg: 1, tags: { beast: 1.5, wild: .5 } },
+  foal:    { st: 1, name: 'ลูกม้าเทพ', e: '🐴', egg: 1, tags: { light: 1, royal: 1.5 } },
+  kirin:   { st: 1, name: 'ลูกกิเลน', e: '🐲', egg: 1, tags: { royal: 2, fire: 1, light: 1 } },
   rooster: { st: 2, name: 'ไก่ชนเพลิง', e: '🐓', tags: { fire: 2, beast: 1 } },
   duck:    { st: 2, name: 'เป็ดวารี', e: '🦆', tags: { water: 2, cute: 1 } },
   owl:     { st: 2, name: 'นกฮูกจันทรา', e: '🦉', tags: { dark: 1.5, light: 1 } },
@@ -1515,13 +1544,13 @@ const PET_FORM_KEYS = Object.keys(PET_FORMS);
 const PET_TAGS = ['fire', 'water', 'nature', 'light', 'dark', 'thunder', 'cute', 'cool', 'royal', 'beast', 'sweet', 'wild', 'sly', 'loyal'];
 const PET_EVO_LV = { 2: 10, 3: 25 }, PET_EVO_AFF = { 2: 40, 3: 70 }, PET_LV_CAP = 50;
 const petXpNeed = lv => Math.round(10 * Math.pow(lv, 1.5));
-function newPet() {
+function newPet(sp) {
   const pers = pick(Object.keys(PET_PERS)), foods = Object.keys(PET_FOODS).filter(k => !PET_FOODS[k].rare);
   const likes = [], dislikes = [];
   // likes lean on personality but are not fixed: 70% from the personality list, else any food
   while (likes.length < 2) { const f = Math.random() < .7 ? pick(PET_PERS[pers].likes) : pick(foods); if (!likes.includes(f)) likes.push(f); }
   while (!dislikes.length) { const f = pick(foods); if (!likes.includes(f)) dislikes.push(f); }
-  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sp: pick(PET_FORM_KEYS.filter(k => PET_FORMS[k].st === 1)), stage: 1, lv: 1, xp: 0,
+  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sp: sp || pick(PET_EGGS.normal.pool), stage: 1, lv: 1, xp: 0,
     hunger: 80, aff: 10, pers, likes, dislikes, known: [], fed: {}, acc: null, hidden: pick(PET_TAGS), history: [], born: Date.now() };
 }const FOE_KEYS = Object.keys(FOES);
 const ZONES = [
@@ -1936,7 +1965,7 @@ function migrate(s) {
   s.skills = s.skills && typeof s.skills === 'object' ? s.skills : {};
   if (!FORM_ARCH[s.form]) s.form = null;
   s.pets = Array.isArray(s.pets) ? s.pets.filter(pt => pt && PET_FORMS[pt.sp] && PET_PERS[pt.pers]) : [];
-  s.petItems = Object.assign({ food: {}, stone: {}, acc: [], eggs: 0 }, s.petItems || {});
+  s.petItems = Object.assign({ food: {}, stone: {}, acc: [], eggs: 0, eggT: {} }, s.petItems || {});
   s.runes = s.runes && typeof s.runes === 'object' ? s.runes : {};
   s.act = s.act && typeof s.act === 'object' ? s.act : {}; s.traits = s.traits && typeof s.traits === 'object' ? s.traits : {}; s.scen = s.scen && typeof s.scen === 'object' ? s.scen : {}; for (const k in s.scen) if (typeof s.scen[k] === 'number') s.scen[k] = s.scen[k] === 2 ? { s: 3, done: true } : { s: 3, n: 0, b: 0 };
   s.curses = Array.isArray(s.curses) ? s.curses : []; s.uwins = Array.isArray(s.uwins) ? s.uwins : []; if (!s.latent || !LATENT[s.latent.k]) s.latent = rollLatent();
@@ -2393,6 +2422,7 @@ function leaveDungeon(msg) {
       else if (l.kind === 'item') { if (P.bag.length < BAG_MAX) P.bag.push(l.val); }
       else if (l.kind === 'petfood') P.petItems.food[l.val] = (P.petItems.food[l.val] || 0) + 1;
       else if (l.kind === 'stone') P.petItems.stone[l.val] = (P.petItems.stone[l.val] || 0) + 1;
+      else if (l.kind === 'egg') addEgg(l.val);
       else P.items[l.kind] = (P.items[l.kind] || 0) + 1;
     }
   }
@@ -2790,6 +2820,10 @@ function reward(s, x, y, mlv, tierOverride) {
     if (Math.random() < .1) dropLoot('petfood', x, y, pick(fz.filter(f => !PET_FOODS[f].rare)));
     if (s.boss && Math.random() < .5) dropLoot('petfood', x, y, 'steak');
     if ((s.sec || s.uniq) && Math.random() < .8) dropLoot('petfood', x, y, 'peach');
+    const zi = clamp(s.zi || 0, 0, EGG_ZONE.length - 1);
+    if (s.sec || FOES[s.key] && FOES[s.key].uniq) { if (Math.random() < (s.sec ? .25 : .5)) dropLoot('egg', x, y, 'myth'); }
+    else if (s.boss) { if (Math.random() < .08) dropLoot('egg', x, y, 'star'); else if (Math.random() < .03) dropLoot('egg', x, y, EGG_ZONE[zi]); }
+    else if (Math.random() < .003) dropLoot('egg', x, y, Math.random() < .15 ? 'normal' : EGG_ZONE[zi]);
     const pm = activePet() && PET_MOODS[petMood(activePet())]; if (pm && pm.drop && Math.random() < pm.drop) dropLoot('petfood', x, y, pick(fz)); }
   if (s.boss && Math.random() < .3) dropLoot('stone', x, y, pick(Object.keys(PET_STONES)));
   if (Math.random() < (s.boss ? .4 : s.sec ? 1 : .025) * (1 + uqFx('drop'))) dropLoot('rune', x, y, rollRune(mlv, s.boss || s.sec ? .3 : 0));
@@ -2845,6 +2879,7 @@ function pickupLoot(dt) {
       if (it.r >= 3) banner(`ได้ของ${RAR[it.r].th}!`, itemName(it));
       $('#bBag').innerHTML = '🎒<span class="dot"></span><kbd class="kb">I</kbd>';
     } else if (l.kind === 'petfood') { P.petItems.food[l.val] = (P.petItems.food[l.val] || 0) + 1; floatAt(me.x, me.y - 40, PET_FOODS[l.val].icon + ' +1', '#fff', 15); sfx('pick'); }
+    else if (l.kind === 'egg') { addEgg(l.val); const eg = PET_EGGS[l.val]; floatAt(me.x, me.y - 40, `🥚${eg.b} ${eg.name}!`, '#FFE98A', 16); sfx('rare'); banner(`ได้${eg.name}!`, `${eg.desc} · เปิด 🐾 เพื่อฟัก`); chatLine('', `🥚 ${P.name} ได้${eg.name}`, true); }
     else if (l.kind === 'rune') { addRune(l.val); floatAt(me.x, me.y - 40, `${RUNES[runeOf(l.val).t].icon} ${runeName(l.val)}`, RUNES[runeOf(l.val).t].c, 15); sfx('rare'); }
     else if (l.kind === 'stone') { P.petItems.stone[l.val] = (P.petItems.stone[l.val] || 0) + 1; floatAt(me.x, me.y - 40, PET_STONES[l.val].name + ' +1', '#E9D5FF', 15); sfx('rare'); }
     else { P.items[l.kind]++; floatAt(me.x, me.y - 40, CONSUME[l.kind].icon + ' +1', '#fff', 15); sfx('pick'); }
@@ -3190,7 +3225,7 @@ function adminAct(act, v) {
   else if (act === 'uniques') { for (const k of UNIQUE_KEYS) if (P.bag.length < BAG_MAX) P.bag.push(makeUnique(k)); toast('ใส่ของยูนิคไว้ในกระเป๋าแล้ว'); }
   else if (act === 'titles') { P.titles = TITLES.map(t => t.id); if (!P.title) P.title = TITLES[0].id; }
   else if (act === 'warps') { P.warps = WARPS.map((_, i) => i); }
-  else if (act === 'petkit') { P.petItems.eggs += 3; for (const k in PET_FOODS) P.petItems.food[k] = (P.petItems.food[k] || 0) + 10; for (const k in PET_STONES) P.petItems.stone[k] = (P.petItems.stone[k] || 0) + 3; P.petItems.acc = Object.keys(PET_ACCS); toast('ได้ของสัตว์เลี้ยงแล้ว เปิด 🐾'); }
+  else if (act === 'petkit') { P.petItems.eggs += 3; for (const t of EGG_KEYS) if (t !== 'normal') addEgg(t, 2); for (const k in PET_FOODS) P.petItems.food[k] = (P.petItems.food[k] || 0) + 10; for (const k in PET_STONES) P.petItems.stone[k] = (P.petItems.stone[k] || 0) + 3; P.petItems.acc = Object.keys(PET_ACCS); toast('ได้ของสัตว์เลี้ยงแล้ว เปิด 🐾'); }
   else if (act === 'petlv') { const pt = activePet(); if (!pt) { toast('ยังไม่มีสัตว์เลี้ยงที่ออกเดินทาง'); return; } pt.lv = 30; pt.xp = 0; pt.aff = 100; pt.hunger = 100; toast('สัตว์เลี้ยง Lv 30 แล้ว'); }
   else if (act === 'secret') {
     const z = zoneAt(me.x, me.y) - 1, q = SECRETS.find(e => e.zones.includes(z));
@@ -3225,18 +3260,19 @@ function adminAct(act, v) {
 }
 $('#bAdmin').onclick = () => { sfx('tap'); openAdmin(); };
 let petSel = null, petMsg = '';
+function eggButtons(cls) { return EGG_KEYS.filter(t => eggN(t)).map(t => { const eg = PET_EGGS[t]; return `<button class="${cls} egg-btn" type="button" data-pet="hatch" data-v="${t}" style="--egg:${eg.c}" title="${eg.desc}">🥚${eg.b} ฟัก${eg.name} ×${eggN(t)}</button>`; }).join(''); }
 function openPets() { petSel = P.petActive; petMsg = ''; openSheet('สัตว์เลี้ยง', renderPets, 'pets'); }
 const hearts = a => '❤️'.repeat(Math.round(a / 20)) + '🤍'.repeat(5 - Math.round(a / 20));
 function renderPets(el) {
   if (!(P.pets || []).length) {
-    el.innerHTML = `<p style="margin:0">ยังไม่มีสัตว์เลี้ยง ไปหาคุณยายที่ร้านสัตว์เลี้ยงในเมือง (ฝั่งซ้ายของน้ำพุ) รับไข่ใบแรกฟรี!</p>${P.petItems.eggs ? `<button class="btn primary block" type="button" data-pet="hatch">🥚 ฟักไข่สัตว์เลี้ยง (มี ${P.petItems.eggs})</button>` : ''}`;
+    el.innerHTML = `<p style="margin:0">ยังไม่มีสัตว์เลี้ยง ไปหาคุณยายที่ร้านสัตว์เลี้ยงในเมือง (ฝั่งซ้ายของน้ำพุ) รับไข่ใบแรกฟรี!</p>${eggButtons('btn primary block')}`;
     return;
   }
   const pt = P.pets.find(x => x.id === petSel) || P.pets[0]; petSel = pt.id;
   const f = PET_FORMS[pt.sp], per = petPers(pt), fedTotal = Object.values(pt.fed).reduce((a, b) => a + b, 0);
   const nextSt = pt.stage + 1, canEvo = pt.stage < 3 && pt.lv >= PET_EVO_LV[nextSt] && pt.aff >= PET_EVO_AFF[nextSt];
   el.innerHTML = `
-    <div class="chips">${P.pets.map(x => `<button class="btn sm${x.id === pt.id ? ' primary' : ''}" type="button" data-pet="sel" data-v="${x.id}" style="min-height:34px">${PET_FORMS[x.sp].e} ${PET_FORMS[x.sp].name}${x.id === P.petActive ? ' ✓' : ''}</button>`).join('')}${P.petItems.eggs ? `<button class="btn sm" type="button" data-pet="hatch" style="min-height:34px">🥚 ฟัก (${P.petItems.eggs})</button>` : ''}</div>
+    <div class="chips">${P.pets.map(x => `<button class="btn sm${x.id === pt.id ? ' primary' : ''}" type="button" data-pet="sel" data-v="${x.id}" style="min-height:34px">${PET_FORMS[x.sp].e} ${PET_FORMS[x.sp].name}${x.id === P.petActive ? ' ✓' : ''}</button>`).join('')}</div>${eggTotal() ? `<div class="chips" style="margin-top:6px">${eggButtons('btn sm')}</div>` : ''}
     ${petMsg ? `<div class="panel center" style="background:#FFF3F8">${petMsg}</div>` : ''}
     <div class="panel" style="display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:center">
       <div style="font-size:58px;text-align:center;line-height:1.1">${f.e}${pt.acc ? `<div style="font-size:20px">${PET_ACCS[pt.acc].icon}</div>` : ''}</div>
@@ -3311,10 +3347,12 @@ function evolvePet(pt, stoneKey) {
   banner(`สัตว์เลี้ยงวิวัฒน์เป็น${PET_FORMS[pickK].name}!`, `ร่างขั้น ${next}`);
   if (pt.id === P.petActive) petEmote('✨');
 }
-function hatchPetEgg() {
-  if (!(P.petItems.eggs > 0) || P.pets.length >= PET_MAX) { if (P.pets.length >= PET_MAX) toast(`เลี้ยงได้สูงสุด ${PET_MAX} ตัว`); return; }
-  P.petItems.eggs--; const pt = newPet(); P.pets.push(pt); if (!P.petActive) P.petActive = pt.id; petSel = pt.id;
-  petMsg = `🥚💥 ฟักออกมาเป็น <b>${PET_FORMS[pt.sp].name}</b> ${PET_FORMS[pt.sp].e} นิสัย${petPers(pt).th}!`;
+function hatchPetEgg(t) {
+  t = PET_EGGS[t] ? t : 'normal'; const eg = PET_EGGS[t];
+  if (!(eggN(t) > 0) || P.pets.length >= PET_MAX) { if (P.pets.length >= PET_MAX) toast(`เลี้ยงได้สูงสุด ${PET_MAX} ตัว`); return; }
+  addEgg(t, -1); const pt = newPet(pick(eg.pool)); P.pets.push(pt); if (!P.petActive) P.petActive = pt.id; petSel = pt.id;
+  if (eg.rare) { pt.aff = eg.rare === 2 ? 40 : 25; pt.hidden = eg.rare === 2 ? 'royal' : pt.hidden; }
+  petMsg = `🥚💥 ${eg.name}ฟักออกมาเป็น <b>${PET_FORMS[pt.sp].name}</b> ${PET_FORMS[pt.sp].e} นิสัย${petPers(pt).th}!${eg.rare ? ' ✨ เกิดมาสนิทกับคุณแล้ว' : ''}`;
   sfx('hatch'); banner(`ได้${PET_FORMS[pt.sp].name}!`, `นิสัย${petPers(pt).th} ${petPers(pt).emo}`);
 }
 function openPetShop() { openSheet('ร้านสัตว์เลี้ยงคุณยาย', renderPetShop, 'petshop'); scenTalk('pets') || checkScenarios('pets'); }
@@ -3496,7 +3534,7 @@ $('#mBody').addEventListener('click', e => {
     else if (act2 === 'feed' && pt) feedPet(pt, v);
     else if (act2 === 'acc' && pt) pt.acc = pt.acc === v ? null : v;
     else if (act2 === 'evo' && pt) evolvePet(pt, v);
-    else if (act2 === 'hatch') hatchPetEgg();
+    else if (act2 === 'hatch') hatchPetEgg(v);
     save(); return refreshSheet();
   }
   if (b.dataset.pshop) {
@@ -3719,7 +3757,7 @@ const LOOT_ICON = { gold: '🪙', potion: '🍯', ether: '💧', elixir: '✨' }
 function drawLoot(l) {
   const bob = Math.sin(nowS() * 4 + l.t) * 2 - l.z;
   if (l.kind === 'item') { const c = RAR[l.val.r].c; ctx.fillStyle = c + '55'; ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(l.x, l.y + 2, 14, 5, 0, 0, 7); ctx.fill(); ctx.stroke(); if (l.val.r >= 2) { if (l.val.r === 5) { ctx.fillStyle = `hsla(${(nowS() * 120) % 360},90%,70%,.35)`; ctx.fillRect(l.x - 5, l.y - 90, 10, 90); } ctx.fillStyle = c + '30'; ctx.fillRect(l.x - 3, l.y - 60, 6, 60); } }
-  const e = l.kind === 'item' ? itemIcon(l.val) : l.kind === 'petfood' ? PET_FOODS[l.val].icon : l.kind === 'stone' ? PET_STONES[l.val].icon : l.kind === 'rune' ? RUNES[runeOf(l.val).t].icon : LOOT_ICON[l.kind];
+  const e = l.kind === 'item' ? itemIcon(l.val) : l.kind === 'petfood' ? PET_FOODS[l.val].icon : l.kind === 'stone' ? PET_STONES[l.val].icon : l.kind === 'rune' ? RUNES[runeOf(l.val).t].icon : l.kind === 'egg' ? '🥚' : LOOT_ICON[l.kind];
   ctx.drawImage(emojiSprite(e, 22), l.x - 13, l.y - 26 + bob, 26, 26);
 }
 // One map image per zone (other zones blacked out, gates highlighted); shared by the minimap and the world map.
