@@ -231,6 +231,11 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .slot.r1{box-shadow:inset 0 0 0 3px #2FAE62}.slot.r2{box-shadow:inset 0 0 0 3px #3F86F5}.slot.r3{box-shadow:inset 0 0 0 3px #A155E8;background:#F6EEFF}.slot.r4{box-shadow:inset 0 0 0 3px #FF8A1F;background:#FFF2E2}
 .bag{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .detail{display:flex;flex-direction:column;gap:8px}
+.opts{font-size:13px;color:#6B4FB8;font-weight:600;display:grid;gap:2px}
+.socks{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sock{width:38px;height:38px;border-radius:50%;border:2.5px dashed #B8AECF;background:#F6F2FF;font:700 18px var(--f-body);color:#8F88A0;cursor:pointer;display:grid;place-items:center;line-height:1;padding:0;position:relative}
+.sock.full{border-style:solid;background:#fff;font-size:19px}
+.sock small{position:absolute;bottom:-4px;right:-4px;font:800 9px var(--f-body);background:#2B2340;color:#fff;border-radius:6px;padding:1px 3px}
 .detail .top{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center}
 .detail .big{width:52px;height:52px;font-size:30px;cursor:default}
 .statline{display:flex;flex-wrap:wrap;gap:6px}
@@ -821,7 +826,69 @@ const UNIQUES = {
   galaxy: { name: 'คทาดาราจักร', icon: '🌌', slot: 'weapon', stats: { atk: 165, luk: 40, spd: 15 }, fx: { skill: .2 }, desc: 'สกิลทุกสกิลแรงขึ้น 20%' },
 };
 const UNIQUE_KEYS = Object.keys(UNIQUES);
-function makeUnique(k) { const u = UNIQUES[k]; return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slot: u.slot, tier: 9, r: 5, uq: k, stats: { ...u.stats } }; }
+function makeUnique(k) { const u = UNIQUES[k]; return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slot: u.slot, tier: 9, r: 5, uq: k, stats: { ...u.stats }, opts: [rollOpt(9), rollOpt(9)], sock: [null, null, null] }; }
+
+// ---------------- Secondary options & runes ----------------
+// Every item rolls random secondary options (more on rarer items); values grow with the item tier.
+const OPTS = {
+  atkP:  { th: 'ATK', pct: 1, lo: .02, hi: .05 },   defP:  { th: 'DEF', pct: 1, lo: .02, hi: .05 },
+  hpP:   { th: 'HP', pct: 1, lo: .02, hi: .06 },    spdP:  { th: 'SPD', pct: 1, lo: .02, hi: .05 },
+  lukP:  { th: 'LUK', pct: 1, lo: .02, hi: .06 },   crit:  { th: 'โอกาสคริ', pt: 1, lo: 1, hi: 3 },
+  steal: { th: 'ดูดเลือด', pct: 1, lo: .005, hi: .015 }, skill: { th: 'ดาเมจสกิล', pct: 1, lo: .03, hi: .07 },
+  cdr:   { th: 'ลดคูลดาวน์สกิล', pct: 1, lo: .02, hi: .04 }, boss: { th: 'ดาเมจใส่บอส', pct: 1, lo: .04, hi: .1 },
+  xp:    { th: 'EXP', pct: 1, lo: .03, hi: .07 },   gold:  { th: 'ทองดรอป', pct: 1, lo: .05, hi: .12 },
+  drop:  { th: 'โอกาสดรอปของ', pct: 1, lo: .03, hi: .08 }, move: { th: 'ความเร็วเดิน', pct: 1, lo: .02, hi: .05 },
+  regen: { th: 'ฟื้น HP', pct: 1, lo: .1, hi: .25 }, dodge: { th: 'หลบหลีก', pt: 1, lo: 1, hi: 2.5 },
+  block: { th: 'กันดาเมจ', pt: 1, lo: 1, hi: 2.5 },
+};
+const OPT_KEYS = Object.keys(OPTS), OPT_COUNT = [1, 1, 2, 2, 3, 4], SOCKETS = [0, 1, 1, 2, 2, 3];
+const fmtOpt = (k, v) => { const o = OPTS[k]; return `${o.th} +${o.pt ? +v.toFixed(1) : +(v * 100).toFixed(1)}%`; };
+function rollOpt(tier, not) {
+  const pool = OPT_KEYS.filter(k => !(not || []).includes(k)), k = pick(pool), o = OPTS[k];
+  const v = rnd(o.lo, o.hi) * (1 + tier * .12), dp = o.pt ? 10 : 1000;
+  return { k, v: Math.round(v * dp) / dp };
+}
+function rollOpts(it) {
+  const n = OPT_COUNT[it.r] || 1; it.opts = [];
+  for (let i = 0; i < n; i++) it.opts.push(rollOpt(it.tier, it.opts.map(o => o.k)));
+  if (!it.sock) it.sock = Array(SOCKETS[it.r] || 0).fill(null);
+  return it;
+}
+const rerollCost = it => Math.round(120 * (it.tier + 1) * (1 + it.r * .5));
+// Runes: socket them into gear. Grade I–V; 3 of the same rune fuse into the next grade.
+// 3+ equipped runes of one kind give a set bonus (doubled at 5+).
+const RUNES = {
+  fire:    { th: 'รูนเพลิง', icon: '🔥', c: '#FF5A1F', k: 'atkP', v: [.02, .03, .05, .07, .1], set: ['skill', .1] },
+  ice:     { th: 'รูนน้ำแข็ง', icon: '❄️', c: '#62B6FF', k: 'defP', v: [.02, .03, .05, .07, .1], set: ['block', 5] },
+  life:    { th: 'รูนชีวิต', icon: '💚', c: '#3FBF5A', k: 'hpP', v: [.03, .04, .06, .09, .12], set: ['regen', .6] },
+  wind:    { th: 'รูนวายุ', icon: '🌪️', c: '#9FE3FF', k: 'spdP', v: [.02, .03, .05, .07, .1], set: ['cdr', .08] },
+  star:    { th: 'รูนดารา', icon: '⭐', c: '#FFD23F', k: 'lukP', v: [.03, .04, .06, .09, .12], set: ['drop', .2] },
+  blood:   { th: 'รูนโลหิต', icon: '🩸', c: '#C0223A', k: 'steal', v: [.005, .008, .012, .016, .02], set: ['boss', .15] },
+  thunder: { th: 'รูนอัสนี', icon: '⚡', c: '#FFE14D', k: 'crit', v: [1, 2, 3, 4, 6], set: ['move', .1] },
+  sage:    { th: 'รูนปราชญ์', icon: '📜', c: '#A155E8', k: 'skill', v: [.03, .04, .06, .08, .11], set: ['xp', .15] },
+};
+const RUNE_KEYS = Object.keys(RUNES), ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
+const runeOf = id => { const m = /^([a-z]+)([1-5])$/.exec(id || ''); return m && RUNES[m[1]] ? { t: m[1], g: +m[2], r: RUNES[m[1]] } : null; };
+const runeName = id => { const q = runeOf(id); return q ? `${q.r.th} ${ROMAN[q.g]}` : ''; };
+const runeDesc = id => { const q = runeOf(id); return q ? fmtOpt(q.r.k, q.r.v[q.g - 1]) : ''; };
+const runeSetDesc = t => { const r = RUNES[t]; return fmtOpt(r.set[0], r.set[1]); };
+function runeCounts() { const n = {}; if (!P) return n; for (const sl of SLOTS) for (const id of (P.eq[sl] && P.eq[sl].sock) || []) { const q = runeOf(id); if (q) n[q.t] = (n[q.t] || 0) + 1; } return n; }
+function addRune(id, n = 1) { P.runes[id] = (P.runes[id] || 0) + n; if (P.runes[id] <= 0) delete P.runes[id]; }
+function rollRune(mlv, boost) { let g = 1 + Math.floor(mlv / 20); if (Math.random() < .2 + (boost || 0)) g++; return pick(RUNE_KEYS) + clamp(g, 1, 5); }
+// Sum of an effect from equipped gear: secondary options, socketed runes and rune set bonuses. Cached per frame.
+let gearFxCache = null, gearFxAt = -1;
+function gearFx() {
+  const t = performance.now(); if (gearFxCache && t - gearFxAt < 50) return gearFxCache;
+  const o = {};
+  if (P) {
+    for (const sl of SLOTS) { const it = P.eq[sl]; if (!it) continue;
+      for (const x of it.opts || []) o[x.k] = (o[x.k] || 0) + x.v;
+      for (const id of it.sock || []) { const q = runeOf(id); if (q) o[q.r.k] = (o[q.r.k] || 0) + q.r.v[q.g - 1]; } }
+    const n = runeCounts(); for (const t in n) if (n[t] >= 3) { const [k, v] = RUNES[t].set; o[k] = (o[k] || 0) + v * (n[t] >= 5 ? 2 : 1); }
+  }
+  gearFxCache = o; gearFxAt = t; return o;
+}
+const gearDirty = () => { gearFxCache = null; };
 
 // ---------------- Pets ----------------
 // Personalities bias which foods a pet likes, how it fights, and which forms it leans toward when it evolves.
@@ -1305,6 +1372,8 @@ function migrate(s) {
   if (!FORM_ARCH[s.form]) s.form = null;
   s.pets = Array.isArray(s.pets) ? s.pets.filter(pt => pt && PET_FORMS[pt.sp] && PET_PERS[pt.pers]) : [];
   s.petItems = Object.assign({ food: {}, stone: {}, acc: [], eggs: 0 }, s.petItems || {});
+  s.runes = s.runes && typeof s.runes === 'object' ? s.runes : {};
+  for (const it of [...(s.bag || []), ...Object.values(s.eq || {})]) if (it && !Array.isArray(it.opts)) { if (it.uq) { it.opts = [rollOpt(9), rollOpt(9)]; it.sock = [null, null, null]; } else rollOpts(it); }
   s.kills = s.kills || 0; s.bossKills = s.bossKills || 0; s.points = s.points || 0; s.gold = s.gold || 0; s.xp = s.xp || 0;
   return s;
 }
@@ -1320,7 +1389,7 @@ function gearBonus(k) { let v = 0; for (const s of SLOTS) { const it = P.eq[s]; 
 const arch = () => (P && P.form && FORM_ARCH[P.form]) || null;
 const tierF = () => [0, 0, 1, 1.5, 2, 2.6][(P && P.formTier) || 2];
 const ap = k => { const a = arch(); return a && a[k] ? a[k] * tierF() : 0; };
-const st = k => { const a = arch(), br = branchOn(), m = (a && a.mul[k] ? 1 + (a.mul[k] - 1) * tierF() : 1) * (br && br.mul[k] || 1); return Math.round((P.base[k] + gearBonus(k) + titleBonus(k)) * m); };
+const st = k => { const a = arch(), br = branchOn(), m = (a && a.mul[k] ? 1 + (a.mul[k] - 1) * tierF() : 1) * (br && br.mul[k] || 1); return Math.round((P.base[k] + gearBonus(k) + titleBonus(k)) * m * (1 + (gearFx()[k + 'P'] || 0))); };
 function formOdds() {
   const w = {}; let sum = 0;
   for (const k of FORM_KEYS) { const ref = BASE[k] + GROW[k] * (P.lv - 1); w[k] = Math.pow(Math.max(.2, P.base[k] / ref), 3); sum += w[k]; }
@@ -1373,15 +1442,15 @@ const xpScale = mlv => { const d = P.lv - mlv; return d <= 3 ? 1 : Math.max(.1, 
 const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
 const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
 const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ap('haste'));
-const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75));
+const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75)) * (1 + uqFx('move'));
 const mySkills = () => { const fs = P.form && formSkillFor(P.color, P.form, P.formTier, P.formBranch, P.formSub); return fs ? [...SKILLS[P.color], fs] : SKILLS[P.color]; };
 const skLv = sk => (P.lv >= sk.unlock ? clamp(P.skills[sk.id] || 1, 1, SKILL_MAX) : 0);
 const skPow = L => 1 + .15 * (L - 1);
-const skCd = (sk, L) => sk.cd * (1 - .05 * (Math.max(1, L) - 1));
+const skCd = (sk, L) => sk.cd * (1 - .05 * (Math.max(1, L) - 1)) * (1 - Math.min(.4, uqFx('cdr')));
 const skDur = (sk, L) => sk.dur + .5 * (Math.max(1, L) - 1);
 function itemName(it) { return (it.uq && UNIQUES[it.uq] ? UNIQUES[it.uq].name : SLOT[it.slot].names[it.tier]) + (it.en ? ` +${it.en}` : ''); }
 function itemIcon(it) { return it.uq && UNIQUES[it.uq] ? UNIQUES[it.uq].icon : SLOT[it.slot].icons[it.tier]; }
-const uqFx = k => { let v = 0; if (!P) return 0; for (const sl of SLOTS) { const it = P.eq[sl]; if (it && it.uq && UNIQUES[it.uq]) v += UNIQUES[it.uq].fx[k] || 0; } return v; };
+const uqFx = k => { let v = gearFx()[k] || 0; if (!P) return 0; for (const sl of SLOTS) { const it = P.eq[sl]; if (it && it.uq && UNIQUES[it.uq]) v += UNIQUES[it.uq].fx[k] || 0; } return v; };
 const gearCode = it => (!it ? 0 : it.uq ? 100 + UNIQUE_KEYS.indexOf(it.uq) : it.tier + 1);
 const gearIconFor = (slot, n) => (n >= 100 ? (UNIQUES[UNIQUE_KEYS[n - 100]] || {}).icon : SLOT[slot].icons[n - 1]);
 function itemPrice(it) { if (it.uq) return Math.round(5000 * (1 + (it.en || 0) * .3)); return Math.round((6 + it.tier * it.tier * 14 + it.tier * 10) * (1 + it.r * 0.8) * (1 + (it.en || 0) * .3)); }
@@ -1401,7 +1470,7 @@ function makeItem(tier, minR, forceSlot) {
   stats[s.stat] = Math.max(1, Math.round(s.base[tier] * RAR[r].m * rnd(.85, 1.15)));
   const others = SLOTS.filter(q => q !== slot);
   for (let i = 0; i < r; i++) { const o = SLOT[pick(others)]; stats[o.stat] = (stats[o.stat] || 0) + Math.max(1, Math.round(o.base[tier] * rnd(.22, .4))); }
-  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slot, tier, r, stats };
+  return rollOpts({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slot, tier, r, stats });
 }
 const loot = [];
 function dropLoot(kind, x, y, val) {
@@ -1497,6 +1566,7 @@ async function hatch() {
 /* ================= entering the world ================= */
 let started = false;
 function enterWorld() {
+  if (P && (!P.runes || typeof P.runes !== 'object')) P.runes = {};
   if (P && P.form && (P.formTier || 2) >= 3 && !BRANCH[P.formBranch]) { P.formBranch = rollBranch(); setTimeout(() => banner(`ร่างของคุณแตกสาย: ${BRANCH[P.formBranch].th}`, fullFormName()), 1500); }
   if (P && P.form && (P.formTier || 2) >= 4 && cleanSub(P.formBranch, P.formSub).length < (P.formTier || 2) - 3) { fillPath(); setTimeout(() => banner(`ร่างของคุณแตกแขนง: ${branchOn().last.th}`, fullFormName()), 300); }
   $('#s-egg').hidden = true; $('#hud').hidden = false;
@@ -1953,8 +2023,8 @@ function attackMon(m, mult, o = {}) {
   let d = dmgCalc(st('atk') * (1 + buff('atk')), m.def, mult, P.lv, m.lv);
   const crit = Math.random() * 100 < clamp(5 + st('luk') * 0.4 + (o.critBonus || 0) + buff('crit') + ap('crit') + uqFx('crit') + ((branchOn() || {}).crit || 0), 0, 85);
   if (crit) d = Math.round(d * 1.75);
-  if (m.boss && ap('boss')) d = Math.round(d * (1 + ap('boss')));
-  const stl = ap('steal') + ((branchOn() || {}).steal || 0); if (stl) P.hp = Math.min(maxHp(), P.hp + d * stl);
+  if (m.boss && ap('boss') + uqFx('boss')) d = Math.round(d * (1 + ap('boss') + uqFx('boss')));
+  const stl = ap('steal') + uqFx('steal') + ((branchOn() || {}).steal || 0); if (stl) P.hp = Math.min(maxHp(), P.hp + d * stl);
   floatAt(m.rx, m.ry - 26, crit ? d + '!' : d, crit ? '#FFD23F' : '#fff', crit ? 24 : 19);
   sfx(crit ? 'crit' : 'hit');
   if (DG) dDamage(m, d);
@@ -2107,7 +2177,7 @@ function reward(s, x, y, mlv, tierOverride) {
   }
   sfx('kill');
   const luk = st('luk');
-  dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * (1 + luk / 100) * (1 + ap('gold')) * rnd(.8, 1.2))));
+  dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * (1 + luk / 100) * (1 + ap('gold') + uqFx('gold')) * rnd(.8, 1.2))));
   if (Math.random() * 100 < 9 + luk * .2) dropLoot('potion', x, y, 1);
   if (Math.random() * 100 < 4 + luk * .1) dropLoot('ether', x, y, 1);
   const tier = tierOverride != null ? tierOverride : s.zi;
@@ -2121,7 +2191,8 @@ function reward(s, x, y, mlv, tierOverride) {
     } }
   if (Math.random() < .06) dropLoot('petfood', x, y, pick(Object.keys(PET_FOODS)));
   if (s.boss && Math.random() < .3) dropLoot('stone', x, y, pick(Object.keys(PET_STONES)));
-  const xp = Math.max(1, Math.round(s.xp * xpScale(mlv)));
+  if (Math.random() < (s.boss ? .4 : s.sec ? 1 : .025) * (1 + uqFx('drop'))) dropLoot('rune', x, y, rollRune(mlv, s.boss || s.sec ? .3 : 0));
+  const xp = Math.max(1, Math.round(s.xp * xpScale(mlv) * (1 + uqFx('xp'))));
   floatAt(x, y - 44, `+${xp} EXP${xp < s.xp ? ' (มอนเลเวลต่ำ)' : ''}`, xp < s.xp ? '#C9C2D6' : '#FFE08A', 14);
   gainXp(xp);
   save();
@@ -2171,6 +2242,7 @@ function pickupLoot(dt) {
       if (it.r >= 3) banner(`ได้ของ${RAR[it.r].th}!`, itemName(it));
       $('#bBag').innerHTML = '🎒<span class="dot"></span><kbd class="kb">I</kbd>';
     } else if (l.kind === 'petfood') { P.petItems.food[l.val] = (P.petItems.food[l.val] || 0) + 1; floatAt(me.x, me.y - 40, PET_FOODS[l.val].icon + ' +1', '#fff', 15); sfx('pick'); }
+    else if (l.kind === 'rune') { addRune(l.val); floatAt(me.x, me.y - 40, `${RUNES[runeOf(l.val).t].icon} ${runeName(l.val)}`, RUNES[runeOf(l.val).t].c, 15); sfx('rare'); }
     else if (l.kind === 'stone') { P.petItems.stone[l.val] = (P.petItems.stone[l.val] || 0) + 1; floatAt(me.x, me.y - 40, PET_STONES[l.val].name + ' +1', '#E9D5FF', 15); sfx('rare'); }
     else { P.items[l.kind]++; floatAt(me.x, me.y - 40, CONSUME[l.kind].icon + ' +1', '#fff', 15); sfx('pick'); }
     loot.splice(i, 1); save();
@@ -2311,7 +2383,7 @@ $('#chatbar').addEventListener('submit', e => {
 document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); atkHeld = false; save(); } });
 
 /* ================= sheets: bag / character / shop ================= */
-let selItem = null, sellMode = false;
+let selItem = null, sellMode = false, sockPick = null;
 const picked = new Set();
 function itemScore(it) { let v = 0; for (const s of SLOTS) { const k = SLOT[s].stat; v += itemStat(it, k) / SLOT[s].base[2]; } return v; }
 function worseThanEquipped(it) { const cur = P.eq[it.slot]; return !!cur && itemScore(it) < itemScore(cur); }
@@ -2336,8 +2408,11 @@ function renderBag(el) {
     detail = `<div class="panel detail">
       <div class="top"><span class="slot big r${it.r}">${itemIcon(it)}</span><div><b style="font:700 17px var(--f-display);color:${RAR[it.r].c}">${esc(itemName(it))}</b><div class="muted" style="font-size:12px">${SLOT[it.slot].th} · ${RAR[it.r].th}${it.uq ? '' : ` · ขั้น ${it.tier + 1}`}${sel.eq ? ' · สวมอยู่' : ''}</div>${it.uq ? `<div style="font-size:13px;color:#B8860B;font-weight:600">✦ ${UNIQUES[it.uq].desc}</div>` : ''}</div></div>
       <div class="statline">${STATS.filter(k => it.stats[k]).map(k => `<span class="chip">${STAT_SHORT[k]} +${itemStat(it, k)}</span>`).join('')}</div>
+      ${(it.opts || []).length ? `<div class="opts">${it.opts.map(o => `<div>◆ ${fmtOpt(o.k, o.v)}</div>`).join('')}</div>` : ''}
+      ${(it.sock || []).length ? `<div class="socks">${it.sock.map((id, i) => id ? `<button class="sock full" type="button" data-unsock="${i}" style="border-color:${RUNES[runeOf(id).t].c}" title="แตะเพื่อถอด">${RUNES[runeOf(id).t].icon}<small>${ROMAN[runeOf(id).g]}</small></button>` : `<button class="sock" type="button" data-sock="${i}" title="ใส่รูน">＋</button>`).join('')}<span class="muted" style="font-size:12px">${it.sock.filter(Boolean).map(id => `${runeName(id)}: ${runeDesc(id)}`).join(' · ') || 'ช่องรูน แตะ ＋ เพื่อใส่รูน'}</span></div>` : ''}
+      ${sockPick != null ? `<div class="panel rows" style="padding:8px">${Object.keys(P.runes).length ? Object.entries(P.runes).sort().map(([id, n]) => `<div class="row"><span class="ico">${RUNES[runeOf(id).t].icon}</span><div><div class="nm">${runeName(id)} × ${n}</div><div class="ds">${runeDesc(id)}</div></div><button class="btn sm" type="button" data-putrune="${id}">ใส่</button></div>`).join('') : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีรูน ตีมอนเพื่อหารูน หรือซื้อถุงรูนที่ร้านป้าแมวเหมียว</p>'}</div>` : ''}
       ${cmp ? `<div style="font-size:13px">เทียบกับที่ใส่อยู่: ${cmp}</div>` : ''}
-      <div class="m-btns">${sel.eq ? `<button class="btn sm" type="button" data-act="unequip">ถอดออก</button>` : `<button class="btn sm primary" type="button" data-act="equip">สวมใส่</button><button class="btn sm" type="button" data-act="sell">ขาย <span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${itemPrice(it)}</button>`}</div>
+      <div class="m-btns"><button class="btn sm" type="button" data-act="reroll" ${P.gold < rerollCost(it) ? 'disabled' : ''}>🎲 สุ่ม option ใหม่ (${rerollCost(it).toLocaleString()})</button>${sel.eq ? `<button class="btn sm" type="button" data-act="unequip">ถอดออก</button>` : `<button class="btn sm primary" type="button" data-act="equip">สวมใส่</button><button class="btn sm" type="button" data-act="sell">ขาย <span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${itemPrice(it)}</button>`}</div>
     </div>`;
   }
   const eq = SLOTS.map(s => P.eq[s] ? slotBtn(P.eq[s], selItem === P.eq[s].id ? ' sel' : '') : `<span class="slot empty">${SLOT[s].th}</span>`).join('');
@@ -2363,6 +2438,7 @@ function renderBag(el) {
     <div><p class="eyebrow" style="margin-bottom:6px">ที่สวมอยู่ · ${STATS.map(k => `${STAT_SHORT[k]} ${st(k)}`).join(' · ')}</p><div class="eq-row">${eq}</div></div>
     <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><p class="eyebrow">ของในกระเป๋า ${P.bag.length}/${BAG_MAX}</p>${P.bag.length ? `<button class="btn sm" type="button" data-act="sellmode" style="min-height:32px;font-size:12px">🪙 เลือกขายหลายชิ้น</button>` : ''}</div>
       ${P.bag.length ? `<div class="bag">${bag}</div>` : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีของ ออกไปตีมอนนอกเมืองแล้วเดินทับของที่ดรอปเพื่อเก็บ</p>'}</div>
+    <button class="btn block" type="button" data-act="runes">💠 รูน (${Object.values(P.runes).reduce((a, b) => a + b, 0)})${Object.keys(runeCounts()).length ? ' · ' + Object.entries(runeCounts()).map(([t, n]) => `${RUNES[t].icon}${n}`).join(' ') : ''}</button>
     <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} × ${P.items[k]}</div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div>`;
 }
 function openChar() { openSheet('ตัวละคร', renderChar, 'char'); }
@@ -2488,7 +2564,7 @@ function renderAdmin(el) {
     <b style="font-family:var(--f-display)">ตัวละคร · Lv ${P.lv}</b>
     <div class="row2">
       <button class="btn" type="button" data-adm="lv" data-v="1">+1 เลเวล</button><button class="btn" type="button" data-adm="lv" data-v="10">+10 เลเวล</button>
-      <button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
+      <button class="btn" type="button" data-adm="runes">รับรูนทุกแบบ ×3</button><button class="btn" type="button" data-adm="gear">รับของตำนาน 5 ชิ้น</button><button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
       <button class="btn" type="button" data-adm="gold">ทอง +10,000</button><button class="btn" type="button" data-adm="heal">เติม HP/MP + รีเซ็ตคูลดาวน์</button>
       <button class="btn" type="button" data-adm="god" style="${me.god ? 'background:#FFF3B0' : ''}">อมตะ: ${me.god ? 'เปิด' : 'ปิด'}</button>
       <button class="btn" type="button" data-adm="gear">ของตำนานขั้นสูงสุดครบชุด</button><button class="btn" type="button" data-adm="items">ยาทุกชนิด ×10</button>
@@ -2517,6 +2593,8 @@ function adminAct(act, v) {
     announceSecret(foeStats(t, FOES[q.key].lv), m.x, m.y); closeSheet(); return;
   }
   else if (act === 'color') { P.color = v; toast(`เปลี่ยนเป็น${COLORS[v].species}`); }
+  else if (act === 'runes') { for (const t of RUNE_KEYS) for (let g = 1; g <= 5; g++) addRune(t + g, 3); toast('ได้รูนทุกแบบ ขั้นละ 3 อัน'); }
+  else if (act === 'gear') { for (const sl of SLOTS) if (P.bag.length < BAG_MAX) P.bag.push(makeItem(Math.min(9, Math.floor(P.lv / 8)), 4, sl)); toast('ได้ของตำนาน 5 ชิ้น'); }
   else if (act === 'lv' || act === 'lvto') {
     const target = clamp(act === 'lv' ? P.lv + +v : +v, 1, LV_CAP);
     let need = -P.xp; for (let l = P.lv; l < target; l++) need += xpNeed(l);
@@ -2729,6 +2807,13 @@ function warpTo(i) {
 }
 function nearNpc() { if (DG) return null; return NPCS.find(n => Math.hypot(me.x - n.x, me.y - n.y) < 2.4 * T) || null; }
 function nearShop() { const n = nearNpc(); return !!n && n.id === 'shop'; }
+function openRunes() { openSheet('รูน', renderRunes); }
+function renderRunes(el) {
+  const n = runeCounts(), owned = Object.entries(P.runes).sort();
+  el.innerHTML = `<p style="margin:0;font-size:14px">ใส่รูนในช่องของอุปกรณ์ (เปิดของใน 🎒 แล้วแตะ ＋) · รวมรูนชนิดเดียวกันขั้นเดียวกัน 3 อัน = ขั้นถัดไป 1 อัน · ใส่รูนชนิดเดียวกัน 3 อันขึ้นไป ได้โบนัสชุด (5 อันได้ 2 เท่า)</p>
+    <div class="panel rows">${owned.length ? owned.map(([id, c]) => { const q = runeOf(id); return `<div class="row"><span class="ico">${q.r.icon}</span><div><div class="nm" style="color:${q.r.c}">${runeName(id)} × ${c}</div><div class="ds">${runeDesc(id)}</div></div>${q.g < 5 ? `<button class="btn sm" type="button" data-fuse="${id}" ${c >= 3 ? '' : 'disabled'}>รวม 3→${ROMAN[q.g + 1]}</button>` : ''}</div>`; }).join('') : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีรูน มอนทุกตัวมีโอกาสดรอป บอสดรอปบ่อย มอนลับดรอปทุกครั้ง</p>'}</div>
+    <div class="panel" style="font-size:13px"><b>โบนัสชุดรูน</b>${RUNE_KEYS.map(t => `<div class="${(n[t] || 0) >= 3 ? '' : 'muted'}">${RUNES[t].icon} ${RUNES[t].th} (${n[t] || 0}/3): ${runeSetDesc(t)}${(n[t] || 0) >= 5 ? ' ×2' : ''}${(n[t] || 0) >= 3 ? ' ✓' : ''}</div>`).join('')}</div>`;
+}
 function openShop() { openSheet('ร้านป้าแมวเหมียว', renderShop); }
 let smithTier = -1;
 const maxShopTier = () => Math.max(0, ZONES.filter(z => z.lv <= P.lv).length - 1);
@@ -2751,7 +2836,7 @@ function renderShop(el) {
   const junk = P.bag.filter(i => i.r === 0);
   el.innerHTML = `<p class="muted" style="margin:0">“มาแล้วเหรอจ๊ะ ยาดีๆ มีเพียบ ของที่ไม่ใช้ก็เอามาขายได้นะ”</p>
     <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} <span class="muted" style="font:600 12px var(--f-body)">มี ${P.items[k]}</span></div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-buy="${k}" ${P.gold < c.price ? 'disabled' : ''}><span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${c.price}</button></div>`).join('')}</div>
-    <div class="m-btns"><button class="btn sm" type="button" data-buy5="potion" ${P.gold < 75 ? 'disabled' : ''}>ซื้อยาน้ำผึ้ง ×5 (75)</button>${junk.length ? `<button class="btn sm" type="button" data-act="sellcommon">ขายของธรรมดา ${junk.length} ชิ้น (${junk.reduce((a, i) => a + itemPrice(i), 0)})</button>` : ''}</div>
+    <div class="m-btns"><button class="btn sm" type="button" data-buy5="potion" ${P.gold < 75 ? 'disabled' : ''}>ซื้อยาน้ำผึ้ง ×5 (75)</button><button class="btn sm" type="button" data-act="runebag" ${P.gold < 600 ? 'disabled' : ''}>💠 ถุงรูนสุ่ม (600)</button>${junk.length ? `<button class="btn sm" type="button" data-act="sellcommon">ขายของธรรมดา ${junk.length} ชิ้น (${junk.reduce((a, i) => a + itemPrice(i), 0)})</button>` : ''}</div>
     <p class="muted" style="margin:0;font-size:13px">ยืนใกล้น้ำพุกลางเมืองจะฟื้น HP และ MP เร็วมาก</p>`;
 }
 $('#mBody').addEventListener('click', e => {
@@ -2820,21 +2905,36 @@ $('#mBody').addEventListener('click', e => {
     P.bag = P.bag.filter(i => !picked.has(i.id)); P.gold += g; picked.clear(); sellMode = false;
     sfx('coin'); toast(`ขาย ${list.length} ชิ้น ได้ ${g.toLocaleString()} ทอง`); save(); updateHud(true); return refreshSheet();
   }
-  if (b.dataset.item) { selItem = selItem === b.dataset.item ? null : b.dataset.item; sfx('tap'); return refreshSheet(); }
+  if (b.dataset.item) { selItem = selItem === b.dataset.item ? null : b.dataset.item; sockPick = null; sfx('tap'); return refreshSheet(); }
   if (b.dataset.use) { usePotion(b.dataset.use); return refreshSheet(); }
   if (b.dataset.alloc) { if (P.points <= 0) return; const k = b.dataset.alloc; P.points--; P.base[k] += POINT_VALUE[k]; if (k === 'hp') P.hp += POINT_VALUE.hp; sfx('tap'); save(); return refreshSheet(); }
   if (b.dataset.buy || b.dataset.buy5) {
     const k = b.dataset.buy || b.dataset.buy5, n = b.dataset.buy5 ? 5 : 1, cost = CONSUME[k].price * n; if (P.gold < cost) return;
     P.gold -= cost; P.items[k] += n; sfx('coin'); toast(`ซื้อ${CONSUME[k].name} ×${n} แล้ว`); save(); return refreshSheet();
   }
+  if (b.dataset.sock != null) { sockPick = sockPick === +b.dataset.sock ? null : +b.dataset.sock; sfx('tap'); return refreshSheet(); }
+  if (b.dataset.putrune || b.dataset.unsock != null) {
+    const f = selItem && findItem(selItem); if (!f) return; const it = f.it;
+    if (b.dataset.putrune) { const id = b.dataset.putrune; if (!P.runes[id] || sockPick == null || it.sock[sockPick]) return; addRune(id, -1); it.sock[sockPick] = id; sockPick = null; sfx('rare'); toast(`ใส่${runeName(id)}แล้ว`); }
+    else { const i = +b.dataset.unsock, id = it.sock[i]; if (!id) return; it.sock[i] = null; addRune(id); sfx('tap'); toast(`ถอด${runeName(id)}คืนถุงแล้ว`); }
+    gearDirty(); P.hp = Math.min(P.hp, maxHp()); save(); hudStatic(); return refreshSheet();
+  }
+  if (b.dataset.fuse) { const id = b.dataset.fuse, q = runeOf(id); if (!q || q.g >= 5 || (P.runes[id] || 0) < 3) return; addRune(id, -3); const nid = q.t + (q.g + 1); addRune(nid); sfx('lvl'); banner('รวมรูนสำเร็จ!', runeName(nid)); save(); return refreshSheet(); }
   const act = b.dataset.act;
+  if (act === 'runes') { openRunes(); return; }
+  if (act === 'runebag') { if (P.gold < 600) return; P.gold -= 600; const id = pick(RUNE_KEYS) + (Math.random() < .15 ? 2 : 1); addRune(id); sfx('rare'); toast(`ได้${runeName(id)}!`); save(); return refreshSheet(); }
+  if (act === 'reroll') {
+    const f = selItem && findItem(selItem); if (!f) return; const it = f.it, cost = rerollCost(it); if (P.gold < cost) return;
+    P.gold -= cost; const n = (it.opts || []).length || OPT_COUNT[it.r] || 1; it.opts = []; for (let i = 0; i < n; i++) it.opts.push(rollOpt(it.tier, it.opts.map(o => o.k)));
+    gearDirty(); sfx('rare'); toast('สุ่ม option ใหม่แล้ว'); P.hp = Math.min(P.hp, maxHp()); save(); hudStatic(); return refreshSheet();
+  }
   if (act === 'equip' || act === 'unequip' || act === 'sell') {
     const f = selItem && findItem(selItem); if (!f) return;
     const it = f.it, hpFrac = P.hp / maxHp();
     if (act === 'equip') { const old = P.eq[it.slot]; P.bag = P.bag.filter(i => i !== it); if (old) P.bag.push(old); P.eq[it.slot] = it; sfx('pick'); toast(`สวม ${itemName(it)} แล้ว`); }
     else if (act === 'unequip') { if (P.bag.length >= BAG_MAX) { toast('กระเป๋าเต็ม'); return; } delete P.eq[it.slot]; P.bag.push(it); selItem = null; sfx('tap'); }
     else { P.bag = P.bag.filter(i => i !== it); P.gold += itemPrice(it); selItem = null; sfx('coin'); toast(`ขายได้ ${itemPrice(it)} ทอง`); }
-    P.hp = Math.min(maxHp(), Math.max(1, Math.round(hpFrac * maxHp()))); save(); return refreshSheet();
+    gearDirty(); P.hp = Math.min(maxHp(), Math.max(1, Math.round(hpFrac * maxHp()))); save(); return refreshSheet();
   }
   if (act === 'sellcommon') { const j = P.bag.filter(i => i.r === 0), g = j.reduce((a, i) => a + itemPrice(i), 0); P.bag = P.bag.filter(i => i.r !== 0); P.gold += g; selItem = null; sfx('coin'); toast(`ขาย ${j.length} ชิ้น ได้ ${g} ทอง`); save(); return refreshSheet(); }
   if (act === 'skills') { openSkills(); return; }
@@ -2974,7 +3074,7 @@ const LOOT_ICON = { gold: '🪙', potion: '🍯', ether: '💧', elixir: '✨' }
 function drawLoot(l) {
   const bob = Math.sin(nowS() * 4 + l.t) * 2 - l.z;
   if (l.kind === 'item') { const c = RAR[l.val.r].c; ctx.fillStyle = c + '55'; ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(l.x, l.y + 2, 14, 5, 0, 0, 7); ctx.fill(); ctx.stroke(); if (l.val.r >= 2) { if (l.val.r === 5) { ctx.fillStyle = `hsla(${(nowS() * 120) % 360},90%,70%,.35)`; ctx.fillRect(l.x - 5, l.y - 90, 10, 90); } ctx.fillStyle = c + '30'; ctx.fillRect(l.x - 3, l.y - 60, 6, 60); } }
-  const e = l.kind === 'item' ? itemIcon(l.val) : l.kind === 'petfood' ? PET_FOODS[l.val].icon : l.kind === 'stone' ? PET_STONES[l.val].icon : LOOT_ICON[l.kind];
+  const e = l.kind === 'item' ? itemIcon(l.val) : l.kind === 'petfood' ? PET_FOODS[l.val].icon : l.kind === 'stone' ? PET_STONES[l.val].icon : l.kind === 'rune' ? RUNES[runeOf(l.val).t].icon : LOOT_ICON[l.kind];
   ctx.drawImage(emojiSprite(e, 22), l.x - 13, l.y - 26 + bob, 26, 26);
 }
 function drawMinimap() {
