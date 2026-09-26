@@ -119,8 +119,8 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .me-card .bar{height:10px;border-width:1.5px}
 .me-card .bar.xp{height:7px}
 .me-card .bar span{position:absolute;inset:0;font:700 8px/7px var(--f-body);text-align:center;color:var(--ink)}
-.menu-row{position:absolute;top:84px;left:var(--gl);display:flex;gap:8px}
-.ibtn{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);box-shadow:0 3px 0 var(--ink);font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;position:relative;padding:0}
+.menu-row{position:absolute;top:84px;left:var(--gl);display:flex;gap:6px}
+.ibtn{width:39px;height:39px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);box-shadow:0 3px 0 var(--ink);font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;position:relative;padding:0}
 .ibtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .ibtn .dot{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--hp);border:2px solid var(--paper)}
 .side{position:absolute;top:10px;right:var(--gr);display:flex;flex-direction:column;align-items:flex-end;gap:6px}
@@ -279,6 +279,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
       <button class="ibtn" type="button" id="bChar" aria-label="ตัวละคร">🐣<kbd class="kb">C</kbd></button>
       <button class="ibtn" type="button" id="bChat" aria-label="แชท">💬<kbd class="kb">Enter</kbd></button>
       <button class="ibtn" type="button" id="bSkills" aria-label="สกิล">📜<kbd class="kb">K</kbd></button>
+      <button class="ibtn" type="button" id="bPet" aria-label="สัตว์เลี้ยง">🐾<kbd class="kb">P</kbd></button>
       <button class="ibtn" type="button" id="bHelp" aria-label="วิธีเล่น">❓<kbd class="kb">H</kbd></button>
     </div>
     <div class="side">
@@ -586,7 +587,92 @@ const UNIQUES = {
 };
 const UNIQUE_KEYS = Object.keys(UNIQUES);
 function makeUnique(k) { const u = UNIQUES[k]; return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slot: u.slot, tier: 9, r: 5, uq: k, stats: { ...u.stats } }; }
-const FOE_KEYS = Object.keys(FOES);
+
+// ---------------- Pets ----------------
+// Personalities bias which foods a pet likes, how it fights, and which forms it leans toward when it evolves.
+const PET_PERS = {
+  playful: { th: 'ขี้เล่น', emo: '🎵', tags: { cute: 2, light: .5 }, likes: ['sweets', 'fruit'], desc: 'ตีเร็วบ้างช้าบ้าง อารมณ์ดีตลอด' },
+  lazy:    { th: 'ขี้เกียจ', emo: '💤', tags: { sweet: 2 }, likes: ['sweets', 'veg'], atk: .8, spd: 1.4, hunger: .6, desc: 'ตีช้า แต่หิวช้ามาก' },
+  glutton: { th: 'ตะกละ', emo: '🤤', tags: { beast: 2 }, likes: ['meat', 'fish'], hunger: 1.6, exp: 1.25, desc: 'หิวไว แต่โตไวกว่าตัวอื่น' },
+  fierce:  { th: 'ดุดัน', emo: '💢', tags: { wild: 2, fire: 1 }, likes: ['meat', 'bugs'], atk: 1.35, desc: 'ตีแรงกว่าตัวอื่นมาก' },
+  shy:     { th: 'ขี้อาย', emo: '😳', tags: { dark: 1, cute: 1 }, likes: ['fruit', 'veg'], heal: 1, desc: 'แอบฟื้น HP ให้เจ้าของเป็นระยะ' },
+  curious: { th: 'อยากรู้อยากเห็น', emo: '❓', tags: { thunder: 1, light: 1 }, likes: ['bugs', 'fish'], gold: .25, desc: 'ชอบคุ้ยหาทองเพิ่มเวลาปราบมอน' },
+  clingy:  { th: 'ขี้อ้อน', emo: '💕', tags: { loyal: 2 }, likes: ['sweets', 'meat'], aff: 1.5, heal: 1, desc: 'สนิทง่าย และฟื้น HP ให้เจ้าของ' },
+  sly:     { th: 'เจ้าเล่ห์', emo: '😏', tags: { sly: 2, dark: 1 }, likes: ['fish', 'bugs'], drop: .15, desc: 'ขโมยของจากมอนได้บ่อยขึ้น' },
+};
+const PET_FOODS = {
+  meat:   { name: 'เนื้อย่าง', icon: '🍖', price: 20, tags: { beast: 1, wild: 1, fire: .5 } },
+  fruit:  { name: 'ผลไม้สด', icon: '🍎', price: 15, tags: { sweet: 1, nature: 1, light: .5 } },
+  fish:   { name: 'ปลาทะเล', icon: '🐟', price: 20, tags: { water: 1.5, cool: .5 } },
+  sweets: { name: 'เค้กหวาน', icon: '🍰', price: 25, tags: { sweet: 1, cute: 1 } },
+  veg:    { name: 'ผักกรอบ', icon: '🥕', price: 12, tags: { nature: 1.5 } },
+  bugs:   { name: 'แมลงกรุบกรอบ', icon: '🦗', price: 15, tags: { wild: 1, dark: .5, sly: .5 } },
+};
+const PET_ACCS = {
+  bow:    { name: 'โบว์ชมพู', icon: '🎀', price: 300, tags: { cute: 1.5 } },
+  shades: { name: 'แว่นดำ', icon: '🕶️', price: 400, tags: { cool: 1.5, sly: .5 } },
+  crown:  { name: 'มงกุฎจิ๋ว', icon: '👑', price: 1500, tags: { royal: 2 } },
+  scarf:  { name: 'ผ้าพันคอ', icon: '🧣', price: 250, tags: { loyal: 1, nature: .5 } },
+  bell:   { name: 'กระดิ่งทอง', icon: '🔔', price: 350, tags: { light: 1, loyal: .5 } },
+  flower: { name: 'ดอกไม้ประดับ', icon: '🌸', price: 250, tags: { nature: 1, sweet: 1 } },
+  bone:   { name: 'กระดูกเคี้ยวเล่น', icon: '🦴', price: 200, tags: { beast: 1.5, wild: .5 } },
+};
+const PET_STONES = {
+  fire:    { name: 'ศิลาเพลิง', icon: '🔴' }, water: { name: 'ศิลาวารี', icon: '🔵' }, nature: { name: 'ศิลาไพร', icon: '🟢' },
+  light:   { name: 'ศิลาแสง', icon: '⚪' }, dark: { name: 'ศิลาเงา', icon: '⚫' }, thunder: { name: 'ศิลาอัสนี', icon: '🟡' },
+};
+const STONE_PRICE = 2000, PET_EGG_PRICE = 800, PET_MAX = 6;
+const PET_FORMS = {
+  chick:   { st: 1, name: 'ลูกเจี๊ยบ', e: '🐣', tags: { sweet: 1, light: 1 } },
+  puppy:   { st: 1, name: 'ลูกหมา', e: '🐶', tags: { beast: 1, loyal: 1 } },
+  kitten:  { st: 1, name: 'ลูกแมว', e: '🐱', tags: { cute: 1, sly: 1 } },
+  bunny:   { st: 1, name: 'กระต่ายน้อย', e: '🐰', tags: { cute: 1, nature: 1 } },
+  foxkit:  { st: 1, name: 'จิ้งจอกน้อย', e: '🦊', tags: { sly: 1, fire: 1 } },
+  froglet: { st: 1, name: 'กบน้อย', e: '🐸', tags: { water: 1, nature: 1 } },
+  rooster: { st: 2, name: 'ไก่ชนเพลิง', e: '🐓', tags: { fire: 2, beast: 1 } },
+  duck:    { st: 2, name: 'เป็ดวารี', e: '🦆', tags: { water: 2, cute: 1 } },
+  owl:     { st: 2, name: 'นกฮูกจันทรา', e: '🦉', tags: { dark: 1.5, light: 1 } },
+  guard:   { st: 2, name: 'สุนัขพิทักษ์', e: '🐕', tags: { loyal: 2, beast: 1 } },
+  wolfp:   { st: 2, name: 'หมาป่าเงา', e: '🐺', tags: { dark: 1.5, wild: 1.5 } },
+  zapcat:  { st: 2, name: 'แมวสายฟ้า', e: '🐈', tags: { thunder: 2, sly: 1 } },
+  blackcat:{ st: 2, name: 'แมวดำลึกลับ', e: '🐈‍⬛', tags: { dark: 2, sly: 1 } },
+  moonbun: { st: 2, name: 'กระต่ายจันทร์', e: '🐇', tags: { light: 2, cute: 1 } },
+  raccoon: { st: 2, name: 'แรคคูนจอมขโมย', e: '🦝', tags: { sly: 2, wild: 1 } },
+  squirrel:{ st: 2, name: 'กระรอกไพร', e: '🐿️', tags: { nature: 2, cute: 1 } },
+  salamander:{ st: 2, name: 'กิ้งก่าไฟ', e: '🦎', tags: { fire: 1.5, wild: 1.5 } },
+  turtle:  { st: 2, name: 'เต่าผลึก', e: '🐢', tags: { water: 1.5, loyal: 1 } },
+  hedgie:  { st: 2, name: 'เม่นสายฟ้า', e: '🦔', tags: { thunder: 1.5, cute: 1 } },
+  penguin: { st: 2, name: 'เพนกวินเท่', e: '🐧', tags: { water: 1, cool: 2 } },
+  parrot:  { st: 2, name: 'นกแก้วสายรุ้ง', e: '🦜', tags: { light: 1, sweet: 1.5 } },
+  eagle:   { st: 3, name: 'อินทรีเพลิง', e: '🦅', tags: { fire: 2, royal: 1.5 } },
+  dragonp: { st: 3, name: 'มังกรน้อย', e: '🐉', tags: { fire: 1.5, royal: 1, wild: 1 } },
+  unicorn: { st: 3, name: 'ยูนิคอร์นแสง', e: '🦄', tags: { light: 2, cute: 1, royal: 1 } },
+  seadragon:{ st: 3, name: 'มังกรวารี', e: '🐲', tags: { water: 2, royal: 1.5 } },
+  goldlion:{ st: 3, name: 'ราชสีห์ทอง', e: '🦁', tags: { beast: 1.5, royal: 2, light: .5 } },
+  thundert:{ st: 3, name: 'เสืออัสนี', e: '🐯', tags: { thunder: 2, wild: 1.5 } },
+  peacockp:{ st: 3, name: 'นกยูงสวรรค์', e: '🦚', tags: { light: 1, sweet: 1.5, royal: 1 } },
+  skywhale:{ st: 3, name: 'วาฬฟ้า', e: '🐋', tags: { water: 2, cute: 1, loyal: .5 } },
+  nightbat:{ st: 3, name: 'ค้างคาวรัตติกาล', e: '🦇', tags: { dark: 2, sly: 1.5 } },
+  serpent: { st: 3, name: 'อสรพิษ', e: '🐍', tags: { dark: 1.5, wild: 1.5 } },
+  butterflyp:{ st: 3, name: 'ผีเสื้อพฤกษา', e: '🦋', tags: { nature: 2, cute: 1 } },
+  croc:    { st: 3, name: 'จระเข้บึง', e: '🐊', tags: { water: 1, wild: 1.5, beast: 1 } },
+  trex:    { st: 3, name: 'ทีเร็กซ์น้อย', e: '🦖', tags: { beast: 2, fire: 1 } },
+  panda:   { st: 3, name: 'แพนด้าขี้เซา', e: '🐼', tags: { nature: 1, sweet: 1.5, loyal: 1 } },
+  shadefox:{ st: 3, name: 'จิ้งจอกเก้าหาง', e: '🦊', tags: { sly: 2, light: 1, royal: .5 } },
+};
+const PET_FORM_KEYS = Object.keys(PET_FORMS);
+const PET_TAGS = ['fire', 'water', 'nature', 'light', 'dark', 'thunder', 'cute', 'cool', 'royal', 'beast', 'sweet', 'wild', 'sly', 'loyal'];
+const PET_EVO_LV = { 2: 10, 3: 25 }, PET_EVO_AFF = { 2: 40, 3: 70 }, PET_LV_CAP = 50;
+const petXpNeed = lv => Math.round(10 * Math.pow(lv, 1.5));
+function newPet() {
+  const pers = pick(Object.keys(PET_PERS)), foods = Object.keys(PET_FOODS);
+  const likes = [], dislikes = [];
+  // likes lean on personality but are not fixed: 70% from the personality list, else any food
+  while (likes.length < 2) { const f = Math.random() < .7 ? pick(PET_PERS[pers].likes) : pick(foods); if (!likes.includes(f)) likes.push(f); }
+  while (!dislikes.length) { const f = pick(foods); if (!likes.includes(f)) dislikes.push(f); }
+  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sp: pick(PET_FORM_KEYS.filter(k => PET_FORMS[k].st === 1)), stage: 1, lv: 1, xp: 0,
+    hunger: 80, aff: 10, pers, likes, dislikes, known: [], fed: {}, acc: null, hidden: pick(PET_TAGS), history: [], born: Date.now() };
+}const FOE_KEYS = Object.keys(FOES);
 const ZONES = [
   { name: 'ทุ่งหญ้าสดใส', lv: 1,  foes: ['worm', 'bee', 'shroom', 'frog', 'snail'],   boss: 'wormking', g: ['#A6DB88', '#9CD27E'], road: '#E6D29E' },
   { name: 'ป่าลึกลับ',   lv: 4,  foes: ['wolf', 'bat', 'treant', 'fox', 'boar'],     boss: 'bear',     g: ['#62A873', '#5A9F6B'], road: '#C9B383' },
@@ -721,6 +807,45 @@ function limbArt(color, rk, c) {
   else out += `<ellipse cx="46" cy="109" rx="8" ry="5" fill="${c[2]}" ${K2(2)}/><ellipse cx="74" cy="109" rx="8" ry="5" fill="${c[2]}" ${K2(2)}/>`;
   return out + `<g${small}>${arm}</g><g transform="translate(120 0) scale(-1 1)"><g${small}>${arm}</g></g>`;
 }
+// Form stages 3-5 upgrade the form's own features (cumulative), so each branch grows in its own direction.
+function formTierArt(form, ft, c, SL) {
+  const S = (w) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round"`, G = '#FFD23F';
+  let b = '', f = '';
+  if (form === 'atk') {
+    if (ft >= 3) f += `<path d="M34 38Q12 22 18 1Q30 18 46 28ZM86 38Q108 22 102 1Q90 18 74 28Z" fill="#FFF1DA" ${S(2.5)}/><path d="M78 72L86 80" ${SK}/>`;
+    if (ft >= 4) f += `<path d="M22 14L30 10M24 22L33 17M98 14L90 10M96 22L87 17" stroke="${c[2]}" stroke-width="3.5" stroke-linecap="round"/><path d="M55 26L60 6L65 26Z" fill="#FFF1DA" ${S(2)}/>`;
+    if (ft >= 5) f += `<circle cx="18" cy="3" r="3.5" fill="${G}" ${S(1.5)}/><circle cx="102" cy="3" r="3.5" fill="${G}" ${S(1.5)}/><circle cx="60" cy="7" r="3" fill="${G}" ${S(1.5)}/><path d="M52 82L54 89L57 82ZM63 82L66 89L68 82Z" fill="#fff" ${S(1.2)}/>`;
+  } else if (form === 'def') {
+    if (ft >= 3) f += `<path d="M18 54L13 78L25 72ZM102 54L107 78L95 72Z" fill="#C9CCD8" ${S(2.5)}/><path d="M28 48Q60 36 92 48" fill="none" stroke="${INK}" stroke-width="2.5"/>`;
+    if (ft >= 4) f += `<path d="M60 16C55 5 63 0 73 3C66 6 64 10 60 16Z" fill="${c[1]}" ${S(2)}/><circle cx="20" cy="88" r="12" fill="#C9CCD8" ${S(2.5)}/><circle cx="20" cy="88" r="5" fill="${c[1]}" ${S(1.5)}/>`;
+    if (ft >= 5) f += `<path d="M18 56Q20 18 60 16Q100 18 102 56Q82 44 60 44Q38 44 18 56Z" fill="${G}" opacity=".55"/><path d="M16 40L3 28L7 46ZM104 40L117 28L113 46Z" fill="${G}" ${S(2)}/>`;
+  } else if (form === 'spd') {
+    if (ft >= 3) f += `<path d="M32 76Q60 94 88 76L88 88Q60 104 32 88Z" fill="${c[2]}" ${S(2.5)}/>`;
+    if (ft >= 4) b += `<path d="M14 14L106 106M106 14L14 106" stroke="${INK}" stroke-width="7" stroke-linecap="round"/><path d="M14 14L106 106M106 14L14 106" stroke="#DCE1EC" stroke-width="4" stroke-linecap="round"/>`;
+    if (ft >= 5) f += `<path d="M100 56Q118 62 117 82Q111 98 118 112" fill="none" stroke="${INK}" stroke-width="9" stroke-linecap="round"/><path d="M100 56Q118 62 117 82Q111 98 118 112" fill="none" stroke="${G}" stroke-width="6" stroke-linecap="round"/>`;
+  } else if (form === 'hp') {
+    if (ft >= 3) f += `<rect x="44" y="86" width="32" height="16" rx="6" fill="#C9CCD8" ${S(2.5)}/><path d="M50 94H70" stroke="${INK}" stroke-width="2"/>`;
+    if (ft >= 4) f += `<path d="M13 60L22 38L31 60ZM89 60L98 38L107 60Z" fill="#8A6A52" ${S(2.5)}/>`;
+    if (ft >= 5) f += `<path d="M16 98Q60 112 104 98" fill="none" stroke="${INK}" stroke-width="10" stroke-linecap="round"/><path d="M16 98Q60 112 104 98" fill="none" stroke="${G}" stroke-width="7" stroke-linecap="round"/><circle cx="60" cy="105" r="5" fill="${c[1]}" ${S(1.5)}/>`;
+  } else if (form === 'luk') {
+    if (ft >= 3) f += `<ellipse cx="60" cy="5" rx="14" ry="4" fill="none" stroke="${G}" stroke-width="3"/>`;
+    if (ft >= 4) f += `<g fill="#5CCB6B" ${S(1)}><circle cx="9" cy="58" r="4"/><circle cx="15" cy="58" r="4"/><circle cx="9" cy="64" r="4"/><circle cx="15" cy="64" r="4"/><circle cx="105" cy="58" r="4"/><circle cx="111" cy="58" r="4"/><circle cx="105" cy="64" r="4"/><circle cx="111" cy="64" r="4"/></g>`;
+    if (ft >= 5) f += `<g stroke="${G}" stroke-width="3" stroke-linecap="round"><path d="M30 12L22 8M90 12L98 8M36 4L32 0M84 4L88 0"/></g>`;
+  } else if (form === 'rainbow') {
+    if (ft >= 3) f += `<circle cx="34" cy="26" r="3" fill="#62B6FF"/><circle cx="86" cy="26" r="3" fill="#FF7A8A"/>`;
+    if (ft >= 4) b += `<path d="M18 80Q-2 70 1 48Q12 60 22 64ZM102 80Q122 70 119 48Q108 60 98 64Z" fill="${SL.wing}" ${S(2)}/>`;
+    if (ft >= 5) b = `<ellipse cx="60" cy="64" rx="57" ry="54" fill="none" stroke="#FF8FB1" stroke-width="3" opacity=".7"/><ellipse cx="60" cy="64" rx="52" ry="49" fill="none" stroke="#62B6FF" stroke-width="3" opacity=".7"/>` + b;
+  } else if (form === 'shadow') {
+    if (ft >= 3) f += `<ellipse cx="60" cy="48" rx="5" ry="7" fill="${SL.se}" ${S(1.5)}/>`;
+    if (ft >= 4) b += `<path d="M24 100Q14 112 6 108M96 100Q106 112 114 108M44 106Q40 118 32 118M76 106Q80 118 88 118" fill="none" stroke="${SL.sc[2]}" stroke-width="6" stroke-linecap="round"/>`;
+    if (ft >= 5) f += `<path d="M34 32L38 16L46 28L54 10L60 26L66 10L74 28L82 16L86 32Z" fill="${SL.sc[2]}" stroke="${SL.se}" stroke-width="2" stroke-linejoin="round"/>`;
+  } else if (form === 'unique') {
+    if (ft >= 3) f += `<path d="M104 112L112 42" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="M104 112L112 42" stroke="${G}" stroke-width="3.5" stroke-linecap="round"/><circle cx="112" cy="38" r="6" fill="#4A9DFF" ${S(2)}/>`;
+    if (ft >= 4) b += `<path d="M24 58Q60 70 96 58" fill="none" stroke="${G}" stroke-width="4"/>`;
+    if (ft >= 5) f += STAR(8, 20, 7, '') + STAR(60, 114, 6, 'b');
+  }
+  return [b, f];
+}
 const TIER_NAME = { 2: '', 3: 'ขั้นตื่นรู้', 4: 'ขั้นตำนาน', 5: 'ขั้นเทพ' };
 function blobSVG(color, st = 1, o = {}) {
   const form = o.form && FORM_ARCH[o.form] ? o.form : null;
@@ -743,6 +868,7 @@ function blobSVG(color, st = 1, o = {}) {
   else if (form === 'luk') formArt = `<ellipse cx="60" cy="10" rx="24" ry="6.5" fill="none" stroke="#FFD23F" stroke-width="5"/><ellipse cx="60" cy="10" rx="24" ry="6.5" fill="none" stroke="${INK}" stroke-width="1.5"/>` + STAR(104, 40, 6, '') + STAR(16, 36, 5, 'b');
   const lookX = form && FORM_LOOK[color] && FORM_LOOK[color][form];
   if (lookX) { back += lookX[0]; formArt += lookX[1]; }
+  if (form && ft >= 3) { const [tb, tf] = formTierArt(form, ft, c, SL); back = tb + back; formArt += tf; }
   // rank art, cumulative: 1 arms+feet, 2 element limbs, 3 pauldrons+belt, 4 cape+medal, 5 aura+wings+tail, 6 war banner, 7 gold hero
   if (rk >= 6) back = `<path d="M104 112V2" stroke="${INK}" stroke-width="4"/><path d="M104 4H119L114 12L119 20H104Z" fill="${c[1]}" ${K2(2)}/>` + back;
   if (rk >= 5) back = `<ellipse cx="60" cy="66" rx="54" ry="50" fill="${c[1]}" opacity=".22"/><ellipse cx="60" cy="66" rx="46" ry="42" fill="#fff" opacity=".18"/>` + (form !== 'rainbow' ? `<path d="M18 70Q0 60 3 40Q14 52 24 56ZM102 70Q120 60 117 40Q106 52 96 56Z" fill="${rk >= 7 ? '#FFE98A' : '#fff'}" ${K2(2.5)}/>` : '') + back;
@@ -816,13 +942,14 @@ function vnoise(x, y, s) {
 const roadY = x => 48 + Math.sin(x / 9) * 5 + Math.sin(x / 23) * 4;
 // ground: 0 town, 1..5 zones. obj: 0 none, 1 tree, 2 pine, 3 rock, 4 crystal, 5 water, 6 lava, 7 pillar, 8 fountain, 9 stall, 10 house, 20+ decor (walkable)
 const GROUND = new Uint8Array(W * H), OBJ = new Uint8Array(W * H), ROAD = new Uint8Array(W * H);
-const BLOCK = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 31]);
+const BLOCK = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 31, 33]);
 const GATES = new Map(); // tile index -> { tx, ty, to } (tile coords of the arrival spot)
 const ZB = []; // per-map bounding box in tiles
 const BOSS_POS = [];
 const ZONE_TILES = ZONES.map(() => []);
 const SHOP = { x: TOWN.x - 4, y: TOWN.y - 3 };
 const SMITH = { x: TOWN.x + 3, y: TOWN.y - 2 };
+const PETSHOP = { x: TOWN.x - 7, y: TOWN.y - 1 };
 const PORTAL = { x: TOWN.x - 4, y: TOWN.y + 1 };
 // Warp stones: one in town and one where the road enters each zone. Touch one to unlock it.
 const WARPS = [{ x: TOWN.x + 4, y: TOWN.y + 2, name: 'เมืองปุ๊กปิ๊ก', lv: 0 }, ...ZONES.map((z, zi) => { const x = TOWN.x + BANDS[zi] + 3; return { x, y: Math.round(roadY(x)), name: z.name, lv: z.lv }; })];
@@ -889,6 +1016,7 @@ const ARENAS = DUNGEONS.map((d, i) => ({ x0: 4 + i * 46, y0: HW + 3, w: 40, h: 2
   put(TOWN.x, TOWN.y, 8); put(TOWN.x + 1, TOWN.y, 8); put(TOWN.x, TOWN.y + 1, 8); put(TOWN.x + 1, TOWN.y + 1, 8);
   put(SHOP.x, SHOP.y, 9); put(SHOP.x + 1, SHOP.y, 9);
   put(SMITH.x, SMITH.y, 11); put(SMITH.x + 1, SMITH.y, 11);
+  put(PETSHOP.x, PETSHOP.y, 33); put(PETSHOP.x + 1, PETSHOP.y, 33);
   put(PORTAL.x, PORTAL.y, 12);
   for (const w of WARPS) put(w.x, w.y, 30);
   // dungeon rows: solid rock with three carved arenas
@@ -939,6 +1067,8 @@ function migrate(s) {
   if (typeof s.sp !== 'number') s.sp = Math.max(0, s.lv - 1);
   s.skills = s.skills && typeof s.skills === 'object' ? s.skills : {};
   if (!FORM_ARCH[s.form]) s.form = null;
+  s.pets = Array.isArray(s.pets) ? s.pets.filter(pt => pt && PET_FORMS[pt.sp] && PET_PERS[pt.pers]) : [];
+  s.petItems = Object.assign({ food: {}, stone: {}, acc: [], eggs: 0 }, s.petItems || {});
   s.kills = s.kills || 0; s.bossKills = s.bossKills || 0; s.points = s.points || 0; s.gold = s.gold || 0; s.xp = s.xp || 0;
   return s;
 }
@@ -946,7 +1076,7 @@ function makePlayer(color, shiny) {
   const main = COLORS[color].main, base = {};
   for (const k of STATS) base[k] = BASE[k] + (k === 'hp' ? ri(0, 6) : ri(0, 2)) + (k === main ? BONUS[k] : 0) + (shiny ? (k === 'hp' ? 8 : 2) : 0);
   return { v: 2, name: COLORS[color].species, color, shiny, lv: 1, xp: 0, base, points: 0, gold: 20, hp: base.hp, mp: 20,
-    items: { potion: 3, ether: 1, elixir: 0, power: 0, speed: 0, scroll: 1 }, bag: [], eq: {}, dungeons: 0, warps: [0], secretKills: [], visited: [], titles: [], title: null, sp: 0, skills: {}, kills: 0, bossKills: 0, born: Date.now() };
+    items: { potion: 3, ether: 1, elixir: 0, power: 0, speed: 0, scroll: 1 }, bag: [], eq: {}, dungeons: 0, warps: [0], secretKills: [], visited: [], titles: [], title: null, pets: [], petItems: { food: {}, stone: {}, acc: [], eggs: 0 }, sp: 0, skills: {}, kills: 0, bossKills: 0, born: Date.now() };
 }
 const col = () => COLORS[P.color];
 const itemStat = (it, k) => Math.round((it.stats[k] || 0) * (1 + .08 * (it.en || 0)));
@@ -1238,6 +1368,49 @@ function stepDown() {
   if (sim) { views = new Map(); for (const m of sim.mons.values()) views.set(m.id, { ...m }); }
   hosting = false; sim = null;
 }
+const petObj = { x: 0, y: 0, cd: 1, emoT: 0, emo: '', healT: 8, hungerT: 0, placed: false };
+const activePet = () => P && (P.pets || []).find(pt => pt.id === P.petActive) || null;
+const petPers = pt => PET_PERS[pt.pers];
+const petPower = pt => (6 + pt.lv * 2.4) * [0, 1, 1.7, 2.6][pt.stage] * (petPers(pt).atk || 1) * (1 + pt.aff / 250);
+function petEmote(e) { petObj.emo = e; petObj.emoT = 2.2; }
+function petGainXp(pt, x) {
+  if (!pt || pt.lv >= PET_LV_CAP) return;
+  pt.xp += Math.round(x * (petPers(pt).exp || 1));
+  while (pt.lv < PET_LV_CAP && pt.xp >= petXpNeed(pt.lv)) { pt.xp -= petXpNeed(pt.lv); pt.lv++; floatAt(petObj.x, petObj.y - 30, `สัตว์เลี้ยง Lv ${pt.lv}!`, '#FFB3C7', 14); petEmote('✨');
+    if (pt.stage < 3 && pt.lv === PET_EVO_LV[pt.stage + 1]) toast(`${PET_FORMS[pt.sp].name} พร้อมวิวัฒน์แล้ว (ต้องมีความผูกพัน ${PET_EVO_AFF[pt.stage + 1]}+ และศิลาวิวัฒน์)`); }
+}
+function petTick(dt) {
+  const pt = activePet(); if (!pt || me.dead) { petObj.placed = false; return; }
+  const tx = me.x - me.dir * 30, ty = me.y + 8;
+  if (!petObj.placed || Math.hypot(petObj.x - tx, petObj.y - ty) > 8 * T) { petObj.x = tx; petObj.y = ty; petObj.placed = true; }
+  const k = Math.min(1, dt * (pt.pers === 'clingy' ? 8 : pt.pers === 'lazy' ? 3 : 5)); petObj.x += (tx - petObj.x) * k; petObj.y += (ty - petObj.y) * k;
+  petObj.emoT = Math.max(0, petObj.emoT - dt);
+  const per = petPers(pt);
+  petObj.hungerT += dt; if (petObj.hungerT >= 25) { petObj.hungerT = 0; pt.hunger = Math.max(0, pt.hunger - (per.hunger || 1)); if (pt.hunger <= 0) pt.aff = Math.max(0, pt.aff - 1); }
+  if (pt.hunger < 15) { if (!petObj.emoT && Math.random() < dt * .3) petEmote('💢'); return; }
+  if (!petObj.emoT && Math.random() < dt * .05) petEmote(per.emo);
+  if (per.heal) { petObj.healT -= dt; if (petObj.healT <= 0) { petObj.healT = 10; if (P.hp < maxHp()) { const g = Math.round(maxHp() * .03 * (1 + pt.stage * .3)); P.hp = Math.min(maxHp(), P.hp + g); floatAt(me.x, me.y - 30, '+' + g, '#FFB3C7', 14); petEmote('💗'); } } }
+  petObj.cd -= dt;
+  if (petObj.cd > 0) return;
+  const m = nearestMon(120);
+  if (!m) { petObj.cd = .3; return; }
+  petObj.cd = (pt.pers === 'playful' ? rnd(.9, 2.3) : 1.6) * (per.spd || 1) / (1 + (pt.stage - 1) * .15);
+  const d = dmgCalc(petPower(pt), m.def, 1, pt.lv + (pt.stage - 1) * 5, m.lv);
+  myHits.set(m.id, nowS());
+  fx.push({ type: 'bolt', x: petObj.x, y: petObj.y - 14, x2: m.rx, y2: m.ry - 12, t: 0, dur: .25 });
+  floatAt(m.rx + 10, m.ry - 18, d, '#FFB3C7', 14);
+  if (DG) dDamage(m, d);
+  else if (hosting) damageMon(m, d, myPeer || 'me');
+  else { hitsOut.push([++hitSeq, m.id, d]); if (hitsOut.length > 10) hitsOut.shift(); m.predHp = Math.max(0, (m.predHp != null && nowS() - m.predT < .8 ? m.predHp : m.hp) - d); m.predT = nowS(); m.flash = .15; }
+}
+function drawPet(x, y, formKey, acc, stage, emo) {
+  const f = PET_FORMS[formKey]; if (!f) return;
+  const size = [0, 24, 30, 38][stage] || 24, bob = Math.sin(nowS() * 6 + x) * 2;
+  ctx.fillStyle = 'rgba(51,40,74,.2)'; ctx.beginPath(); ctx.ellipse(x, y + 2, size * .35, size * .1, 0, 0, 7); ctx.fill();
+  ctx.drawImage(emojiSprite(f.e, 32), x - size * .6, y - size + bob, size * 1.2, size * 1.2);
+  if (acc && PET_ACCS[acc]) ctx.drawImage(emojiSprite(PET_ACCS[acc].icon, 18), x + size * .05, y - size - 6 + bob, 16, 16);
+  if (emo) ctx.drawImage(emojiSprite(emo, 18), x - 8, y - size - 20 + bob, 18, 18);
+}
 function monsterList() { return DG ? DG.mons.values() : hosting ? (sim ? sim.mons.values() : []) : views.values(); }
 function getMon(id) { return DG ? DG.mons.get(id) : hosting ? sim && sim.mons.get(id) : views.get(id); }
 
@@ -1304,7 +1477,7 @@ function dDamage(m, dmg) {
     DG.clear = true; P.dungeons = (P.dungeons || 0) + 1;
     const cx = (DG.a.x0 + DG.a.w / 2) * T, cy = (DG.a.y0 + DG.a.h / 2) * T;
     for (let k = 0; k < 3; k++) dropLoot('item', cx, cy, makeItem(DG.d.tier, 2));
-    dropLoot('gold', cx, cy, Math.round(DG.d.fee * 1.5)); dropLoot('elixir', cx, cy, 1);
+    dropLoot('gold', cx, cy, Math.round(DG.d.fee * 1.5)); dropLoot('elixir', cx, cy, 1); dropLoot('stone', cx, cy, pick(Object.keys(PET_STONES)));
     DG.portal = { x: cx, y: cy + 2 * T };
     sfx('rare'); banner('ผ่านดันเจี้ยน!', 'เก็บสมบัติแล้วเดินเข้าวงวาร์ปเพื่อกลับเมือง');
     save();
@@ -1316,6 +1489,8 @@ function leaveDungeon(msg) {
     for (const l of loot) {
       if (l.kind === 'gold') P.gold += l.val;
       else if (l.kind === 'item') { if (P.bag.length < BAG_MAX) P.bag.push(l.val); }
+      else if (l.kind === 'petfood') P.petItems.food[l.val] = (P.petItems.food[l.val] || 0) + 1;
+      else if (l.kind === 'stone') P.petItems.stone[l.val] = (P.petItems.stone[l.val] || 0) + 1;
       else P.items[l.kind] = (P.items[l.kind] || 0) + 1;
     }
   }
@@ -1453,7 +1628,7 @@ function snapshotOut() {
   return { l };
 }
 function presenceState() {
-  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_INDEX.indexOf(P.form) + 1 : 0, ft: P.form ? P.formTier || 2 : 0, tt: P.title ? TITLES.findIndex(t => t.id === P.title) + 1 : 0, sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
+  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_INDEX.indexOf(P.form) + 1 : 0, ft: P.form ? P.formTier || 2 : 0, tt: P.title ? TITLES.findIndex(t => t.id === P.title) + 1 : 0, pt: (() => { const pt = activePet(); return pt ? [PET_FORM_KEYS.indexOf(pt.sp), pt.acc ? Object.keys(PET_ACCS).indexOf(pt.acc) : -1, pt.stage] : null; })(), sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
     lv: P.lv, hp: Math.round(P.hp / maxHp() * 100), hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon),
     a: me.atkCount, dead: me.dead ? 1 : 0, hid: document.hidden ? 1 : 0, h: hitsOut.slice(), ch: me.chat || null, ct: me.chatAt || null };
   if (hosting && sim) { s.M = snapshotOut(); s.k = sim.k.slice(); s.ma = sim.ma.slice(); }
@@ -1469,7 +1644,7 @@ function upsertRemote(p) {
   let r = remotes.get(p.peer);
   if (!r) { r = { x, y, walk: 0, swing: 0, a: pr.a, ct: pr.ct, bubble: '', bubbleT: 0 }; remotes.set(p.peer, r); chatLine('', `${name} เข้ามาในโลก`, true); }
   r.tx = x; r.ty = y; if (Math.hypot(r.x - x, r.y - y) > T * 8) { r.x = x; r.y = y; }
-  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_INDEX[clamp(num(pr.f, 0) | 0, 0, FORM_INDEX.length) - 1] || null; r.ft = clamp(num(pr.ft, 0) | 0, 0, 5); r.tt = (TITLES[(num(pr.tt, 0) | 0) - 1] || {}).name || ''; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
+  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_INDEX[clamp(num(pr.f, 0) | 0, 0, FORM_INDEX.length) - 1] || null; r.ft = clamp(num(pr.ft, 0) | 0, 0, 5); r.tt = (TITLES[(num(pr.tt, 0) | 0) - 1] || {}).name || ''; r.pt = Array.isArray(pr.pt) && PET_FORM_KEYS[num(pr.pt[0], -1)] ? [PET_FORM_KEYS[num(pr.pt[0], -1)], Object.keys(PET_ACCS)[num(pr.pt[1], -1)] || null, clamp(num(pr.pt[2], 1) | 0, 1, 3)] : null; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
   r.lv = clamp(num(pr.lv, 1) | 0, 1, 999); r.hp = clamp(num(pr.hp, 100), 0, 100); const okGear = n => { n = num(n, 0) | 0; return (n >= 0 && n <= TIERS) || (n >= 100 && n < 100 + UNIQUE_KEYS.length) ? n : 0; }; r.hat = okGear(pr.hat); r.wp = okGear(pr.wp); r.dead = !!pr.dead;
   if (pr.a !== r.a) { r.a = pr.a; r.swing = .2; }
   if (pr.ct !== r.ct) { r.ct = pr.ct; const t = clean(pr.ch).slice(0, 80); if (t) { r.bubble = t; r.bubbleT = 6; chatLine(name, t); } }
@@ -1695,6 +1870,14 @@ function reward(s, x, y, mlv, tierOverride) {
   const tier = tierOverride != null ? tierOverride : s.zi;
   if (s.boss) { dropLoot('item', x, y, makeItem(tier, 2)); dropLoot('item', x, y, makeItem(tier, 1)); if (Math.random() < .5) dropLoot('elixir', x, y, 1); }
   else if (Math.random() * 100 < (20 + luk * .3) * (1 + ap('drop') + uqFx('drop'))) dropLoot('item', x, y, makeItem(tier, 0));
+  { const pt = activePet(); if (pt && pt.hunger > 0) {
+      petGainXp(pt, Math.max(1, Math.round(s.xp * xpScale(mlv) * .5)));
+      const per = petPers(pt);
+      if (per.gold && Math.random() < .5) dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * per.gold)));
+      if (per.drop && Math.random() < per.drop) dropLoot('item', x, y, makeItem(tier, 0));
+    } }
+  if (Math.random() < .06) dropLoot('petfood', x, y, pick(Object.keys(PET_FOODS)));
+  if (s.boss && Math.random() < .3) dropLoot('stone', x, y, pick(Object.keys(PET_STONES)));
   const xp = Math.max(1, Math.round(s.xp * xpScale(mlv)));
   floatAt(x, y - 44, `+${xp} EXP${xp < s.xp ? ' (มอนเลเวลต่ำ)' : ''}`, xp < s.xp ? '#C9C2D6' : '#FFE08A', 14);
   gainXp(xp);
@@ -1744,7 +1927,9 @@ function pickupLoot(dt) {
       floatAt(me.x, me.y - 44, itemName(it), RAR[it.r].c, 15); sfx(it.r >= 2 ? 'rare' : 'pick');
       if (it.r >= 3) banner(`ได้ของ${RAR[it.r].th}!`, itemName(it));
       $('#bBag').innerHTML = '🎒<span class="dot"></span><kbd class="kb">I</kbd>';
-    } else { P.items[l.kind]++; floatAt(me.x, me.y - 40, CONSUME[l.kind].icon + ' +1', '#fff', 15); sfx('pick'); }
+    } else if (l.kind === 'petfood') { P.petItems.food[l.val] = (P.petItems.food[l.val] || 0) + 1; floatAt(me.x, me.y - 40, PET_FOODS[l.val].icon + ' +1', '#fff', 15); sfx('pick'); }
+    else if (l.kind === 'stone') { P.petItems.stone[l.val] = (P.petItems.stone[l.val] || 0) + 1; floatAt(me.x, me.y - 40, PET_STONES[l.val].name + ' +1', '#E9D5FF', 15); sfx('rare'); }
+    else { P.items[l.kind]++; floatAt(me.x, me.y - 40, CONSUME[l.kind].icon + ' +1', '#fff', 15); sfx('pick'); }
     loot.splice(i, 1); save();
   }
 }
@@ -1758,7 +1943,7 @@ window.addEventListener('keydown', e => {
   if (typing() || !started || !$('#s-egg').hidden) { if (e.key === 'Escape' && !$('#chatbar').hidden) closeChat(); return; }
   const k = e.key.toLowerCase();
   setMode('desk');
-  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills') || (k === 't' && sheetName === 'titles')) closeSheet(); return; }
+  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills') || (k === 't' && sheetName === 'titles') || (k === 'p' && sheetName === 'pets')) closeSheet(); return; }
   if (k === 'escape') { me.targetId = null; me.goal = null; return; }
   if (k === 'h' || k === '?') { openHelp(); return; }
   if (k === 'r') { usePotion('ether'); return; }
@@ -1769,6 +1954,7 @@ window.addEventListener('keydown', e => {
   if (k >= '1' && k <= '5') { castSkill(+k - 1); return; }
   if (k === 'k') { openSkills(); return; }
   if (k === 't') { openTitles(); return; }
+  if (k === 'p') { openPets(); return; }
   if (k === 'q') { usePotion(); return; }
   if (k === 'i' || k === 'b') { openBag(); return; }
   if (k === 'c') { openChar(); return; }
@@ -1869,6 +2055,7 @@ $('#bChat').onclick = () => { sfx('tap'); openChat(); };
 $('#bHelp').onclick = () => { sfx('tap'); openHelp(); };
 $('#bTalk').onclick = () => { sfx('tap'); if (DG) { if (!DG.clear) leaveDungeon('ออกจากดันเจี้ยนแล้ว (ไม่ได้รับรางวัล)'); return; } const n = nearNpc(); if (n) n.open(); else if (nearWarp() >= 0) openWarps(); };
 $('#bSkills').onclick = () => { sfx('tap'); openSkills(); };
+$('#bPet').onclick = () => { sfx('tap'); openPets(); };
 function openChat() { $('#chatbar').hidden = false; keys.clear(); setTimeout(() => $('#chatIn').focus(), 30); }
 function closeChat() { $('#chatbar').hidden = true; $('#chatIn').blur(); }
 $('#chatX').onclick = closeChat;
@@ -2043,6 +2230,8 @@ function renderAdmin(el) {
       <button class="btn${P.form ? '' : ' on'}" type="button" data-adm="form" data-v=""><span class="pic">${blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, noShadow: true })}</span>ไม่มีร่าง<span class="muted" style="font-size:10px">ร่างปกติ</span></button></div>
     <b style="font-family:var(--f-display)">ขั้นของร่าง</b>
     <div class="row2">${[2, 3, 4, 5].map(t => `<button class="btn" type="button" data-adm="tier" data-v="${t}" style="${(P.formTier || 2) === t ? 'background:#FFF3B0' : ''}">ร่าง ${t}</button>`).join('')}</div>
+    <b style="font-family:var(--f-display)">สัตว์เลี้ยง</b>
+    <div class="row2"><button class="btn" type="button" data-adm="petkit">ไข่ 3 ใบ + อาหาร ×10 + ศิลา ×3 + ของสวมใส่ครบ</button><button class="btn" type="button" data-adm="petlv">สัตว์เลี้ยง Lv 30 + ผูกพัน 100</button></div>
     <b style="font-family:var(--f-display)">ของลับ · ฉายา</b>
     <div class="row2"><button class="btn" type="button" data-adm="secret">เสกมอนลับของดินแดนนี้</button><button class="btn" type="button" data-adm="uniques">ของยูนิคครบ 6 ชิ้น</button><button class="btn" type="button" data-adm="titles">ปลดล็อกฉายาทั้งหมด</button><button class="btn" type="button" data-adm="warps">ปลดล็อกจุดวาร์ปทั้งหมด</button></div>
     <p class="muted" style="margin:0;font-size:12px">ร่างยูนิค (ลับ ไม่บอกผู้เล่น): ได้อัตโนมัติเมื่อปราบมอนลับครบทั้ง 6 ชนิดและ Lv 20 ขึ้นไป</p>
@@ -2067,6 +2256,8 @@ function adminAct(act, v) {
   else if (act === 'uniques') { for (const k of UNIQUE_KEYS) if (P.bag.length < BAG_MAX) P.bag.push(makeUnique(k)); toast('ใส่ของยูนิคไว้ในกระเป๋าแล้ว'); }
   else if (act === 'titles') { P.titles = TITLES.map(t => t.id); if (!P.title) P.title = TITLES[0].id; }
   else if (act === 'warps') { P.warps = WARPS.map((_, i) => i); }
+  else if (act === 'petkit') { P.petItems.eggs += 3; for (const k in PET_FOODS) P.petItems.food[k] = (P.petItems.food[k] || 0) + 10; for (const k in PET_STONES) P.petItems.stone[k] = (P.petItems.stone[k] || 0) + 3; P.petItems.acc = Object.keys(PET_ACCS); toast('ได้ของสัตว์เลี้ยงแล้ว เปิด 🐾'); }
+  else if (act === 'petlv') { const pt = activePet(); if (!pt) { toast('ยังไม่มีสัตว์เลี้ยงที่ออกเดินทาง'); return; } pt.lv = 30; pt.xp = 0; pt.aff = 100; pt.hunger = 100; toast('สัตว์เลี้ยง Lv 30 แล้ว'); }
   else if (act === 'secret') {
     const z = zoneAt(me.x, me.y) - 1, q = SECRETS.find(e => e.zones.includes(z));
     if (!q || DG || !hosting || !sim) { toast(q ? 'ต้องเป็นเครื่องที่คุมมอนอยู่ (ลองตอนเล่นคนเดียว)' : 'ต้องอยู่ในดินแดน ไม่ใช่ในเมือง'); return; }
@@ -2094,6 +2285,100 @@ function adminAct(act, v) {
   save(); hudStatic(); updateSkillBar(); updateHud(true); refreshSheet();
 }
 $('#bAdmin').onclick = () => { sfx('tap'); openAdmin(); };
+let petSel = null, petMsg = '';
+function openPets() { petSel = P.petActive; petMsg = ''; openSheet('สัตว์เลี้ยง', renderPets, 'pets'); }
+const hearts = a => '❤️'.repeat(Math.round(a / 20)) + '🤍'.repeat(5 - Math.round(a / 20));
+function renderPets(el) {
+  if (!(P.pets || []).length) {
+    el.innerHTML = `<p style="margin:0">ยังไม่มีสัตว์เลี้ยง ไปหาคุณยายที่ร้านสัตว์เลี้ยงในเมือง (ฝั่งซ้ายของน้ำพุ) รับไข่ใบแรกฟรี!</p>${P.petItems.eggs ? `<button class="btn primary block" type="button" data-pet="hatch">🥚 ฟักไข่สัตว์เลี้ยง (มี ${P.petItems.eggs})</button>` : ''}`;
+    return;
+  }
+  const pt = P.pets.find(x => x.id === petSel) || P.pets[0]; petSel = pt.id;
+  const f = PET_FORMS[pt.sp], per = petPers(pt), fedTotal = Object.values(pt.fed).reduce((a, b) => a + b, 0);
+  const nextSt = pt.stage + 1, canEvo = pt.stage < 3 && pt.lv >= PET_EVO_LV[nextSt] && pt.aff >= PET_EVO_AFF[nextSt];
+  el.innerHTML = `
+    <div class="chips">${P.pets.map(x => `<button class="btn sm${x.id === pt.id ? ' primary' : ''}" type="button" data-pet="sel" data-v="${x.id}" style="min-height:34px">${PET_FORMS[x.sp].e} ${PET_FORMS[x.sp].name}${x.id === P.petActive ? ' ✓' : ''}</button>`).join('')}${P.petItems.eggs ? `<button class="btn sm" type="button" data-pet="hatch" style="min-height:34px">🥚 ฟัก (${P.petItems.eggs})</button>` : ''}</div>
+    ${petMsg ? `<div class="panel center" style="background:#FFF3F8">${petMsg}</div>` : ''}
+    <div class="panel" style="display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:center">
+      <div style="font-size:58px;text-align:center;line-height:1.1">${f.e}${pt.acc ? `<div style="font-size:20px">${PET_ACCS[pt.acc].icon}</div>` : ''}</div>
+      <div><div style="font:700 19px var(--f-display)">${f.name} <span class="chip">Lv ${pt.lv}</span></div>
+        <div class="muted" style="font-size:13px">ร่างขั้น ${pt.stage} · นิสัย <b>${per.th}</b> ${per.emo} · ${per.desc}</div>
+        <div style="font-size:13px;margin-top:4px">ความผูกพัน ${hearts(pt.aff)} <span class="muted">${Math.round(pt.aff)}/100</span></div>
+        <div class="bar-row" style="margin-top:4px"><span>อิ่ม</span><div class="bar hp"><i style="width:${pt.hunger}%"></i></div><span class="v">${Math.round(pt.hunger)}%</span></div>
+        <div class="bar-row"><span>EXP</span><div class="bar xp"><i style="width:${pt.lv >= PET_LV_CAP ? 100 : pt.xp / petXpNeed(pt.lv) * 100}%"></i></div><span class="v">${pt.lv >= PET_LV_CAP ? 'MAX' : `${pt.xp}/${petXpNeed(pt.lv)}`}</span></div>
+      </div></div>
+    ${pt.id !== P.petActive ? `<button class="btn primary block" type="button" data-pet="active">ให้ตัวนี้ออกเดินทางด้วย</button>` : '<p class="muted" style="margin:0;font-size:12px">ตัวนี้กำลังเดินทางด้วย ช่วยตีมอนและได้ EXP เมื่อคุณปราบมอน (ต้องไม่หิว)</p>'}
+    <div><b style="font-family:var(--f-display)">ให้อาหาร</b> <span class="muted" style="font-size:12px">ของที่ชอบ: ${PET_FOODS && pt.likes.map(k => pt.known.includes(k) ? PET_FOODS[k].icon : '❔').join(' ')} · ไม่ชอบ: ${pt.dislikes.map(k => pt.known.includes(k) ? PET_FOODS[k].icon : '❔').join(' ')}</span></div>
+    <div class="quick">${Object.entries(PET_FOODS).map(([k, fd]) => `<button class="btn" type="button" data-pet="feed" data-v="${k}" ${(P.petItems.food[k] || 0) ? '' : 'disabled'}>${fd.icon} ${fd.name} ×${P.petItems.food[k] || 0}</button>`).join('')}</div>
+    <p class="muted" style="margin:0;font-size:12px">เคยกิน: ${fedTotal ? Object.entries(pt.fed).filter(([, n]) => n).map(([k, n]) => `${PET_FOODS[k].icon}×${n}`).join(' ') : 'ยังไม่เคยกินอะไร'}</p>
+    <div><b style="font-family:var(--f-display)">ของสวมใส่</b></div>
+    <div class="quick">${P.petItems.acc.length ? P.petItems.acc.map(k => `<button class="btn${pt.acc === k ? ' primary' : ''}" type="button" data-pet="acc" data-v="${k}">${PET_ACCS[k].icon} ${PET_ACCS[k].name}</button>`).join('') : '<span class="muted" style="font-size:13px">ยังไม่มี ซื้อได้ที่ร้านคุณยาย</span>'}</div>
+    <div class="panel"><b style="font-family:var(--f-display)">วิวัฒน์</b>
+      ${pt.stage >= 3 ? '<p class="muted" style="margin:4px 0 0">วิวัฒน์ครบทุกขั้นแล้ว</p>' : `<p class="muted" style="margin:4px 0 6px;font-size:13px">ต้อง Lv ${PET_EVO_LV[nextSt]}+ และความผูกพัน ${PET_EVO_AFF[nextSt]}+ แล้วเลือกศิลาวิวัฒน์ 1 ก้อน ร่างที่ได้ขึ้นกับนิสัย ของที่ใส่ อาหารที่เคยกิน ศิลาที่ใช้ และโชค ไม่มีสูตรตายตัว</p>
+      <div class="quick">${Object.entries(PET_STONES).map(([k, st]) => `<button class="btn" type="button" data-pet="evo" data-v="${k}" ${canEvo && (P.petItems.stone[k] || 0) ? '' : 'disabled'}>${st.icon} ${st.name} ×${P.petItems.stone[k] || 0}</button>`).join('')}</div>`}
+      ${pt.history.length ? `<p class="muted" style="margin:6px 0 0;font-size:12px">ประวัติ: ${pt.history.map(h => `${PET_FORMS[h.from].e}→${PET_FORMS[h.to].e}`).join(' · ')}</p>` : ''}</div>`;
+}
+function feedPet(pt, k) {
+  if (!(P.petItems.food[k] > 0)) return;
+  if (pt.hunger >= 95) { petMsg = `${PET_FORMS[pt.sp].name} อิ่มแล้ว ไม่ยอมกิน`; return; }
+  P.petItems.food[k]--; pt.fed[k] = (pt.fed[k] || 0) + 1;
+  const like = pt.likes.includes(k), hate = pt.dislikes.includes(k), per = petPers(pt);
+  if ((like || hate) && !pt.known.includes(k)) pt.known.push(k);
+  pt.hunger = Math.min(100, pt.hunger + (like ? 35 : 25));
+  pt.aff = clamp(pt.aff + (like ? 8 : hate ? -3 : 4) * (per.aff || 1) * (hate ? 1 : 1), 0, 100);
+  petMsg = like ? `${PET_FORMS[pt.sp].e} ชอบ${PET_FORMS && PET_FOODS[k].name}มาก! 💕` : hate ? `${PET_FORMS[pt.sp].e} ทำหน้าเบ้… ไม่ชอบ${PET_FOODS[k].name}` : `${PET_FORMS[pt.sp].e} กิน${PET_FOODS[k].name}หมดเกลี้ยง`;
+  if (pt.id === P.petActive) petEmote(like ? '💕' : hate ? '😖' : '😋');
+  sfx(like ? 'heal' : 'tap');
+}
+// Evolution: every candidate form is scored from the pet's whole story, then dice are rolled.
+function evolvePet(pt, stoneKey) {
+  const next = pt.stage + 1;
+  if (pt.stage >= 3 || pt.lv < PET_EVO_LV[next] || pt.aff < PET_EVO_AFF[next] || !(P.petItems.stone[stoneKey] > 0)) return;
+  const score = {}; const add = (tags, w) => { for (const t in tags) score[t] = (score[t] || 0) + tags[t] * w; };
+  add(petPers(pt).tags, 1.5);
+  if (pt.acc) add(PET_ACCS[pt.acc].tags, 1.2);
+  score[stoneKey] = (score[stoneKey] || 0) + 3;
+  const total = Object.values(pt.fed).reduce((a, b) => a + b, 0);
+  if (total) for (const k in pt.fed) add(PET_FOODS[k].tags, 4 * pt.fed[k] / total);
+  add(PET_FORMS[pt.sp].tags, .8);
+  if (pt.aff >= 80) { score.royal = (score.royal || 0) + 1; score.loyal = (score.loyal || 0) + 1; }
+  score[pt.hidden] = (score[pt.hidden] || 0) + 1.5;
+  const pool = PET_FORM_KEYS.filter(k => PET_FORMS[k].st === next);
+  let pickK;
+  if (Math.random() < .1) pickK = pick(pool); // mutation: anything can happen
+  else {
+    const w = pool.map(k => { let v = .3; const tg = PET_FORMS[k].tags; for (const t in tg) v += tg[t] * (score[t] || 0); return Math.pow(v, 1.6) * rnd(.6, 1.6); });
+    let r = Math.random() * w.reduce((a, b) => a + b, 0); pickK = pool[pool.length - 1];
+    for (let i = 0; i < pool.length; i++) { if ((r -= w[i]) <= 0) { pickK = pool[i]; break; } }
+  }
+  P.petItems.stone[stoneKey]--;
+  pt.history.push({ from: pt.sp, to: pickK, stone: stoneKey, t: Date.now() });
+  pt.sp = pickK; pt.stage = next;
+  const fl = document.createElement('div'); fl.className = 'flash'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 900);
+  sfx('lvl'); buzz([40, 40, 80]);
+  petMsg = `✨ วิวัฒน์เป็น <b>${PET_FORMS[pickK].name}</b> ${PET_FORMS[pickK].e}!`;
+  banner(`สัตว์เลี้ยงวิวัฒน์เป็น${PET_FORMS[pickK].name}!`, `ร่างขั้น ${next}`);
+  if (pt.id === P.petActive) petEmote('✨');
+}
+function hatchPetEgg() {
+  if (!(P.petItems.eggs > 0) || P.pets.length >= PET_MAX) { if (P.pets.length >= PET_MAX) toast(`เลี้ยงได้สูงสุด ${PET_MAX} ตัว`); return; }
+  P.petItems.eggs--; const pt = newPet(); P.pets.push(pt); if (!P.petActive) P.petActive = pt.id; petSel = pt.id;
+  petMsg = `🥚💥 ฟักออกมาเป็น <b>${PET_FORMS[pt.sp].name}</b> ${PET_FORMS[pt.sp].e} นิสัย${petPers(pt).th}!`;
+  sfx('hatch'); banner(`ได้${PET_FORMS[pt.sp].name}!`, `นิสัย${petPers(pt).th} ${petPers(pt).emo}`);
+}
+function openPetShop() { openSheet('ร้านสัตว์เลี้ยงคุณยาย', renderPetShop, 'petshop'); }
+function renderPetShop(el) {
+  const free = !P.petFree;
+  const row = (icon, name, desc, price, attrs) => `<div class="row"><span class="ico">${icon}</span><div><div class="nm">${name}</div><div class="ds">${desc}</div></div><button class="btn sm" type="button" ${attrs} ${P.gold < price ? 'disabled' : ''}>${price ? `<span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${price.toLocaleString()}` : 'รับฟรี'}</button></div>`;
+  el.innerHTML = `<p class="muted" style="margin:0">“หลานเอ๊ย สัตว์เลี้ยงแต่ละตัวนิสัยไม่เหมือนกันนะ ลองให้อาหารหลายๆ อย่างดูว่ามันชอบอะไร”</p>
+    <div class="panel rows">${row('🥚', 'ไข่สัตว์เลี้ยง', `ฟักได้ 1 ใน 6 ชนิด นิสัยสุ่ม · มีอยู่ ${P.petItems.eggs} ใบ · เลี้ยงแล้ว ${P.pets.length}/${PET_MAX}`, free ? 0 : PET_EGG_PRICE, 'data-pshop="egg"')}</div>
+    <b style="font-family:var(--f-display)">อาหาร</b>
+    <div class="panel rows">${Object.entries(PET_FOODS).map(([k, fd]) => row(fd.icon, fd.name, `มีอยู่ ${P.petItems.food[k] || 0}`, fd.price, `data-pshop="food" data-v="${k}"`)).join('')}</div>
+    <b style="font-family:var(--f-display)">ของสวมใส่</b>
+    <div class="panel rows">${Object.entries(PET_ACCS).map(([k, a]) => P.petItems.acc.includes(k) ? `<div class="row"><span class="ico">${a.icon}</span><div><div class="nm">${a.name}</div><div class="ds">มีแล้ว</div></div><span class="chip">✓</span></div>` : row(a.icon, a.name, 'ใส่ให้สัตว์เลี้ยงได้ทุกตัว', a.price, `data-pshop="acc" data-v="${k}"`)).join('')}</div>
+    <b style="font-family:var(--f-display)">ศิลาวิวัฒน์</b>
+    <div class="panel rows">${Object.entries(PET_STONES).map(([k, st]) => row(st.icon, st.name, `มีอยู่ ${P.petItems.stone[k] || 0} · ดรอปจากบอสด้วย`, STONE_PRICE, `data-pshop="stone" data-v="${k}"`)).join('')}</div>`;
+}
 function openSkills() { openSheet('สกิล', renderSkills, 'skills'); }
 function skillNumbers(sk, L) {
   const l = Math.max(1, L), pw = skPow(l), out = [];
@@ -2132,6 +2417,7 @@ function openHelp() {
       <span><kbd>1</kbd>–<kbd>5</kbd></span><span>ใช้สกิล (E = สกิลที่ 1 · 5 = สกิลร่างหลังเปลี่ยนร่าง)</span>
       <span><kbd>K</kbd></span><span>หน้าสกิล อัปเลเวลสกิล</span>
       <span><kbd>T</kbd></span><span>ฉายา</span>
+      <span><kbd>P</kbd></span><span>สัตว์เลี้ยง</span>
       <span><kbd>Q</kbd> <kbd>R</kbd></span><span>ดื่มยา HP / ยา MP</span>
       <span><kbd>I</kbd> <kbd>C</kbd></span><span>กระเป๋า / ตัวละคร</span>
       <span><kbd>Enter</kbd></span><span>แชท</span>
@@ -2172,6 +2458,7 @@ function renderChar(el) {
 const NPCS = [
   { id: 'shop', x: (SHOP.x + 1) * T, y: (SHOP.y + 1.4) * T, obj: 9, label: '🛒 ร้านป้าแมวเหมียว', open: () => openShop() },
   { id: 'smith', x: (SMITH.x + 1) * T, y: (SMITH.y + 1.4) * T, obj: 11, label: '⚒️ ร้านตีเหล็กลุงเม่น', open: () => openSmith() },
+  { id: 'pets', x: (PETSHOP.x + 1) * T, y: (PETSHOP.y + 1.4) * T, obj: 33, label: '🐾 ร้านสัตว์เลี้ยงคุณยาย', open: () => openPetShop() },
   { id: 'portal', x: (PORTAL.x + .5) * T, y: (PORTAL.y + 1.5) * T, obj: 12, label: '🌀 ประตูดันเจี้ยน', open: () => openPortal() },
 ];
 function nearWarp() { if (DG) return -1; return WARPS.findIndex(w => Math.hypot(me.x - (w.x + .5) * T, me.y - (w.y + .7) * T) < 1.4 * T); }
@@ -2227,6 +2514,27 @@ $('#mBody').addEventListener('click', e => {
   if (b.dataset.act === 'mute') { muted = !muted; savePrefs(); if (!muted) sfx('tap'); return refreshSheet(); }
   if (b.dataset.adm) { adminAct(b.dataset.adm, b.dataset.v); return; }
   if (b.dataset.title != null && sheetName === 'titles') { const hpFrac = P.hp / maxHp(); P.title = b.dataset.title || null; P.hp = Math.round(hpFrac * maxHp()); sfx('tap'); save(); updateHud(true); return refreshSheet(); }
+  if (b.dataset.pet) {
+    const act2 = b.dataset.pet, v = b.dataset.v, pt = (P.pets || []).find(x => x.id === petSel);
+    if (act2 === 'sel') { petSel = v; petMsg = ''; }
+    else if (act2 === 'active' && pt) { P.petActive = pt.id; petObj.placed = false; petMsg = `${PET_FORMS[pt.sp].name} ออกเดินทางด้วยแล้ว`; }
+    else if (act2 === 'feed' && pt) feedPet(pt, v);
+    else if (act2 === 'acc' && pt) pt.acc = pt.acc === v ? null : v;
+    else if (act2 === 'evo' && pt) evolvePet(pt, v);
+    else if (act2 === 'hatch') hatchPetEgg();
+    save(); return refreshSheet();
+  }
+  if (b.dataset.pshop) {
+    const k = b.dataset.pshop, v = b.dataset.v;
+    const price = k === 'egg' ? (P.petFree ? PET_EGG_PRICE : 0) : k === 'food' ? PET_FOODS[v].price : k === 'acc' ? PET_ACCS[v].price : STONE_PRICE;
+    if (P.gold < price) return;
+    P.gold -= price;
+    if (k === 'egg') { P.petFree = true; P.petItems.eggs++; toast('ได้ไข่สัตว์เลี้ยง! เปิด 🐾 เพื่อฟัก'); }
+    else if (k === 'food') P.petItems.food[v] = (P.petItems.food[v] || 0) + 1;
+    else if (k === 'acc') P.petItems.acc.push(v);
+    else P.petItems.stone[v] = (P.petItems.stone[v] || 0) + 1;
+    sfx('coin'); save(); updateHud(true); return refreshSheet();
+  }
   if (b.dataset.dg) { enterDungeon(+b.dataset.dg); return; }
   if (b.dataset.warp) { warpTo(+b.dataset.warp); return; }
   if (b.dataset.stier) { smithTier = +b.dataset.stier; sfx('tap'); return refreshSheet(); }
@@ -2320,6 +2628,7 @@ function drawObstacle(o, x, y, g) {
   if (o === 15) { const s = sprite('snowpine', 44, 64, c => { c.fillStyle = '#7A4E2C'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.roundRect(18, 46, 8, 14, 2); c.fill(); c.stroke(); for (const [yy, w] of [[4, 12], [16, 16], [28, 20]]) { c.fillStyle = '#3F8A63'; c.beginPath(); c.moveTo(22, yy); c.lineTo(22 + w, yy + 22); c.lineTo(22 - w, yy + 22); c.closePath(); c.fill(); c.stroke(); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(22, yy + 1); c.lineTo(22 + w * .45, yy + 10); c.lineTo(22 - w * .45, yy + 10); c.closePath(); c.fill(); } }); ctx.drawImage(s, px - 6, py - 34, 44, 64); return; }
   if (o === 16) { const s = sprite('deadtree', 44, 56, c => { c.strokeStyle = INK; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(22, 52); c.lineTo(22, 20); c.moveTo(22, 30); c.lineTo(10, 16); c.moveTo(22, 24); c.lineTo(34, 10); c.moveTo(22, 20); c.lineTo(24, 6); c.stroke(); c.strokeStyle = '#6E5A4A'; c.lineWidth = 4; c.stroke(); }); ctx.drawImage(s, px - 6, py - 26, 44, 56); return; }
   if (o === 17) { const s = sprite('cloud', 44, 34, c => { c.fillStyle = '#fff'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.arc(14, 20, 10, 0, 7); c.arc(24, 13, 11, 0, 7); c.arc(32, 21, 9, 0, 7); c.fill(); c.beginPath(); c.roundRect(5, 18, 35, 12, 6); c.fill(); c.stroke(); c.beginPath(); c.arc(14, 20, 10, Math.PI * .9, Math.PI * 1.7); c.stroke(); c.beginPath(); c.arc(24, 13, 11, Math.PI * 1.1, Math.PI * 1.95); c.stroke(); c.beginPath(); c.arc(32, 21, 9, Math.PI * 1.4, Math.PI * 2.2); c.stroke(); }); ctx.drawImage(s, px - 6, py - 6, 44, 34); return; }
+  if (o === 33) { if (OBJ[y * W + x - 1] === 33) return; const s = sprite('petshop', 68, 64, c => { c.strokeStyle = INK; c.lineWidth = 2.5; c.fillStyle = '#F2C6D6'; c.beginPath(); c.roundRect(4, 36, 60, 22, 3); c.fill(); c.stroke(); c.fillStyle = '#8A5A3B'; c.fillRect(8, 12, 4, 26); c.fillRect(56, 12, 4, 26); for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? '#fff' : '#FF8FB1'; c.beginPath(); c.moveTo(2 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 18); c.quadraticCurveTo(7.3 + i * 10.6, 24, 2 + i * 10.6, 18); c.closePath(); c.fill(); } c.strokeRect(2, 6, 64, 12); c.font = '14px sans-serif'; c.fillText('🥚', 12, 50); c.fillText('🍖', 30, 50); c.fillText('🎀', 46, 50); }); ctx.drawImage(s, px - 2, py - 30, 68, 64); ctx.drawImage(emojiSprite('👵', 26), px + 17, py - 34 + Math.sin(nowS() * 2 + 2) * 1.5, 34, 34); return; }
   if (o === 11) { if (OBJ[y * W + x - 1] === 11) return; const s = sprite('smith', 68, 64, c => { c.strokeStyle = INK; c.lineWidth = 2.5; c.fillStyle = '#8E8AA0'; c.beginPath(); c.roundRect(4, 36, 60, 22, 3); c.fill(); c.stroke(); c.fillStyle = '#5B4636'; c.fillRect(8, 12, 4, 26); c.fillRect(56, 12, 4, 26); for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? '#fff' : '#6F6485'; c.beginPath(); c.moveTo(2 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 6); c.lineTo(12.6 + i * 10.6, 18); c.quadraticCurveTo(7.3 + i * 10.6, 24, 2 + i * 10.6, 18); c.closePath(); c.fill(); } c.strokeRect(2, 6, 64, 12); c.font = '14px sans-serif'; c.fillText('⚒️', 12, 50); c.fillText('🛡️', 30, 50); c.fillText('🗡️', 46, 50); }); ctx.drawImage(s, px - 2, py - 30, 68, 64); ctx.drawImage(emojiSprite('🦔', 26), px + 17, py - 34 + Math.sin(nowS() * 2 + 1) * 1.5, 34, 34); return; }
   if (o === 12) { const cx = px + T / 2, cy = py + T / 2 - 14, tt = nowS(); ctx.fillStyle = '#8E82B2'; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.roundRect(cx - 22, cy - 24, 44, 52, [22, 22, 4, 4]); ctx.fill(); ctx.stroke(); for (let k = 0; k < 3; k++) { ctx.strokeStyle = ['#C9A6FF', '#8C5CF0', '#FFD1FF'][k]; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(cx, cy + 4, 14 - k * 4, 18 - k * 5, 0, tt * (2 + k) + k, tt * (2 + k) + k + 4.2); ctx.stroke(); } ctx.drawImage(emojiSprite('🧙', 22), cx + 16, cy - 2 + Math.sin(tt * 2) * 1.5, 28, 28); return; }
   if (o === 1) { const s = sprite('tree', 48, 60, c => { c.fillStyle = '#8A5A3B'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.roundRect(19, 34, 10, 20, 3); c.fill(); c.stroke(); c.fillStyle = '#5CBF5A'; c.beginPath(); c.arc(24, 24, 19, 0, 7); c.fill(); c.stroke(); c.fillStyle = '#86DB7C'; c.beginPath(); c.arc(17, 17, 7, 0, 7); c.fill(); }); ctx.drawImage(s, px - 8, py - 30, 48, 60); }
@@ -2415,7 +2724,7 @@ const LOOT_ICON = { gold: '🪙', potion: '🍯', ether: '💧', elixir: '✨' }
 function drawLoot(l) {
   const bob = Math.sin(nowS() * 4 + l.t) * 2 - l.z;
   if (l.kind === 'item') { const c = RAR[l.val.r].c; ctx.fillStyle = c + '55'; ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(l.x, l.y + 2, 14, 5, 0, 0, 7); ctx.fill(); ctx.stroke(); if (l.val.r >= 2) { if (l.val.r === 5) { ctx.fillStyle = `hsla(${(nowS() * 120) % 360},90%,70%,.35)`; ctx.fillRect(l.x - 5, l.y - 90, 10, 90); } ctx.fillStyle = c + '30'; ctx.fillRect(l.x - 3, l.y - 60, 6, 60); } }
-  const e = l.kind === 'item' ? itemIcon(l.val) : LOOT_ICON[l.kind];
+  const e = l.kind === 'item' ? itemIcon(l.val) : l.kind === 'petfood' ? PET_FOODS[l.val].icon : l.kind === 'stone' ? PET_STONES[l.val].icon : LOOT_ICON[l.kind];
   ctx.drawImage(emojiSprite(e, 22), l.x - 13, l.y - 26 + bob, 26, 26);
 }
 function drawMinimap() {
@@ -2527,6 +2836,7 @@ function update(dt) {
     }
   }
   if (DG) dungeonTick(dt);
+  petTick(dt);
   if (hosting) simTick(dt);
   for (const v of views.values()) { const k = Math.min(1, dt * 10); v.rx += (v.x - v.rx) * k; v.ry += (v.y - v.ry) * k; v.flash = Math.max(0, v.flash - dt); v.lunge = Math.max(0, v.lunge - dt); if (Math.hypot(v.x - v.rx, v.y - v.ry) > 6 * T) { v.rx = v.x; v.ry = v.y; } }
   for (const r of remotes.values()) { const k = Math.min(1, dt * 12); r.x += (r.tx - r.x) * k; r.y += (r.ty - r.y) * k; if (r.mv || Math.hypot(r.tx - r.x, r.ty - r.y) > 1) r.walk += dt; r.swing = Math.max(0, r.swing - dt); r.bubbleT = Math.max(0, r.bubbleT - dt); }
@@ -2567,6 +2877,8 @@ function render() {
   for (const m of monsterList()) if (inView(m.rx, m.ry) && (curZ < 0 || zoneAt(m.rx, m.ry) === curZ)) ents.push({ y: m.ry, d: () => drawMon(m) });
   for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, ft: r.ft, rk: rankOf(r.lv), title: r.tt, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
   ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, ft: P.formTier, rk: rankOf(P.lv), title: titleName(), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon), self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
+  { const pt = activePet(); if (pt && petObj.placed && !me.dead) ents.push({ y: petObj.y, d: () => drawPet(petObj.x, petObj.y, pt.sp, pt.acc, pt.stage, petObj.emoT > 0 ? petObj.emo : (pt.hunger < 15 ? '💢' : '')) }); }
+  for (const r of remotes.values()) if (r.pt && !DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) { const [fk, ak, stg] = r.pt; ents.push({ y: r.y + 8, d: () => drawPet(r.x - r.d * 30, r.y + 8, fk, ak, stg, '') }); }
   ents.sort((a, b) => a.y - b.y);
   for (const e of ents) e.d();
   for (const mt of me.meteors) { const k = 1 - mt.t / .6; ctx.fillStyle = `rgba(255,120,40,${.15 + .2 * k})`; ctx.strokeStyle = 'rgba(255,90,31,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mt.x, mt.y, mt.r, 0, 7); ctx.fill(); ctx.stroke(); ctx.drawImage(emojiSprite('☄️', 30), mt.x - 20 + (1 - k) * 60, mt.y - 60 - (1 - k) * 160, 40, 40); }
