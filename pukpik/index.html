@@ -1088,7 +1088,6 @@ function rollOpts(it) {
   if (!it.sock) it.sock = Array(SOCKETS[it.r] || 0).fill(null);
   return it;
 }
-const rerollCost = it => Math.round(120 * (it.tier + 1) * (1 + it.r * .5));
 // Runes: socket them into gear. Grade I–V; 3 of the same rune fuse into the next grade.
 // 3+ equipped runes of one kind give a set bonus (doubled at 5+).
 const RUNES = {
@@ -3021,7 +3020,7 @@ function renderBag(el) {
       ${(it.sock || []).length ? `<div class="socks">${it.sock.map((id, i) => id ? `<button class="sock full" type="button" data-unsock="${i}" style="border-color:${RUNES[runeOf(id).t].c}" title="แตะเพื่อถอด">${RUNES[runeOf(id).t].icon}<small>${ROMAN[runeOf(id).g]}</small></button>` : `<button class="sock" type="button" data-sock="${i}" title="ใส่รูน">＋</button>`).join('')}<span class="muted" style="font-size:12px">${it.sock.filter(Boolean).map(id => `${runeName(id)}: ${runeDesc(id)}`).join(' · ') || 'ช่องรูน แตะ ＋ เพื่อใส่รูน'}</span></div>` : ''}
       ${sockPick != null ? `<div class="panel rows" style="padding:8px">${Object.keys(P.runes).length ? Object.entries(P.runes).sort().map(([id, n]) => `<div class="row"><span class="ico">${RUNES[runeOf(id).t].icon}</span><div><div class="nm">${runeName(id)} × ${n}</div><div class="ds">${runeDesc(id)}</div></div><button class="btn sm" type="button" data-putrune="${id}">ใส่</button></div>`).join('') : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีรูน ตีมอนเพื่อหารูน หรือซื้อถุงรูนที่ร้านป้าแมวเหมียว</p>'}</div>` : ''}
       ${cmp ? `<div style="font-size:13px">เทียบกับที่ใส่อยู่: ${cmp}</div>` : ''}
-      <div class="m-btns"><button class="btn sm" type="button" data-act="reroll" ${P.gold < rerollCost(it) ? 'disabled' : ''}>🎲 สุ่ม option ใหม่ (${rerollCost(it).toLocaleString()})</button>${sel.eq ? `<button class="btn sm" type="button" data-act="unequip">ถอดออก</button>` : `<button class="btn sm primary" type="button" data-act="equip">สวมใส่</button><button class="btn sm" type="button" data-act="sell">ขาย <span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${itemPrice(it)}</button>`}</div>
+      <div class="m-btns">${sel.eq ? `<button class="btn sm" type="button" data-act="unequip">ถอดออก</button>` : `<button class="btn sm primary" type="button" data-act="equip">สวมใส่</button><button class="btn sm" type="button" data-act="sell">ขาย <span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${itemPrice(it)}</button>`}</div>
     </div>`;
   }
   const eq = SLOTS.map(s => P.eq[s] ? slotBtn(P.eq[s], selItem === P.eq[s].id ? ' sel' : '') : `<span class="slot empty">${SLOT[s].th}</span>`).join('');
@@ -3570,11 +3569,7 @@ $('#mBody').addEventListener('click', e => {
   if (act === 'hidden') { openHidden(); return; }
   if (act === 'closestory') { closeSheet(); return; }
   if (act === 'runebag') { if (P.gold < 600) return; P.gold -= 600; const id = pick(RUNE_KEYS) + (Math.random() < .15 ? 2 : 1); addRune(id); sfx('rare'); toast(`ได้${runeName(id)}!`); save(); return refreshSheet(); }
-  if (act === 'reroll') {
-    const f = selItem && findItem(selItem); if (!f) return; const it = f.it, cost = rerollCost(it); if (P.gold < cost) return;
-    P.gold -= cost; const n = (it.opts || []).length || OPT_COUNT[it.r] || 1; it.opts = []; for (let i = 0; i < n; i++) it.opts.push(rollOpt(it.tier, it.opts.map(o => o.k)));
-    gearDirty(); sfx('rare'); toast('สุ่ม option ใหม่แล้ว'); P.hp = Math.min(P.hp, maxHp()); save(); hudStatic(); return refreshSheet();
-  }
+
   if (act === 'equip' || act === 'unequip' || act === 'sell') {
     const f = selItem && findItem(selItem); if (!f) return;
     const it = f.it, hpFrac = P.hp / maxHp();
