@@ -199,6 +199,14 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .slot{position:relative;aspect-ratio:1;border:2px solid var(--ink);border-radius:14px;background:#fff;display:grid;place-items:center;font-size:24px;cursor:pointer;padding:0}
 .slot.empty{background:var(--paper-2);color:var(--ink-soft);font:600 10px var(--f-body);border-style:dashed}
 .slot.sel{outline:3px solid var(--mp);outline-offset:2px}
+.slot.picked{outline:3px solid var(--hp);outline-offset:2px;background:#FFE3E6}
+.slot.picked::after{content:"✓";position:absolute;top:-7px;left:-7px;width:20px;height:20px;border-radius:50%;background:var(--hp);color:#fff;border:2px solid var(--ink);font:700 12px/16px var(--f-body);text-align:center}
+.bag.selecting .slot:not(.picked){opacity:.8}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick .btn{min-height:34px;font-size:12.5px;padding:4px 10px;box-shadow:0 2px 0 var(--ink)}
+.sellbar{position:sticky;bottom:-14px;margin:0 -14px -14px;padding:10px 14px 14px;background:var(--paper);border-top:2px solid var(--ink);display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-radius:0 0 22px 22px}
+.sellbar b{font:700 15px var(--f-display)}
+.sellbar .warn{display:block;font:600 12px var(--f-body);color:var(--hp)}
 .slot .lv{position:absolute;bottom:1px;right:4px;font:700 9px var(--f-body)}
 .slot.r1{box-shadow:inset 0 0 0 3px #2FAE62}.slot.r2{box-shadow:inset 0 0 0 3px #3F86F5}.slot.r3{box-shadow:inset 0 0 0 3px #A155E8;background:#F6EEFF}.slot.r4{box-shadow:inset 0 0 0 3px #FF8A1F;background:#FFF2E2}
 .bag{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
@@ -1371,13 +1379,18 @@ $('#chatbar').addEventListener('submit', e => {
 document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); atkHeld = false; save(); } });
 
 /* ================= sheets: bag / character / shop ================= */
-let selItem = null;
+let selItem = null, sellMode = false;
+const picked = new Set();
+function itemScore(it) { let v = 0; for (const s of SLOTS) { const k = SLOT[s].stat; v += (it.stats[k] || 0) / SLOT[s].base[2]; } return v; }
+function worseThanEquipped(it) { const cur = P.eq[it.slot]; return !!cur && itemScore(it) < itemScore(cur); }
+function pickedItems() { return P.bag.filter(i => picked.has(i.id)); }
 function slotBtn(it, extra = '') {
   if (!it) return '';
   return `<button class="slot r${it.r}${extra}" type="button" data-item="${it.id}" aria-label="${esc(itemName(it))}">${itemIcon(it)}<span class="lv">T${it.tier + 1}</span></button>`;
 }
 function findItem(id) { for (const s of SLOTS) if (P.eq[s] && P.eq[s].id === id) return { it: P.eq[s], eq: true }; const it = P.bag.find(i => i.id === id); return it ? { it, eq: false } : null; }
 function openBag() {
+  sellMode = false; picked.clear();
   $('#bBag').innerHTML = '🎒<kbd class="kb">I</kbd>';
   selItem = null;
   openSheet('กระเป๋า', renderBag, 'bag');
@@ -1396,11 +1409,27 @@ function renderBag(el) {
     </div>`;
   }
   const eq = SLOTS.map(s => P.eq[s] ? slotBtn(P.eq[s], selItem === P.eq[s].id ? ' sel' : '') : `<span class="slot empty">${SLOT[s].th}</span>`).join('');
+  if (sellMode) {
+    for (const id of [...picked]) if (!P.bag.some(i => i.id === id)) picked.delete(id);
+    const list = pickedItems(), gold = list.reduce((a, i) => a + itemPrice(i), 0), rare = list.filter(i => i.r >= 3).length;
+    el.innerHTML = `<p style="margin:0;font-size:14px">แตะของที่ต้องการขายเพื่อเลือก แตะซ้ำเพื่อเอาออก <span class="muted">(ของที่สวมอยู่ไม่ถูกขาย)</span></p>
+      <div class="quick">
+        <button class="btn" type="button" data-pick="common">ธรรมดาทั้งหมด</button>
+        <button class="btn" type="button" data-pick="low">ธรรมดา + ดี</button>
+        <button class="btn" type="button" data-pick="worse">แย่กว่าที่ใส่อยู่</button>
+        <button class="btn" type="button" data-pick="all">ทั้งหมด</button>
+        <button class="btn" type="button" data-pick="none">ล้างที่เลือก</button>
+      </div>
+      <div><p class="eyebrow" style="margin-bottom:6px">ของในกระเป๋า ${P.bag.length}/${BAG_MAX} · เลือกแล้ว ${list.length} ชิ้น</p>
+        ${P.bag.length ? `<div class="bag selecting">${P.bag.map(it => slotBtn(it, picked.has(it.id) ? ' picked' : '')).join('')}</div>` : '<p class="muted" style="margin:0;font-size:13px">ไม่มีของให้ขาย</p>'}</div>
+      <div class="sellbar"><div><b>ขาย ${list.length} ชิ้น · <span class="coin" style="width:14px;height:14px;vertical-align:-2px"></span> ${gold.toLocaleString()}</b>${rare ? `<span class="warn">มีของมหากาพย์/ตำนาน ${rare} ชิ้นในที่เลือก</span>` : ''}</div>
+        <div style="display:flex;gap:8px"><button class="btn sm" type="button" data-act="sellcancel">ยกเลิก</button><button class="btn sm primary" type="button" data-act="sellpicked" ${list.length ? '' : 'disabled'}>ขายเลย</button></div></div>`;
+    return;
+  }
   const bag = P.bag.map(it => slotBtn(it, selItem === it.id ? ' sel' : '')).join('') + Array.from({ length: Math.max(0, 12 - P.bag.length) }, () => '<span class="slot empty"></span>').join('');
-  const commons = P.bag.filter(i => i.r === 0);
   el.innerHTML = `${detail}
     <div><p class="eyebrow" style="margin-bottom:6px">ที่สวมอยู่ · ${STATS.map(k => `${STAT_SHORT[k]} ${st(k)}`).join(' · ')}</p><div class="eq-row">${eq}</div></div>
-    <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><p class="eyebrow">ของในกระเป๋า ${P.bag.length}/${BAG_MAX}</p>${commons.length ? `<button class="btn sm" type="button" data-act="sellcommon" style="min-height:32px;font-size:12px">ขายของธรรมดาทั้งหมด (${commons.reduce((a, i) => a + itemPrice(i), 0)} ทอง)</button>` : ''}</div>
+    <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><p class="eyebrow">ของในกระเป๋า ${P.bag.length}/${BAG_MAX}</p>${P.bag.length ? `<button class="btn sm" type="button" data-act="sellmode" style="min-height:32px;font-size:12px">🪙 เลือกขายหลายชิ้น</button>` : ''}</div>
       ${P.bag.length ? `<div class="bag">${bag}</div>` : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีของ ออกไปตีมอนนอกเมืองแล้วเดินทับของที่ดรอปเพื่อเก็บ</p>'}</div>
     <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} × ${P.items[k]}</div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div>`;
 }
@@ -1539,6 +1568,25 @@ $('#mBody').addEventListener('click', e => {
     P.sp--; P.skills[sk.id] = L + 1; sfx('lvl'); toast(`${sk.name} เลเวล ${L + 1}!`); save(); updateHud(true); return refreshSheet();
   }
   if (b.dataset.act === 'mute') { muted = !muted; savePrefs(); if (!muted) sfx('tap'); return refreshSheet(); }
+  if (b.dataset.item && sellMode) {
+    if (!P.bag.some(i => i.id === b.dataset.item)) return;
+    if (picked.has(b.dataset.item)) picked.delete(b.dataset.item); else picked.add(b.dataset.item);
+    sfx('tap'); return refreshSheet();
+  }
+  if (b.dataset.pick) {
+    const k = b.dataset.pick;
+    if (k === 'none') picked.clear();
+    else for (const it of P.bag) if (k === 'all' || (k === 'common' && it.r === 0) || (k === 'low' && it.r <= 1) || (k === 'worse' && worseThanEquipped(it))) picked.add(it.id);
+    sfx('tap'); return refreshSheet();
+  }
+  if (b.dataset.act === 'sellmode') { sellMode = true; selItem = null; picked.clear(); sfx('tap'); return refreshSheet(); }
+  if (b.dataset.act === 'sellcancel') { sellMode = false; picked.clear(); sfx('tap'); return refreshSheet(); }
+  if (b.dataset.act === 'sellpicked') {
+    const list = pickedItems(); if (!list.length) return;
+    const g = list.reduce((a, i) => a + itemPrice(i), 0);
+    P.bag = P.bag.filter(i => !picked.has(i.id)); P.gold += g; picked.clear(); sellMode = false;
+    sfx('coin'); toast(`ขาย ${list.length} ชิ้น ได้ ${g.toLocaleString()} ทอง`); save(); updateHud(true); return refreshSheet();
+  }
   if (b.dataset.item) { selItem = selItem === b.dataset.item ? null : b.dataset.item; sfx('tap'); return refreshSheet(); }
   if (b.dataset.use) { usePotion(b.dataset.use); return refreshSheet(); }
   if (b.dataset.alloc) { if (P.points <= 0) return; const k = b.dataset.alloc; P.points--; P.base[k] += POINT_VALUE[k]; if (k === 'hp') P.hp += POINT_VALUE.hp; sfx('tap'); save(); return refreshSheet(); }
