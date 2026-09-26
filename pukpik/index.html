@@ -495,13 +495,36 @@ function branchOdds() {
 }
 function rollBranch() { const o = branchOdds(); let r = Math.random(); for (const k of BRANCH_KEYS) if ((r -= o[k]) <= 0) return k; return 'a'; }
 const branchOn = () => P && P.form ? pathFx(P.formBranch, P.formSub, P.formTier || 2) : null;
+// Each line reshapes the body: its own colour cast, face and a large silhouette piece, so the 4 lines never look alike.
+const BRANCH_TINT = { a: '#C8102E', b: '#7F8BA8', c: '#2EC8F0', u: '#FF7FE0' };
+const hexMix = (a, b, t) => { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); const x = p(a), y = p(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
+// Body colours along the path: line colour at form 3, then each sub-line's colour on top.
+function pathTint(c, fb, sub, t) {
+  const ns = pathNodes(fb, sub, t); if (!ns.length) return c;
+  let out = c.slice(); const mixIn = (col, k) => { out = out.map((v, i) => hexMix(v, i === 2 ? hexMix(col, '#241a33', .35) : col, k * (i === 0 ? .6 : 1))); };
+  mixIn(BRANCH_TINT[fb], .38);
+  ns.slice(1).forEach((x, i) => mixIn(x.art[1], i ? .3 : .24));
+  return out;
+}
 function branchArt(fb, c) {
   const S = (w) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round"`;
-  if (fb === 'a') return [`<path d="M40 27L44 11L51 24ZM69 24L76 11L80 27Z" fill="#8A6A52" ${S(2)}/>`, `<path d="M25 72L38 68M25 79L38 75M95 72L82 68M95 79L82 75" stroke="#E0303B" stroke-width="3.5" stroke-linecap="round"/>`];
-  if (fb === 'b') return ['', `<path d="M51 87H69V96Q60 105 51 96Z" fill="#C9CCD8" ${S(2)}/><path d="M56 90H64V95Q60 99 56 95Z" fill="${c[1]}"/><circle cx="60" cy="40" r="4.5" fill="#62B6FF" ${S(1.5)}/>`];
-  if (fb === 'c') return ['', `<path d="M9 48Q1 60 10 65Q17 67 15 58M111 48Q119 60 110 65Q103 67 105 58M30 110Q46 104 60 110Q74 104 90 110" fill="none" stroke="#9FE3FF" stroke-width="3.5" stroke-linecap="round"/>`];
-  if (fb === 'u') return [`<ellipse cx="60" cy="64" rx="57" ry="54" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="64" rx="52" ry="49" fill="none" stroke="#9FE3FF" stroke-width="3"/>`, `<path d="M60 0L67 8L60 17L53 8Z" fill="#E0F4FF" ${S(2)}/>` + STAR(14, 30, 5, '') + STAR(106, 30, 5, 'b')];
+  if (fb === 'a') return [`<path d="M32 32Q26 8 38 -2Q40 14 48 16Q48 0 60 -6Q66 10 72 14Q80 0 84 -2Q94 10 88 32Z" fill="#FF5A1F" ${S(2.5)}/><path d="M42 30Q40 16 46 10Q50 20 56 20Q58 8 62 4Q66 16 70 20Q76 12 78 12Q82 22 78 30Z" fill="#FFD23F"/>`,
+    `<path d="M34 53L53 61M86 53L67 61" stroke="${INK}" stroke-width="5.5" stroke-linecap="round"/><path d="M18 76L34 72L32 82ZM102 76L86 72L88 82Z" fill="#8E0E22" ${S(1.5)}/><path d="M60 34L56 42L62 46L58 52" fill="none" stroke="#8E0E22" stroke-width="3" stroke-linecap="round"/>`];
+  if (fb === 'b') return [`<path d="M104 118L114 14" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="M104 118L114 14" stroke="#8A6A52" stroke-width="3"/><path d="M114 0L121 18L113 24L106 17Z" fill="#DDE1EA" ${S(2)}/><path d="M-2 50H26V86Q12 102 -2 86Z" fill="#AEB6C8" ${S(2.5)}/><path d="M12 56V92M2 70H22" stroke="${c[1]}" stroke-width="4"/>`,
+    `<path d="M22 54Q60 38 98 54L96 60Q60 46 24 60Z" fill="#C9CCD8" ${S(2)}/><path d="M14 64Q10 84 22 94L26 66ZM106 64Q110 84 98 94L94 66Z" fill="#C9CCD8" ${S(2)}/><path d="M42 84H78L74 102Q60 110 46 102Z" fill="#DDE1EA" ${S(2.5)}/><circle cx="60" cy="93" r="5" fill="${c[1]}" ${S(1.5)}/>`];
+  if (fb === 'c') return [`<path d="M58 26Q66 -6 100 -2Q82 8 74 26Z" fill="#9FE3FF" ${S(2)}/><path d="M62 26Q54 -6 20 -2Q38 8 46 26Z" fill="#CFF3FF" ${S(2)}/><path d="M96 92Q116 94 120 110Q108 102 94 104Z" fill="#9FE3FF" ${S(2)}/>`,
+    `<path d="M18 84Q30 78 26 70Q22 64 30 62M102 84Q90 78 94 70Q98 64 90 62" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".9"/><path d="M38 58L52 62M82 58L68 62" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`];
+  if (fb === 'u') return [`<ellipse cx="60" cy="64" rx="57" ry="54" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="64" rx="52" ry="49" fill="none" stroke="#9FE3FF" stroke-width="3"/>`,
+    `<path d="M40 28L44 8L52 20L60 0L68 20L76 8L80 28Z" fill="#E0F4FF" ${S(2.5)}/><circle cx="60" cy="18" r="4" fill="#FF7FE0" ${S(1.5)}/><path d="M46 61L47.5 65.5L52 67L47.5 68.5L46 73L44.5 68.5L40 67L44.5 65.5ZM74 61L75.5 65.5L80 67L75.5 68.5L74 73L72.5 68.5L68 67L72.5 65.5Z" fill="#fff"/>` + STAR(14, 30, 5, '') + STAR(106, 30, 5, 'b')];
   return ['', ''];
+}
+// Form-4 body markings, one pattern per sub-line slot (the unique slot gets a glowing chest star).
+function subMark(i, col) {
+  const L = `fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"`;
+  if (i === 0) return `<path d="M17 76Q26 78 28 86M16 88Q24 90 26 98M103 76Q94 78 92 86M104 88Q96 90 94 98" ${L}/>`;
+  if (i === 1) return `<g fill="${col}" stroke="${INK}" stroke-width="1.2"><circle cx="22" cy="90" r="4.5"/><circle cx="30" cy="99" r="3"/><circle cx="98" cy="90" r="4.5"/><circle cx="90" cy="99" r="3"/><circle cx="60" cy="40" r="3.5"/></g>`;
+  if (i === 2) return `<path d="M19 68L26 74L19 80L26 86M101 68L94 74L101 80L94 86" ${L}/>`;
+  return `<path d="M60 84L63 92L71 94L63 96L60 104L57 96L49 94L57 92Z" fill="${col}" stroke="${INK}" stroke-width="1.5"/><circle cx="60" cy="94" r="12" fill="${col}" opacity=".3"/>`;
 }
 // Each line splits again at form 4 and form 5: 3 sub-lines per node (key = line letter + digit per tier).
 // n(th, ep, skEp, w, fx, art): w = stats that raise the odds; fx = effects; art = [shape, colour].
@@ -667,7 +690,8 @@ function subArt(shape, col) {
 function pathArt(fb, sub, t, c) {
   let back = '', front = '';
   const [bb, bf] = branchArt(fb, c); back += bb; front += bf;
-  pathNodes(fb, sub, t).slice(1).forEach((x, i) => { const [pb, pf] = subArt(x.art[0], x.art[1]); back = pb + back; front += pf; if (x.unique) { back = `<ellipse cx="60" cy="64" rx="58" ry="55" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="64" rx="53" ry="50" fill="none" stroke="${x.art[1]}" stroke-width="3"/>` + back; front += STAR(8, 12, 5, '') + STAR(112, 12, 5, 'b'); } if (i === 1) back = `<ellipse cx="60" cy="64" rx="59" ry="56" fill="none" stroke="${x.art[1]}" stroke-width="4" opacity=".75"/>` + back; });
+  const sd = cleanSub(fb, sub);
+  pathNodes(fb, sub, t).slice(1).forEach((x, i) => { const [pb, pf] = subArt(x.art[0], x.art[1]); back = pb + back; front += pf + (i === 0 ? subMark(+sd[0], hexMix(x.art[1], '#241a33', .25)) : `<ellipse cx="46" cy="67" rx="9" ry="11" fill="none" stroke="${x.art[1]}" stroke-width="3" opacity=".95"/><ellipse cx="74" cy="67" rx="9" ry="11" fill="none" stroke="${x.art[1]}" stroke-width="3" opacity=".95"/>`); if (x.unique) { back = `<ellipse cx="60" cy="64" rx="58" ry="55" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="64" rx="53" ry="50" fill="none" stroke="${x.art[1]}" stroke-width="3"/>` + back; front += STAR(8, 12, 5, '') + STAR(112, 12, 5, 'b'); } if (i === 1) back = `<ellipse cx="60" cy="64" rx="59" ry="56" fill="none" stroke="${x.art[1]}" stroke-width="4" opacity=".75"/>` + back; });
   return [back, front];
 }
 // At form 3 and 4: the 3 sub-lines the next evolution can split into, with odds.
@@ -1190,7 +1214,8 @@ const TIER_NAME = { 2: '', 3: 'ขั้นตื่นรู้', 4: 'ขั้
 function blobSVG(color, st = 1, o = {}) {
   const form = o.form && FORM_ARCH[o.form] ? o.form : null;
   const SL = SECRET_LOOK[color], ft = o.ft || 0, rk = o.rk || 0;
-  const c = form === 'shadow' ? SL.sc : form === 'unique' ? ['#FFF6C8', '#FFD23F', '#B98200'] : COLORS[color].c, id = 'g' + (++uid), mood = o.mood || 'idle', eyeC = form === 'shadow' ? SL.se : INK;
+  let c = form === 'shadow' ? SL.sc : form === 'unique' ? ['#FFF6C8', '#FFD23F', '#B98200'] : COLORS[color].c, id = 'g' + (++uid), mood = o.mood || 'idle', eyeC = form === 'shadow' ? SL.se : INK;
+  const onPath = !!(form && ft >= 3 && o.fb && BRANCH[o.fb]); if (onPath && form !== 'rainbow') c = pathTint(c, o.fb, o.fs, ft);
   let eyes, mouth;
   if (mood === 'happy') { eyes = `<path d="M39 70Q46 60 53 70" ${SK}/><path d="M67 70Q74 60 81 70" ${SK}/>`; mouth = `<path d="M52 80Q60 92 68 80Z" fill="${INK}"/>`; }
   else if (mood === 'hurt') { eyes = `<path d="M40 61L51 67L40 73" ${SK}/><path d="M80 61L69 67L80 73" ${SK}/>`; mouth = `<path d="M53 85Q60 78 67 85" ${SK}/>`; }
@@ -1212,7 +1237,7 @@ function blobSVG(color, st = 1, o = {}) {
   if (form && ft >= 3 && o.fb) { const [bb, bf] = pathArt(o.fb, o.fs, ft, c); back = bb + back; formArt += bf; }
   // rank art, cumulative: 1 arms+feet, 2 element limbs, 3 pauldrons+belt, 4 cape+medal, 5 aura+wings+tail, 6 war banner, 7 gold hero
   if (rk >= 6) back = `<path d="M104 112V2" stroke="${INK}" stroke-width="4"/><path d="M104 4H119L114 12L119 20H104Z" fill="${c[1]}" ${K2(2)}/>` + back;
-  if (rk >= 5) back = `<ellipse cx="60" cy="66" rx="54" ry="50" fill="${c[1]}" opacity=".22"/><ellipse cx="60" cy="66" rx="46" ry="42" fill="#fff" opacity=".18"/>` + (form !== 'rainbow' ? `<path d="M18 70Q0 60 3 40Q14 52 24 56ZM102 70Q120 60 117 40Q106 52 96 56Z" fill="${rk >= 7 ? '#FFE98A' : '#fff'}" ${K2(2.5)}/>` : '') + back;
+  if (rk >= 5) back = `<ellipse cx="60" cy="66" rx="54" ry="50" fill="${c[1]}" opacity=".22"/><ellipse cx="60" cy="66" rx="46" ry="42" fill="#fff" opacity=".18"/>` + (form !== 'rainbow' && !onPath ? `<path d="M18 70Q0 60 3 40Q14 52 24 56ZM102 70Q120 60 117 40Q106 52 96 56Z" fill="${rk >= 7 ? '#FFE98A' : '#fff'}" ${K2(2.5)}/>` : '') + back;
   if (rk >= 7) back = `<ellipse cx="60" cy="62" rx="58" ry="56" fill="none" stroke="#FFE98A" stroke-width="3" opacity=".8"/>` + back;
   if (rk >= 4) back += `<path d="M26 52Q10 96 18 114H102Q110 96 94 52Z" fill="${c[2]}" ${K2(2.5)}/>`;
   if (rk >= 1) back += limbArt(color, rk, c);
