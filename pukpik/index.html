@@ -177,6 +177,13 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .tiers{display:flex;flex-wrap:wrap;gap:6px}
 .tiers .btn{min-height:32px;font-size:12.5px;padding:3px 10px;box-shadow:0 2px 0 var(--ink)}
 .tiers .btn.on{background:var(--accent)}
+.adm{display:flex;flex-direction:column;gap:8px}
+.adm .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.adm .grid .btn{min-height:0;padding:4px;font-size:12px;border-radius:12px;box-shadow:0 2px 0 var(--ink);display:flex;flex-direction:column;align-items:center;gap:0}
+.adm .grid .btn .pic{width:52px}
+.adm .grid .btn.on{background:#FFF3B0;outline:3px solid var(--accent)}
+.adm .row2{display:flex;flex-wrap:wrap;gap:6px}
+.adm .row2 .btn{min-height:34px;font-size:12.5px;padding:4px 10px;box-shadow:0 2px 0 var(--ink)}
 .oddbar{height:6px;width:100%;border-radius:99px;background:#EEE8F4;overflow:hidden}
 .oddbar i{display:block;height:100%;background:var(--accent)}
 .talk{position:absolute;right:var(--gr);bottom:282px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
@@ -278,6 +285,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
       <span class="gold"><span class="coin"></span><span id="hudGold">0</span></span>
       <span class="online" id="online"><i></i><span id="onlineT">เล่นคนเดียว</span></span>
       <span class="online" id="dgInfo" hidden></span>
+      <button class="online" type="button" id="bAdmin" hidden style="cursor:pointer;background:#FFE3A1">🛠️ แอดมิน</button>
     </div>
     <div class="chatlog" id="chatlog" aria-live="polite"></div>
     <p class="joyhint" id="joyhint"></p>
@@ -1442,6 +1450,7 @@ function usePotion(kind) {
 }
 function receiveHit(atk, mult, spd) {
   if (!started || me.dead) return;
+  if (me.god) { floatAt(me.x, me.y - 30, 'อมตะ', '#FFE08A', 13); return; }
   const big = mult > 1;
   const dodge = big ? 0 : clamp(3 + (st('spd') - spd) * 1.5 + ((arch() && arch().dodge) || 0), 0, 45);
   if (Math.random() * 100 < dodge) { floatAt(me.x, me.y - 30, 'หลบ!', '#E4DDEF', 15); sfx('miss'); return; }
@@ -1767,6 +1776,62 @@ function rollForm(paid) {
   tick();
 }
 $('#bForm').onclick = () => { sfx('tap'); openForm(); };
+// ---- Admin / test panel: only people who can edit this artifact (the owner and editors) see it ----
+let isAdmin = false;
+(async () => {
+  const C = window.claude;
+  if (!(C && typeof C.use === 'function')) { isAdmin = location.hash === '#admin'; }
+  else { try { const u = await C.use('user'); isAdmin = !!u && ((await u.canEdit()) || (await u.isOwner())); } catch (e) { isAdmin = false; } }
+  $('#bAdmin').hidden = !isAdmin;
+})();
+function openAdmin() { if (isAdmin) openSheet('แอดมิน · โหมดทดสอบ', renderAdmin, 'admin'); }
+function renderAdmin(el) {
+  const zoneBtns = ZONES.map((z, i) => `<button class="btn" type="button" data-adm="warp" data-v="${i}">${z.name} (Lv ${z.lv})</button>`).join('');
+  el.innerHTML = `<div class="adm">
+    <p class="muted" style="margin:0;font-size:13px">เห็นเฉพาะคนที่แก้ไข artifact นี้ได้ ผู้เล่นคนอื่นไม่เห็นปุ่มนี้</p>
+    <b style="font-family:var(--f-display)">เลือกร่างเอง (ไม่ต้องสุ่ม)</b>
+    <div class="grid">${ALL_FORMS.map(f => `<button class="btn${P.form === f ? ' on' : ''}" type="button" data-adm="form" data-v="${f}"><span class="pic">${blobSVG(P.color, 3, { form: f, shiny: P.shiny, noShadow: true })}</span>${formName(f)}<span class="muted" style="font-size:10px">${FORM_ARCH[f].th}</span></button>`).join('')}
+      <button class="btn${P.form ? '' : ' on'}" type="button" data-adm="form" data-v=""><span class="pic">${blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, noShadow: true })}</span>ไม่มีร่าง<span class="muted" style="font-size:10px">ร่างปกติ</span></button></div>
+    <b style="font-family:var(--f-display)">เปลี่ยนสี</b>
+    <div class="row2">${COLOR_KEYS.map(k => `<button class="btn" type="button" data-adm="color" data-v="${k}" style="${P.color === k ? `background:${COLORS[k].light}` : ''}">${COLORS[k].species}</button>`).join('')}</div>
+    <b style="font-family:var(--f-display)">ตัวละคร · Lv ${P.lv}</b>
+    <div class="row2">
+      <button class="btn" type="button" data-adm="lv" data-v="1">+1 เลเวล</button><button class="btn" type="button" data-adm="lv" data-v="10">+10 เลเวล</button>
+      <button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button>
+      <button class="btn" type="button" data-adm="gold">ทอง +10,000</button><button class="btn" type="button" data-adm="heal">เติม HP/MP + รีเซ็ตคูลดาวน์</button>
+      <button class="btn" type="button" data-adm="god" style="${me.god ? 'background:#FFF3B0' : ''}">อมตะ: ${me.god ? 'เปิด' : 'ปิด'}</button>
+      <button class="btn" type="button" data-adm="gear">ของตำนานขั้นสูงสุดครบชุด</button><button class="btn" type="button" data-adm="items">ยาทุกชนิด ×10</button>
+    </div>
+    <b style="font-family:var(--f-display)">วาร์ปไปหน้าบอสของดินแดน</b>
+    <div class="row2"><button class="btn" type="button" data-adm="town">เมือง</button>${zoneBtns}</div>
+  </div>`;
+}
+function adminAct(act, v) {
+  if (!isAdmin) return;
+  if (act === 'form') {
+    const f = v || null; const old = P.form && FORM_SKILLS[P.form];
+    if (old && P.skills[old.id] > 1 && old.id !== (f && FORM_SKILLS[f].id)) { P.sp += P.skills[old.id] - 1; delete P.skills[old.id]; }
+    P.form = f; if (f) P.seen = [...new Set([...(P.seen || []), f])];
+    toast(f ? `เปลี่ยนเป็น${formName(f)}แล้ว` : 'กลับเป็นร่างปกติ');
+  } else if (act === 'color') { P.color = v; toast(`เปลี่ยนเป็น${COLORS[v].species}`); }
+  else if (act === 'lv' || act === 'lvto') {
+    const target = clamp(act === 'lv' ? P.lv + +v : +v, 1, LV_CAP);
+    let need = -P.xp; for (let l = P.lv; l < target; l++) need += xpNeed(l);
+    if (need > 0) gainXp(need); else toast('ลดเลเวลไม่ได้ ใช้ได้แค่เพิ่ม');
+  } else if (act === 'gold') P.gold += 10000;
+  else if (act === 'heal') { me.cds = {}; me.skillCd = 0; }
+  else if (act === 'god') me.god = !me.god;
+  else if (act === 'gear') { for (const sl of SLOTS) { const it = makeItem(TIERS - 1, 4, sl); if (P.eq[sl] && P.bag.length < BAG_MAX) P.bag.push(P.eq[sl]); P.eq[sl] = it; } toast('สวมของตำนานครบชุดแล้ว'); }
+  else if (act === 'items') { for (const k of Object.keys(CONSUME)) P.items[k] = (P.items[k] || 0) + 10; }
+  else if (act === 'town' || act === 'warp') {
+    if (DG) leaveDungeon();
+    if (act === 'town') { me.x = SPAWN.x; me.y = SPAWN.y; } else { const b = BOSS_POS[+v]; me.x = b.x - 5 * T; me.y = b.y; if (solid(me.x, me.y)) { me.x = b.x; me.y = b.y + 3 * T; } }
+    me.goal = null; me.targetId = null; closeSheet(); toast('วาร์ปแล้ว'); save(); return;
+  }
+  P.hp = maxHp(); P.mp = maxMp();
+  save(); hudStatic(); updateSkillBar(); updateHud(true); refreshSheet();
+}
+$('#bAdmin').onclick = () => { sfx('tap'); openAdmin(); };
 function openSkills() { openSheet('สกิล', renderSkills, 'skills'); }
 function skillNumbers(sk, L) {
   const l = Math.max(1, L), pw = skPow(l), out = [];
@@ -1880,6 +1945,7 @@ $('#mBody').addEventListener('click', e => {
     P.sp--; P.skills[sk.id] = L + 1; sfx('lvl'); toast(`${sk.name} เลเวล ${L + 1}!`); save(); updateHud(true); return refreshSheet();
   }
   if (b.dataset.act === 'mute') { muted = !muted; savePrefs(); if (!muted) sfx('tap'); return refreshSheet(); }
+  if (b.dataset.adm) { adminAct(b.dataset.adm, b.dataset.v); return; }
   if (b.dataset.dg) { enterDungeon(+b.dataset.dg); return; }
   if (b.dataset.stier) { smithTier = +b.dataset.stier; sfx('tap'); return refreshSheet(); }
   if (b.dataset.sbuy) {
