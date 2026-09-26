@@ -1298,6 +1298,7 @@ function hiddenFx() {
   for (const c of P.curses || []) if (UNIQUE_MON[c]) add(UNIQUE_MON[c].cfx);
   for (const w of P.uwins || []) add({ atkP: .05, defP: .05, hpP: .05 });
   if (P.codex) add(codexFx());
+  if (P.form && RACES[P.race]) add(RACES[P.race].fx);
   return o;
 }
 function rollLatent() { return { k: pick(Object.keys(LATENT)), shown: false }; }
@@ -1790,7 +1791,35 @@ const HUMAN = {
   unique: { hair: hc => ['', `<path d="M36 40Q34 16 60 16Q86 16 84 40Q74 26 60 28Q46 26 36 40Z" fill="#FFE98A" ${K2(2.5)}/><path d="M42 20L44 4L52 12L60 0L68 12L76 4L78 20Z" fill="#FFD23F" ${K2(2)}/><circle cx="60" cy="12" r="3" fill="#4A9DFF"/>`],
     wpn: (c, ft) => `<path d="M88 92L104 24L110 26L96 94Z" fill="#FFF3B0" ${K2(2)}/><path d="M80 88L100 94" stroke="${INK}" stroke-width="7" stroke-linecap="round"/><path d="M80 88L100 94" stroke="#D4A017" stroke-width="4" stroke-linecap="round"/><circle cx="100" cy="30" r="3" fill="#F2485B"/>` },
 };
+
+// ---------- races ----------
+// At the first transformation the slime is also reborn as a race (random, each colour leaning toward one).
+// The race changes the look (skin, ears, horns, tail, ...) and gives a small bonus of its own.
+const RACES = {
+  human:  { th: 'มนุษย์', e: '🧑', fx: { xp: .05 }, desc: 'ปรับตัวเก่ง · EXP +5%' },
+  beast:  { th: 'มนุษย์สัตว์', e: '🐾', fx: { spdP: .06, dodge: 2 }, desc: 'หูและหางสัตว์ · SPD +6% · หลบ +2%' },
+  elf:    { th: 'เอลฟ์', e: '🧝', fx: { lukP: .06, skill: .05 }, desc: 'หูแหลม · LUK +6% · ดาเมจสกิล +5%' },
+  orc:    { th: 'ออร์ก', e: '👹', fx: { hpP: .08, atkP: .03 }, desc: 'ผิวเขียว เขี้ยวงอก · HP +8% · ATK +3%' },
+  dragon: { th: 'มังกร', e: '🐲', fx: { atkP: .05, defP: .05 }, desc: 'เขา เกล็ด และหางมังกร · ATK/DEF +5%' },
+  spirit: { th: 'ภูต', e: '👻', fx: { cdr: .05, regen: .3 }, desc: 'ตัวโปร่งแสง ลอยได้ · คูลดาวน์ −5% · ฟื้น HP เร็ว' },
+};
+const RACE_KEYS = Object.keys(RACES);
+const RACE_LEAN = { red: 'dragon', blue: 'spirit', yellow: 'beast', brown: 'orc', green: 'elf' };
+function rollRace(color) { const w = RACE_KEYS.map(k => k === 'human' ? 3 : k === RACE_LEAN[color] ? 3 : 1.2), sum = w.reduce((a, b) => a + b, 0); let r = Math.random() * sum; for (let i = 0; i < w.length; i++) if ((r -= w[i]) <= 0) return RACE_KEYS[i]; return 'human'; }
+const RACE_SKIN = { human: '#FFDDBF', beast: '#FFD2A6', elf: '#FFEBDD', orc: '#95C973', dragon: '#FFD6A8', spirit: '#DCEBFF' };
+// [behind the body, in front of the head]
+function raceArt(race, hc, c) {
+  const S = w => K2(w);
+  if (race === 'beast') return [`<path d="M74 96Q104 100 108 78Q110 66 102 70Q104 86 76 88Z" fill="${hc}" ${S(2)}/>`, `<path d="M38 26L34 4L52 18Z" fill="${hc}" ${S(2.5)}/><path d="M82 26L86 4L68 18Z" fill="${hc}" ${S(2.5)}/><path d="M40 20L38 10L47 17ZM80 20L82 10L73 17Z" fill="#FFB3C7"/>`];
+  if (race === 'elf') return [`<path d="M40 40L18 28L40 48Z" fill="${RACE_SKIN.elf}" ${S(2.5)}/><path d="M80 40L102 28L80 48Z" fill="${RACE_SKIN.elf}" ${S(2.5)}/>`, ''];
+  if (race === 'orc') return ['', `<path d="M53 52L51 45L56 50ZM67 52L69 45L64 50Z" fill="#FFF8E6" ${S(1.5)}/><path d="M44 30L56 33M76 30L64 33" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`];
+  if (race === 'dragon') return [`<path d="M72 98Q112 104 114 72L106 80L104 70L98 82Q96 92 74 90Z" fill="${c[1]}" ${S(2)}/><path d="M40 70Q16 50 14 70Q22 68 26 78Q30 70 38 74ZM80 70Q104 50 106 70Q98 68 94 78Q90 70 82 74Z" fill="${c[2]}" ${S(2)}/>`,
+    `<path d="M42 22Q30 10 34 2Q40 12 48 16Z" fill="#FFF1DA" ${S(2)}/><path d="M78 22Q90 10 86 2Q80 12 72 16Z" fill="#FFF1DA" ${S(2)}/><path d="M42 46l3 -2l3 2M72 46l3 -2l3 2" fill="none" stroke="${c[2]}" stroke-width="1.8"/>`];
+  if (race === 'spirit') return [`<ellipse cx="60" cy="60" rx="46" ry="50" fill="#BFE3FF" opacity=".28"/>`, `<circle cx="38" cy="22" r="3" fill="#BFE3FF"/><circle cx="86" cy="28" r="2.5" fill="#BFE3FF"/><circle cx="92" cy="60" r="2" fill="#BFE3FF"/>`];
+  return ['', ''];
+}
 function humanSVG(color, o, form, c, ft, rk, mood, id) {
+  const race = RACES[o.race] ? o.race : (P && P.race && o.race == null ? P.race : 'human'), SKINC = RACE_SKIN[race], [rb, rf] = raceArt(race, form === 'shadow' ? '#2A2240' : HAIR_C[color] || '#8A5A34', c);
   const H = HUMAN[form] || HUMAN.atk, hc = form === 'shadow' ? '#2A2240' : HAIR_C[color] || '#8A5A34';
   const [hb, hf] = H.hair(hc), cloth = c[1], dark = c[2], lite = c[0];
   let eyes;
@@ -1809,7 +1838,7 @@ function humanSVG(color, o, form, c, ft, rk, mood, id) {
     back = branchArt(o.fb, c)[0] + back;
     pathNodes(o.fb, o.fs, ft).slice(1).forEach((x, i) => { const [pb, pf] = subArt(x.art[0], x.art[1]); back = pb + back; front += pf; if (x.unique) back = `<ellipse cx="60" cy="62" rx="58" ry="55" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="62" rx="53" ry="50" fill="none" stroke="${x.art[1]}" stroke-width="3"/>` + back; if (i === 1) back = `<ellipse cx="60" cy="62" rx="59" ry="56" fill="none" stroke="${x.art[1]}" stroke-width="4" opacity=".75"/>` + back; });
   }
-  const legs = form === 'rainbow' || form === 'unique' || form === 'luk'
+  const legs = race === 'spirit' ? `<path d="M40 84H80Q78 100 68 104Q70 112 60 114Q58 106 50 108Q54 100 40 84Z" fill="${cloth}" opacity=".85" ${K2(2)}/>` : form === 'rainbow' || form === 'unique' || form === 'luk'
     ? `<path d="M40 84H80L86 108H34Z" fill="${form === 'unique' ? '#D8333F' : cloth}" ${K2(2.5)}/><path d="M46 106H56V112H44ZM64 106H74L76 112H64Z" fill="${INK}"/>`
     : `<path d="M47 86H57V104H47ZM63 86H73V104H63Z" fill="${dark}" ${K2(2)}/><path d="M44 102H58V111H42ZM62 102H76L78 111H62Z" fill="#6E4424" ${K2(2)}/>`;
   const torso = form === 'def'
@@ -1820,13 +1849,13 @@ function humanSVG(color, o, form, c, ft, rk, mood, id) {
         ? `<path d="M38 58H82L90 98H30Z" fill="#2A2240" ${K2(2.5)}/><path d="M54 60L60 72L66 60" fill="none" stroke="#FF4D6D" stroke-width="2"/>`
         : `<path d="M40 60Q60 55 80 60L82 90H38Z" fill="${cloth}" ${K2(2.5)}/><path d="M54 60L60 70L66 60" fill="${lite}" ${K2(1.5)}/>`;
   const belt = `<path d="M38 84H82" stroke="${INK}" stroke-width="6"/><path d="M38 84H82" stroke="${ft >= 3 ? '#D4A017' : '#6E4424'}" stroke-width="3.5"/><rect x="56" y="80" width="8" height="8" rx="1.5" fill="#FFD23F" ${K2(1.2)}/>`;
-  const arms = `<path d="M42 64Q32 74 32 86" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M42 64Q32 74 32 86" fill="none" stroke="${form === 'def' ? '#C9CCD8' : cloth}" stroke-width="7" stroke-linecap="round"/><path d="M78 64Q88 74 88 86" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M78 64Q88 74 88 86" fill="none" stroke="${form === 'def' ? '#C9CCD8' : cloth}" stroke-width="7" stroke-linecap="round"/><circle cx="32" cy="89" r="5" fill="${SKIN}" ${K2(2)}/><circle cx="88" cy="89" r="5" fill="${SKIN}" ${K2(2)}/>`;
+  const arms = `<path d="M42 64Q32 74 32 86" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M42 64Q32 74 32 86" fill="none" stroke="${form === 'def' ? '#C9CCD8' : cloth}" stroke-width="7" stroke-linecap="round"/><path d="M78 64Q88 74 88 86" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M78 64Q88 74 88 86" fill="none" stroke="${form === 'def' ? '#C9CCD8' : cloth}" stroke-width="7" stroke-linecap="round"/><circle cx="32" cy="89" r="5" fill="${SKINC}" ${K2(2)}/><circle cx="88" cy="89" r="5" fill="${SKINC}" ${K2(2)}/>`;
   const pads = ft >= 3 ? `<path d="M34 66Q34 54 46 58L44 70Q38 72 34 66ZM86 66Q86 54 74 58L76 70Q82 72 86 66Z" fill="${ft >= 5 ? '#FFD23F' : '#C9CCD8'}" ${K2(2)}/>` : '';
-  const head = `<rect x="55" y="54" width="10" height="8" fill="${SKIN}"/><circle cx="60" cy="38" r="22" fill="${SKIN}" ${K2(3)}/><ellipse cx="46" cy="48" rx="4" ry="2.5" fill="#FF6F91" opacity=".45"/><ellipse cx="74" cy="48" rx="4" ry="2.5" fill="#FF6F91" opacity=".45"/>`;
+  const head = `<rect x="55" y="54" width="10" height="8" fill="${SKINC}"/><circle cx="60" cy="38" r="22" fill="${SKINC}" ${K2(3)}/><ellipse cx="46" cy="48" rx="4" ry="2.5" fill="#FF6F91" opacity=".45"/><ellipse cx="74" cy="48" rx="4" ry="2.5" fill="#FF6F91" opacity=".45"/>`;
   const aura = ft >= 5 ? `<ellipse cx="60" cy="62" rx="56" ry="54" fill="${cloth}" opacity=".16"/>` : '';
   const sparkle = o.shiny ? STAR(104, 28, 7, '') + STAR(14, 50, 5, 'b') : '';
   const shadow = o.noShadow ? '' : `<ellipse cx="60" cy="112" rx="28" ry="5" fill="rgba(51,40,74,.18)"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true">${shadow}<g class="blob-body">${aura}${back}${legs}${torso}${belt}${pads}${arms}${head}${hf}${brow}${eyes}${mouth}${H.wpn(c, ft)}${front}</g>${sparkle}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true">${shadow}<g class="blob-body"${race === 'spirit' ? ' opacity=".9" transform="translate(0 -4)"' : ''}>${aura}${rb}${back}${legs}${torso}${belt}${pads}${arms}${head}${hf}${rf}${brow}${eyes}${mouth}${H.wpn(c, ft)}${front}</g>${sparkle}</svg>`;
 }
 function blobSVG(color, st = 1, o = {}) {
   const form = o.form && FORM_ARCH[o.form] ? o.form : null;
@@ -1879,10 +1908,10 @@ function eggSVG(n) {
     + `<ellipse cx="40" cy="36" rx="9" ry="14" fill="#fff" opacity=".7" transform="rotate(24 40 36)"/>${cracks}</svg>`;
 }
 const blobImgs = new Map();
-function blobImg(color, st, shiny, mood, form, ft, rk, fb, fs) {
-  const k = color + st + (shiny ? 's' : '') + mood + (form || '') + (ft || '') + 'r' + (rk || 0) + (fb || '') + (fs || '');
+function blobImg(color, st, shiny, mood, form, ft, rk, fb, fs, race) {
+  const k = color + st + (shiny ? 's' : '') + mood + (form || '') + (ft || '') + 'r' + (rk || 0) + (fb || '') + (fs || '') + (race || '');
   let im = blobImgs.get(k);
-  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, form, ft, rk, fb, fs, noShadow: true })); blobImgs.set(k, im); }
+  if (!im) { im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blobSVG(color, st, { shiny, mood, form, ft, rk, fb, fs, race: race || 'human', noShadow: true })); blobImgs.set(k, im); }
   return im;
 }
 
@@ -2093,6 +2122,7 @@ function setForm(f) {
   const old = P.form && formSkillFor(P.color, P.form);
   if (old && P.skills[old.id] > 1 && (!f || formSkillFor(P.color, f).id !== old.id)) { P.sp += P.skills[old.id] - 1; delete P.skills[old.id]; }
   P.form = f || null; P.formTier = f ? P.formTier || 2 : P.formTier;
+  if (f && !RACES[P.race]) { P.race = rollRace(P.color); setTimeout(() => { banner(`เกิดใหม่เป็นเผ่า${RACES[P.race].th}! ${RACES[P.race].e}`, RACES[P.race].desc); chatLine('', `${P.name} เกิดใหม่เป็นเผ่า${RACES[P.race].th}`, true); }, 2600); }
   if (f) P.seen = [...new Set([...(P.seen || []), f])];
 }
 function evolveForm() {
@@ -2252,6 +2282,7 @@ async function hatch() {
 let started = false;
 function enterWorld() {
   if (P && (!P.runes || typeof P.runes !== 'object')) P.runes = {};
+  if (P && P.form && !RACES[P.race]) P.race = rollRace(P.color);
   if (P) { P.act = P.act || {}; P.traits = P.traits || {}; P.scen = P.scen || {}; P.curses = P.curses || []; P.uwins = P.uwins || []; if (!P.latent) P.latent = rollLatent(); if (P.lv >= 30 && !P.subjob) P.subjob = rollSubjob(); }
   if (P && P.form && (P.formTier || 2) >= 3 && !BRANCH[P.formBranch]) { P.formBranch = rollBranch(); setTimeout(() => banner(`ร่างของคุณแตกสาย: ${BRANCH[P.formBranch].th}`, fullFormName()), 1500); }
   if (P && P.form && (P.formTier || 2) >= 4 && cleanSub(P.formBranch, P.formSub).length < (P.formTier || 2) - 3) { fillPath(); setTimeout(() => banner(`ร่างของคุณแตกแขนง: ${branchOn().last.th}`, fullFormName()), 300); }
@@ -2648,7 +2679,7 @@ function snapshotOut() {
   return { l };
 }
 function presenceState() {
-  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_INDEX.indexOf(P.form) + 1 : 0, ft: P.form ? P.formTier || 2 : 0, fb: P.formBranch ? BRANCH_KEYS.indexOf(P.formBranch) + 1 : 0, fs: P.formSub || '', tt: P.title ? TITLES.findIndex(t => t.id === P.title) + 1 : 0, pt: (() => { const pt = activePet(); return pt ? [PET_FORM_KEYS.indexOf(pt.sp), pt.acc ? Object.keys(PET_ACCS).indexOf(pt.acc) : -1, pt.stage] : null; })(), sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
+  const s = { v: 2, g: me.dead ? 1 : 1, n: P.name, c: P.color, s: stageOf(P.lv), f: P.form ? FORM_INDEX.indexOf(P.form) + 1 : 0, ft: P.form ? P.formTier || 2 : 0, fb: P.formBranch ? BRANCH_KEYS.indexOf(P.formBranch) + 1 : 0, fs: P.formSub || '', rc: P.race ? RACE_KEYS.indexOf(P.race) + 1 : 0, tt: P.title ? TITLES.findIndex(t => t.id === P.title) + 1 : 0, pt: (() => { const pt = activePet(); return pt ? [PET_FORM_KEYS.indexOf(pt.sp), pt.acc ? Object.keys(PET_ACCS).indexOf(pt.acc) : -1, pt.stage] : null; })(), sh: P.shiny ? 1 : 0, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, mv: me.moving ? 1 : 0,
     lv: P.lv, hp: Math.round(P.hp / maxHp() * 100), hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon),
     a: me.atkCount, dead: me.dead ? 1 : 0, hid: document.hidden ? 1 : 0, h: hitsOut.slice(), ch: me.chat || null, ct: me.chatAt || null };
   if (hosting && sim) { s.M = snapshotOut(); s.k = sim.k.slice(); s.ma = sim.ma.slice(); }
@@ -2664,7 +2695,7 @@ function upsertRemote(p) {
   let r = remotes.get(p.peer);
   if (!r) { r = { x, y, walk: 0, swing: 0, a: pr.a, ct: pr.ct, bubble: '', bubbleT: 0 }; remotes.set(p.peer, r); chatLine('', `${name} เข้ามาในโลก`, true); }
   r.tx = x; r.ty = y; if (Math.hypot(r.x - x, r.y - y) > T * 8) { r.x = x; r.y = y; }
-  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_INDEX[clamp(num(pr.f, 0) | 0, 0, FORM_INDEX.length) - 1] || null; r.ft = clamp(num(pr.ft, 0) | 0, 0, 5); r.fb = BRANCH_KEYS[(num(pr.fb, 0) | 0) - 1] || null; r.fs = r.fb ? cleanSub(r.fb, pr.fs) : ''; r.tt = (TITLES[(num(pr.tt, 0) | 0) - 1] || {}).name || ''; r.pt = Array.isArray(pr.pt) && PET_FORM_KEYS[num(pr.pt[0], -1)] ? [PET_FORM_KEYS[num(pr.pt[0], -1)], Object.keys(PET_ACCS)[num(pr.pt[1], -1)] || null, clamp(num(pr.pt[2], 1) | 0, 1, 3)] : null; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
+  r.name = name; r.c = pr.c; r.s = clamp(num(pr.s, 1) | 0, 1, 3); r.f = FORM_INDEX[clamp(num(pr.f, 0) | 0, 0, FORM_INDEX.length) - 1] || null; r.ft = clamp(num(pr.ft, 0) | 0, 0, 5); r.fb = BRANCH_KEYS[(num(pr.fb, 0) | 0) - 1] || null; r.race = RACE_KEYS[(num(pr.rc, 0) | 0) - 1] || 'human'; r.fs = r.fb ? cleanSub(r.fb, pr.fs) : ''; r.tt = (TITLES[(num(pr.tt, 0) | 0) - 1] || {}).name || ''; r.pt = Array.isArray(pr.pt) && PET_FORM_KEYS[num(pr.pt[0], -1)] ? [PET_FORM_KEYS[num(pr.pt[0], -1)], Object.keys(PET_ACCS)[num(pr.pt[1], -1)] || null, clamp(num(pr.pt[2], 1) | 0, 1, 3)] : null; r.sh = !!pr.sh; r.d = pr.d === -1 ? -1 : 1; r.mv = !!pr.mv;
   r.lv = clamp(num(pr.lv, 1) | 0, 1, 999); r.hp = clamp(num(pr.hp, 100), 0, 100); const okGear = n => { n = num(n, 0) | 0; return (n >= 0 && n <= TIERS) || (n >= 100 && n < 100 + UNIQUE_KEYS.length) ? n : 0; }; r.hat = okGear(pr.hat); r.wp = okGear(pr.wp); r.dead = !!pr.dead;
   if (pr.a !== r.a) { r.a = pr.a; r.swing = .2; }
   if (pr.ct !== r.ct) { r.ct = pr.ct; const t = clean(pr.ch).slice(0, 80); if (t) { r.bubble = t; r.bubbleT = 6; chatLine(name, t); } }
@@ -3186,7 +3217,7 @@ function renderForm(el) {
       <p class="muted" style="margin:6px 0 0;font-size:12px">แต่ละขั้นทำให้โบนัสของร่างและสกิลร่างแรงขึ้น และหน้าตาอลังการขึ้น</p>
       ${(P.formTier || 2) === 2 ? `<p style="margin:8px 0 4px;font-size:13px"><b>ตอนขึ้นร่าง 3 จะแตกสายเป็น 1 ใน 3 สาย (หรือร่างยูนิค 1%)</b> <span class="muted">โอกาสขึ้นกับค่าสถานะ</span></p><div class="forms">${BRANCH_KEYS.map(k => { const o = branchOdds()[k]; return `<div class="fcard${BRANCH[k].unique ? ' secret' : ''}"><div class="pic">${blobSVG(P.color, 3, { form: P.form, ft: 3, fb: k, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div><b>${BRANCH[k].unique ? '???' : fullFormName(P.form, 3, k)}</b><span class="arch">${BRANCH[k].th}</span><span class="odds">${o < .02 ? (o * 100).toFixed(0) : Math.round(o * 100)}%<small> โอกาส</small></span><span class="muted" style="font-size:11px">${BRANCH[k].unique ? 'ยังไม่มีใครรู้' : BRANCH[k].desc}</span></div>`; }).join('')}</div>` : branchOn() ? `<p style="margin:8px 0 0;font-size:13px"><b>${branchOn().th}</b><br><span class="muted">${branchOn().nodes.map(x => x.desc || fxDesc(x)).join(' + ')}</span></p>${subCards()}` : ''}${canEvolve() ? `<button class="btn primary block" type="button" data-act="evolve" style="margin-top:8px">✨ วิวัฒน์เป็นร่าง ${(P.formTier || 2) + 1}</button>` : ''}</div>` : '';
   const uqCard = (P.seen || []).includes('unique') && P.form !== 'unique' ? `<button class="btn block" type="button" data-act="gounique" style="background:#FFF3B0">👑 กลับเป็น${formName('unique')} (ฟรี)</button>` : '';
-  const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${fullFormName()}</b><div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div></div>` : '';
+  const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${fullFormName()}</b>${RACES[P.race] ? `<div style="font-size:14px">เผ่า${RACES[P.race].th} ${RACES[P.race].e} · <span class="muted">${RACES[P.race].desc}</span></div>` : ''}<div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div></div>` : '';
   el.innerHTML = `${cur}${tierBox}${uqCard}<p style="margin:0;font-size:14px">${ready ? '' : `<b>ปลดล็อกที่ Lv ${FORM_LV}</b> · `}${c.species}เปลี่ยนร่างได้ 5 แบบ และมีร่างลับอีก 2 แบบ (โอกาสแบบละ 0.5%) ร่างที่ได้เป็นการสุ่ม แต่ค่าสถานะไหนสูงกว่าปกติ โอกาสได้ร่างสายนั้นก็ยิ่งมาก <span class="muted">(อยากได้ร่างไหน ลองแจกแต้มสถานะให้ค่านั้นก่อน)</span></p>
     <div class="forms" id="formCards">${cards}</div>
     <div class="panel" style="font-size:13px">${FORM_KEYS.map(f => `<div><b>${FORM_ARCH[f].th}:</b> <span class="muted">${FORM_ARCH[f].desc} · สกิลร่าง ${formSkillFor(P.color, f).icon} ${formSkillFor(P.color, f).name}</span></div>`).join('')}${SECRET_KEYS.map(f => `<div><b>${known(f) ? formName(f) : 'ร่างลับ ???'}:</b> <span class="muted">${known(f) ? `${FORM_ARCH[f].desc} · สกิล ${formSkillFor(P.color, f).icon} ${formSkillFor(P.color, f).name}` : 'ยังไม่มีใครรู้ความสามารถ'}</span></div>`).join('')}</div>
@@ -3295,7 +3326,7 @@ function renderAdmin(el) {
     <b style="font-family:var(--f-display)">ตัวละคร · Lv ${P.lv}</b>
     <div class="row2">
       <button class="btn" type="button" data-adm="lv" data-v="1">+1 เลเวล</button><button class="btn" type="button" data-adm="lv" data-v="10">+10 เลเวล</button>
-      <button class="btn" type="button" data-adm="traits">ปลุกทักษะแฝงทั้งหมด</button><button class="btn" type="button" data-adm="scen">เริ่ม Scenario ทั้งหมด</button><button class="btn" type="button" data-adm="enc">สู้ยูนิคมอน (สุ่ม)</button><button class="btn" type="button" data-adm="runes">รับรูนทุกแบบ ×3</button><button class="btn" type="button" data-adm="gear">รับของตำนาน 5 ชิ้น</button><button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
+      ${RACE_KEYS.map(k => `<button class="btn" type="button" data-adm="race" data-v="${k}" style="${P.race === k ? 'background:#FFF3B0' : ''}">เผ่า${RACES[k].th}</button>`).join('')}<button class="btn" type="button" data-adm="traits">ปลุกทักษะแฝงทั้งหมด</button><button class="btn" type="button" data-adm="scen">เริ่ม Scenario ทั้งหมด</button><button class="btn" type="button" data-adm="enc">สู้ยูนิคมอน (สุ่ม)</button><button class="btn" type="button" data-adm="runes">รับรูนทุกแบบ ×3</button><button class="btn" type="button" data-adm="gear">รับของตำนาน 5 ชิ้น</button><button class="btn" type="button" data-adm="lvto" data-v="20">ไป Lv 20</button><button class="btn" type="button" data-adm="lvto" data-v="40">ไป Lv 40</button><button class="btn" type="button" data-adm="lvto" data-v="60">ไป Lv 60</button><button class="btn" type="button" data-adm="lvto" data-v="80">ไป Lv 80</button>
       <button class="btn" type="button" data-adm="gold">ทอง +10,000</button><button class="btn" type="button" data-adm="heal">เติม HP/MP + รีเซ็ตคูลดาวน์</button>
       <button class="btn" type="button" data-adm="god" style="${me.god ? 'background:#FFF3B0' : ''}">อมตะ: ${me.god ? 'เปิด' : 'ปิด'}</button>
       <button class="btn" type="button" data-adm="gear">ของตำนานขั้นสูงสุดครบชุด</button><button class="btn" type="button" data-adm="items">ยาทุกชนิด ×10</button>
@@ -3324,6 +3355,7 @@ function adminAct(act, v) {
     announceSecret(foeStats(t, FOES[q.key].lv), m.x, m.y); closeSheet(); return;
   }
   else if (act === 'color') { P.color = v; toast(`เปลี่ยนเป็น${COLORS[v].species}`); }
+  else if (act === 'race') { P.race = v; gearDirty(); hudStatic(); toast(`เปลี่ยนเป็นเผ่า${RACES[v].th}`); }
   else if (act === 'traits') { for (const k of TRAIT_KEYS) P.traits[k] = { xp: 300, evo: Math.random() < .5 ? null : ri(0, 2) }; P.latent.shown = true; if (!P.subjob) P.subjob = rollSubjob(); gearDirty(); toast('ปลุกทักษะแฝงทั้งหมดแล้ว'); }
   else if (act === 'scen') { for (const k in SCENARIOS) startScenario(k); }
   else if (act === 'enc') { closeSheet(); enterEncounter(pick(Object.keys(UNIQUE_MON))); return; }
@@ -3807,7 +3839,7 @@ function drawBubble(text, x, y) {
   ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 8);
 }
 function drawBlob(o) {
-  const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form, o.ft, o.rk, o.fb, o.fs);
+  const size = [0, 40, 46, 52][o.st] * (o.form ? 1.1 : 1), im = blobImg(o.color, o.st, o.shiny, o.mood, o.form, o.ft, o.rk, o.fb, o.fs, o.race);
   const t = o.walk, sq = o.moving ? Math.sin(t * 14) * .07 : Math.sin(nowS() * 3 + o.x) * .03;
   const lift = o.moving ? Math.abs(Math.sin(t * 14)) * 4 : 0;
   ctx.fillStyle = 'rgba(51,40,74,.2)'; ctx.beginPath(); ctx.ellipse(o.x, o.y + 2, size * .36, size * .1, 0, 0, 7); ctx.fill();
@@ -4088,8 +4120,8 @@ function render() {
   if (DG && DG.portal) { const pt = DG.portal; ents.push({ y: pt.y, d: () => { const tt = nowS(); for (let k = 0; k < 3; k++) { ctx.strokeStyle = ['#C9A6FF', '#8C5CF0', '#FFD1FF'][k]; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(pt.x, pt.y - 14, 22 - k * 6, 26 - k * 7, 0, tt * (2 + k) + k, tt * (2 + k) + k + 4.5); ctx.stroke(); } drawName('วงวาร์ปกลับเมือง', pt.x, pt.y - 46, '#E9D5FF'); } }); }
   for (const l of loot) if (inView(l.x, l.y)) ents.push({ y: l.y - 8, d: () => drawLoot(l) });
   for (const m of monsterList()) if (inView(m.rx, m.ry) && (curZ < 0 || zoneAt(m.rx, m.ry) === curZ)) ents.push({ y: m.ry, d: () => drawMon(m) });
-  for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, ft: r.ft, fb: r.fb, fs: r.fs, rk: rankOf(r.lv), title: r.tt, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
-  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, ft: P.formTier, fb: P.formBranch, fs: P.formSub, rk: rankOf(P.lv), title: titleName(), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon), self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
+  for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, ft: r.ft, fb: r.fb, fs: r.fs, race: r.race || 'human', rk: rankOf(r.lv), title: r.tt, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
+  ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, ft: P.formTier, fb: P.formBranch, fs: P.formSub, race: P.race, rk: rankOf(P.lv), title: titleName(), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon), self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
   { const pt = activePet(); if (pt && petObj.placed && !me.dead) ents.push({ y: petObj.y, d: () => drawPet(petObj.x, petObj.y, pt.sp, pt.acc, pt.stage, petObj.emoT > 0 ? petObj.emo : (pt.hunger < 15 ? '💢' : '')) }); }
   for (const r of remotes.values()) if (r.pt && !DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) { const [fk, ak, stg] = r.pt; ents.push({ y: r.y + 8, d: () => drawPet(r.x - r.d * 30, r.y + 8, fk, ak, stg, '') }); }
   ents.sort((a, b) => a.y - b.y);
