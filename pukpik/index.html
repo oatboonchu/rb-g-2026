@@ -120,6 +120,19 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .me-card .bar.xp{height:7px}
 .me-card .bar span{position:absolute;inset:0;font:700 8px/7px var(--f-body);text-align:center;color:var(--ink)}
 .menu-row{position:absolute;top:84px;left:var(--gl);display:flex;gap:6px}
+.mini-tag{position:absolute;left:6px;top:6px;font:700 10px var(--f-body);color:#fff;background:rgba(23,17,42,.7);border-radius:8px;padding:2px 6px;pointer-events:none}
+.mini-tag .kb{display:none}.desk .mini-tag .kb{display:inline-block}
+.maphead{display:flex;flex-direction:column;gap:2px}.maphead b{font:700 18px var(--f-display)}
+.mapcv{width:100%;aspect-ratio:1;border:2px solid var(--ink);border-radius:12px;display:block;background:#17112A}
+.maplegend{display:flex;flex-wrap:wrap;gap:4px 12px;font:600 12px var(--f-body);color:var(--ink-soft)}
+.maplegend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.mapgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.mcell{position:relative;min-height:62px;border:2px solid var(--ink);border-radius:10px;background:var(--zc);box-shadow:0 2px 0 var(--ink);padding:4px;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;cursor:pointer;overflow:hidden}
+.mcell b,.mcell small{background:rgba(255,255,255,.82);border-radius:5px;padding:0 3px;width:fit-content;max-width:100%}
+.mcell b{font:700 11px/1.25 var(--f-body)}.mcell small{font:600 10px var(--f-body);margin-top:2px}
+.mcell .mb{position:absolute;top:2px;right:3px;font-size:13px}
+.mcell.fog{background:repeating-linear-gradient(45deg,#3A3152,#3A3152 6px,#2E2644 6px,#2E2644 12px)}
+.mcell.sel{outline:3px solid #FF8A1F;outline-offset:1px}
 .pet-hud{position:absolute;top:138px;left:var(--gl);display:flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--ink);border-radius:14px;box-shadow:0 2px 0 var(--ink);padding:4px 10px 4px 6px;cursor:pointer;font:600 12px var(--f-body);color:var(--ink);text-align:left}
 .pet-hud .pe{font-size:26px;line-height:1}
 .pet-hud .pm{font-size:18px;line-height:1;margin-left:-12px;margin-top:-18px;animation:petbob 1.6s ease-in-out infinite}
@@ -308,7 +321,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
       <button class="ibtn" type="button" id="bHelp" aria-label="วิธีเล่น">❓<kbd class="kb">H</kbd></button>
     </div>
     <div class="side">
-      <canvas id="mini" width="300" height="104" aria-label="แผนที่ย่อ"></canvas>
+      <canvas id="mini" width="300" height="104" aria-label="แผนที่ย่อ (แตะเพื่อเปิดแผนที่)" style="cursor:pointer"></canvas><span class="mini-tag">🗺️ แผนที่<kbd class="kb" style="position:static;transform:none;display:inline-block;margin-left:4px">M</kbd></span>
       <span class="gold"><span class="coin"></span><span id="hudGold">0</span></span>
       <span class="online" id="online"><i></i><span id="onlineT">เล่นคนเดียว</span></span>
       <span class="online" id="dgInfo" hidden></span>
@@ -2839,7 +2852,7 @@ window.addEventListener('keydown', e => {
   if (typing() || !started || !$('#s-egg').hidden) { if (e.key === 'Escape' && !$('#chatbar').hidden) closeChat(); return; }
   const k = e.key.toLowerCase();
   setMode('desk');
-  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills') || (k === 't' && sheetName === 'titles') || (k === 'p' && sheetName === 'pets')) closeSheet(); return; }
+  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help') || (k === 'k' && sheetName === 'skills') || (k === 't' && sheetName === 'titles') || (k === 'p' && sheetName === 'pets') || (k === 'm' && sheetName === 'map')) closeSheet(); return; }
   if (k === 'escape') { me.targetId = null; me.goal = null; return; }
   if (k === 'h' || k === '?') { openHelp(); return; }
   if (k === 'r') { usePotion('ether'); return; }
@@ -2851,6 +2864,7 @@ window.addEventListener('keydown', e => {
   if (k === 'k') { openSkills(); return; }
   if (k === 't') { openTitles(); return; }
   if (k === 'p') { openPets(); return; }
+  if (k === 'm') { openMap(); return; }
   if (k === 'q') { usePotion(); return; }
   if (k === 'i' || k === 'b') { openBag(); return; }
   if (k === 'c') { openChar(); return; }
@@ -2954,6 +2968,7 @@ $('#bEnc').onclick = () => { if (encounterOffer) enterEncounter(encounterOffer.k
 $('#bTalk').onclick = () => { sfx('tap'); if (DG) { if (!DG.clear) leaveDungeon('ออกจากดันเจี้ยนแล้ว (ไม่ได้รับรางวัล)'); return; } const n = nearNpc(); if (n) n.open(); else if (nearWarp() >= 0) openWarps(); };
 $('#bSkills').onclick = () => { sfx('tap'); openSkills(); };
 $('#bPet').onclick = () => { sfx('tap'); openPets(); };
+$('#mini').onclick = () => { sfx('tap'); openMap(); };
 function openChat() { $('#chatbar').hidden = false; keys.clear(); setTimeout(() => $('#chatIn').focus(), 30); }
 function closeChat() { $('#chatbar').hidden = true; $('#chatIn').blur(); }
 $('#chatX').onclick = closeChat;
@@ -3533,6 +3548,7 @@ $('#mBody').addEventListener('click', e => {
   }
   if (b.dataset.story) { const k = b.dataset.story, sc = SCENARIOS[k], v = scenOf(k); if (!v) return; const lines = [...sc.intro, ...sc.steps.slice(0, v.done ? sc.steps.length : v.s + 1).map(x => x.story), ...(v.done ? sc.end : [`▶ ${sc.steps[v.s].hint}`])]; showStory(`「${sc.th}」`, lines, sc.icon); return; }
   if (b.dataset.encs) { enterEncounter(SCENARIOS[b.dataset.encs].mon); return; }
+  if (b.dataset.mapz != null) { mapSel = +b.dataset.mapz; sfx('tap'); return refreshSheet(); }
   if (b.dataset.job) { const k = b.dataset.job; if (!JOBS[k] || P.lv < 15) return; if (P.job) { if (P.gold < 5000) { toast('ต้องใช้ 5,000 ทอง'); return; } P.gold -= 5000; } P.job = k; gearDirty(); sfx('lvl'); banner(`อาชีพ: ${JOBS[k].th}`, fmtFx(JOBS[k].fx)); save(); hudStatic(); return refreshSheet(); }
   if (b.dataset.fuse) { const id = b.dataset.fuse, q = runeOf(id); if (!q || q.g >= 5 || (P.runes[id] || 0) < 3) return; addRune(id, -3); const nid = q.t + (q.g + 1); addRune(nid); sfx('lvl'); banner('รวมรูนสำเร็จ!', runeName(nid)); save(); return refreshSheet(); }
   const act = b.dataset.act;
@@ -3695,7 +3711,55 @@ function drawLoot(l) {
   const e = l.kind === 'item' ? itemIcon(l.val) : l.kind === 'petfood' ? PET_FOODS[l.val].icon : l.kind === 'stone' ? PET_STONES[l.val].icon : l.kind === 'rune' ? RUNES[runeOf(l.val).t].icon : LOOT_ICON[l.kind];
   ctx.drawImage(emojiSprite(e, 22), l.x - 13, l.y - 26 + bob, 26, 26);
 }
+// One map image per zone (other zones blacked out, gates highlighted); shared by the minimap and the world map.
+function zoneCanvas(cz) {
+  if (!drawMinimap.base) drawMinimap();
+  if (!drawMinimap.zone) drawMinimap.zone = {};
+  if (!drawMinimap.zone[cz]) {
+    const c = document.createElement('canvas'); c.width = W; c.height = HW; const g = c.getContext('2d');
+    g.drawImage(drawMinimap.base, 0, 0); const img = g.getImageData(0, 0, W, HW);
+    for (let i = 0; i < W * HW; i++) if (GROUND[i] !== cz) { img.data[i * 4] = 23; img.data[i * 4 + 1] = 17; img.data[i * 4 + 2] = 42; }
+    for (const [gi] of GATES) if (GROUND[gi] === cz) { img.data[gi * 4] = 201; img.data[gi * 4 + 1] = 166; img.data[gi * 4 + 2] = 255; }
+    g.putImageData(img, 0, 0); drawMinimap.zone[cz] = c;
+  }
+  return drawMinimap.zone[cz];
+}
+/* ---------------- world map (M) ---------------- */
+let mapSel = 0;
+const zoneLabel = z => z === 0 ? 'เมืองปุ๊กปิ๊ก' : ZONES[z - 1].name;
+const zoneKnown = z => z === 0 || (P.visited || []).includes(z - 1) || zoneAt(me.x, me.y) === z;
+function openMap() { mapSel = DG ? 0 : zoneAt(me.x, me.y); if (mapSel > ZONES.length) mapSel = 0; openSheet('แผนที่', renderMap, 'map'); }
+function renderMap(el) {
+  const z = mapSel, here = !DG && zoneAt(me.x, me.y) === z, known = zoneKnown(z), zz = ZONES[z - 1];
+  const cells = [0, ...ZONES.map((_, i) => i + 1)].map(q => { const kn = zoneKnown(q), cur = !DG && zoneAt(me.x, me.y) === q, zq = ZONES[q - 1], warp = (P.warps || []).includes(q);
+    return `<button class="mcell${q === z ? ' sel' : ''}${kn ? '' : ' fog'}" type="button" data-mapz="${q}" style="--zc:${q ? zq.g[0] : '#EAD7A8'}"><b>${kn ? esc(zoneLabel(q)) : '???'}</b><small>${q ? `Lv ${zq.lv}+` : 'ปลอดภัย'}</small><span class="mb">${cur ? '📍' : ''}${warp ? '🔮' : ''}</span></button>`; }).join('');
+  el.innerHTML = `<div class="maphead"><b>${known ? esc(zoneLabel(z)) : 'ดินแดนที่ยังไม่เคยไป'}</b><span class="muted">${z ? `แนะนำ Lv ${zz.lv}+ · บอส ${known ? FOES[zz.boss].e + ' ' + FOES[zz.boss].name : '???'}` : 'ร้านค้า น้ำพุ และประตูดันเจี้ยน'}</span></div>
+    <canvas id="mapCv" class="mapcv" width="640" height="640" aria-label="แผนที่ ${esc(zoneLabel(z))}"></canvas>
+    <div class="maplegend"><span><i style="background:#fff;border:2px solid var(--ink)"></i>คุณ</span><span><i style="background:#FF5A5F"></i>มอน</span><span>🔮 จุดวาร์ป</span><span><i style="background:#C9A6FF"></i>ประตูข้ามแมพ</span><span>💀 บอส</span><span>❗ เนื้อเรื่อง</span></div>
+    <p class="eyebrow" style="margin:4px 0">ทุกดินแดน · แตะเพื่อดูแผนที่ ${DG ? '' : '(📍 อยู่ที่นี่)'}</p>
+    <div class="mapgrid">${cells}</div>`;
+  drawZoneMap($('#mapCv'), z, known);
+}
+function drawZoneMap(cv, z, known) {
+  const g = cv.getContext('2d'), cw = cv.width, ch = cv.height, b = z === 0 ? { x0: TOWN.x - 12, x1: Math.min(TOWN_W, TOWN.x + 14), y0: TOWN.y - 11, y1: TOWN.y + 11 } : ZB[z];
+  g.fillStyle = '#17112A'; g.fillRect(0, 0, cw, ch);
+  if (!known) { g.fillStyle = '#C9C2D6'; g.font = '600 34px sans-serif'; g.textAlign = 'center'; g.fillText('🌫️ ยังไม่เคยไป', cw / 2, ch / 2); return; }
+  const bw = b.x1 - b.x0 + 3, bh = b.y1 - b.y0 + 3, k = Math.min(cw / bw, ch / bh), ox = (cw - bw * k) / 2, oy = (ch - bh * k) / 2;
+  g.imageSmoothingEnabled = false; g.drawImage(zoneCanvas(z), b.x0 - 1, b.y0 - 1, bw, bh, ox, oy, bw * k, bh * k);
+  const MX = x => ox + (x / T - b.x0 + 1) * k, MY = y => oy + (y / T - b.y0 + 1) * k;
+  const icon = (e, x, y, sz) => { g.font = `${sz || 26}px sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, MX(x), MY(y)); };
+  const label = (t, x, y) => { g.font = `700 ${z === 0 ? 13 : 15}px sans-serif`; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = 'rgba(23,17,42,.85)'; g.strokeText(t, MX(x), MY(y)); g.fillStyle = '#fff'; g.fillText(t, MX(x), MY(y)); };
+  if (z === 0) for (const n of NPCS) { icon(n.label.split(' ')[0], n.x, n.y - T); label(n.label.replace(/^\S+\s/, ''), n.x, n.y); }
+  if (z === 0) { icon('⛲', (TOWN.x + 1) * T, (TOWN.y + 1) * T, 30); }
+  if (z >= 1) { const bp = BOSS_POS[z - 1]; icon('💀', bp.x, bp.y, 28); label(FOES[ZONES[z - 1].boss].name, bp.x, bp.y + 1.1 * T); }
+  WARPS.forEach((w, wi) => { if (GROUND[w.y * W + w.x] !== z) return; g.globalAlpha = (P.warps || []).includes(wi) ? 1 : .4; icon('🔮', (w.x + .5) * T, (w.y + .5) * T, 24); g.globalAlpha = 1; });
+  for (const kk in SCENARIOS) { const st0 = scenStep(kk); if (!st0 || !st0.spot) continue; const sp = st0.spot(); if (sp && zoneAt(sp.x, sp.y) === z) icon('❗', sp.x, sp.y, 26); }
+  for (const m of monsterList()) { if (zoneAt(m.rx, m.ry) !== z || m.hp <= 0) continue; const fs = foeStats(m.t, m.lv); if (fs.boss) continue; g.fillStyle = fs.sec ? '#FFE14D' : '#FF5A5F'; g.beginPath(); g.arc(MX(m.rx), MY(m.ry), fs.sec ? 6 : 3.5, 0, 7); g.fill(); }
+  for (const r of remotes.values()) { if (inDungeonRows(r.ty) || zoneAt(r.x, r.y) !== z) continue; g.fillStyle = COLORS[r.c].c[1]; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(MX(r.x), MY(r.y), 7, 0, 7); g.fill(); g.stroke(); label(r.name || '', r.x, r.y - .9 * T); }
+  if (!DG && zoneAt(me.x, me.y) === z) { g.fillStyle = '#fff'; g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.arc(MX(me.x), MY(me.y), 9, 0, 7); g.fill(); g.stroke(); label('คุณ', me.x, me.y - 1 * T); }
+}
 function drawMinimap() {
+  if (sheetName === 'map' && !$('#modal').hidden && (drawMinimap.mt = (drawMinimap.mt || 0) + 1) % 20 === 0 && $('#mapCv')) drawZoneMap($('#mapCv'), mapSel, zoneKnown(mapSel));
   if (!drawMinimap.base) {
     const c = document.createElement('canvas'); c.width = W; c.height = HW; const g = c.getContext('2d'), img = g.createImageData(W, HW);
     const pal = ['#EAD7A8', '#9FD884', '#4F9A63', '#6C679A', '#A05A45', '#4A3F66', '#E6CB88', '#E2F0F7', '#5E7A4A', '#F1E2F8', '#30264A', '#C9B26A', '#1B1633'];
@@ -3716,14 +3780,7 @@ function drawMinimap() {
     return;
   }
   const cz = zoneAt(me.x, me.y), b = ZB[cz];
-  if (!drawMinimap.zone) drawMinimap.zone = {};
-  if (!drawMinimap.zone[cz]) {
-    const c = document.createElement('canvas'); c.width = W; c.height = HW; const g = c.getContext('2d');
-    g.drawImage(drawMinimap.base, 0, 0); const img = g.getImageData(0, 0, W, HW);
-    for (let i = 0; i < W * HW; i++) if (GROUND[i] !== cz) { img.data[i * 4] = 23; img.data[i * 4 + 1] = 17; img.data[i * 4 + 2] = 42; }
-    for (const [gi] of GATES) if (GROUND[gi] === cz) { img.data[gi * 4] = 201; img.data[gi * 4 + 1] = 166; img.data[gi * 4 + 2] = 255; }
-    g.putImageData(img, 0, 0); drawMinimap.zone[cz] = c;
-  }
+  zoneCanvas(cz);
   const bw = b.x1 - b.x0 + 3, bh = b.y1 - b.y0 + 3, k = Math.min(mw / bw, mh / bh), offx = (mw - bw * k) / 2, offy = (mh - bh * k) / 2;
   mctx.fillStyle = '#17112A'; mctx.fillRect(0, 0, mw, mh);
   mctx.imageSmoothingEnabled = false; mctx.drawImage(drawMinimap.zone[cz], b.x0 - 1, b.y0 - 1, bw, bh, offx, offy, bw * k, bh * k);
