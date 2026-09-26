@@ -142,6 +142,16 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .talk{position:absolute;right:var(--gr);bottom:222px;font:700 15px var(--f-display);padding:8px 16px;border-radius:99px;border:2px solid var(--ink);background:var(--accent);box-shadow:0 3px 0 var(--ink);cursor:pointer;animation:rise .2s ease}
 .joy{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);background:rgba(51,40,74,.18);pointer-events:none!important;z-index:6}
 .joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.9);border:2.5px solid var(--ink)}
+.kb{display:none;position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);font:700 10px/1 var(--f-body);color:var(--paper);background:var(--ink);border-radius:6px;padding:3px 5px;white-space:nowrap;pointer-events:none}
+.desk .kb{display:block}
+.desk .abtn .kb{bottom:auto;top:-10px}
+.desk .abtn small{display:none}
+.desk .abtn.atk{width:80px;height:80px;font-size:32px}
+.desk .abtn.skl{right:90px;width:62px;height:62px}
+.desk #cv{cursor:crosshair}
+.desk #cv.over-mon{cursor:pointer}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font-size:14px}
+.keys kbd{font:700 12px var(--f-body);background:var(--paper-2);border:2px solid var(--ink);border-bottom-width:3px;border-radius:8px;padding:2px 7px;white-space:nowrap;justify-self:start}
 .joyhint{position:absolute;left:var(--gl);bottom:40px;font:600 12px var(--f-body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);pointer-events:none!important;max-width:40vw}
 .dead{position:absolute;inset:0;display:grid;place-items:center;background:rgba(51,40,74,.45);text-align:center;color:#fff;z-index:7;text-shadow:0 2px 0 var(--ink)}
 .dead b{display:block;font:700 28px var(--f-display)}
@@ -187,6 +197,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .records b{display:block;font:700 19px var(--f-display);font-variant-numeric:tabular-nums}
 .records span{font-size:12px;color:var(--ink-soft)}
 .toast{position:absolute;left:50%;top:170px;transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font:600 14px var(--f-display);padding:8px 16px;border-radius:99px;animation:rise .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+@media (max-width:380px){.ibtn{width:38px;height:38px;font-size:17px}.menu-row{gap:6px}}
 @media (max-height:560px){.acts{transform:scale(.85);transform-origin:100% 100%}.chatlog{bottom:120px}.talk{bottom:180px}}
 @media (min-width:900px){.acts{bottom:28px;right:28px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
@@ -208,10 +219,11 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
       </div>
     </div>
     <div class="menu-row">
-      <button class="ibtn" type="button" id="bBag" aria-label="กระเป๋า">🎒</button>
-      <button class="ibtn" type="button" id="bChar" aria-label="ตัวละคร">🐣</button>
-      <button class="ibtn" type="button" id="bChat" aria-label="แชท">💬</button>
+      <button class="ibtn" type="button" id="bBag" aria-label="กระเป๋า">🎒<kbd class="kb">I</kbd></button>
+      <button class="ibtn" type="button" id="bChar" aria-label="ตัวละคร">🐣<kbd class="kb">C</kbd></button>
+      <button class="ibtn" type="button" id="bChat" aria-label="แชท">💬<kbd class="kb">Enter</kbd></button>
       <button class="ibtn" type="button" id="bMute" aria-label="เปิดหรือปิดเสียง">🔊</button>
+      <button class="ibtn" type="button" id="bHelp" aria-label="วิธีเล่น">❓<kbd class="kb">H</kbd></button>
     </div>
     <div class="side">
       <canvas id="mini" width="224" height="168" aria-label="แผนที่ย่อ"></canvas>
@@ -219,12 +231,12 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
       <span class="online" id="online"><i></i><span id="onlineT">เล่นคนเดียว</span></span>
     </div>
     <div class="chatlog" id="chatlog" aria-live="polite"></div>
-    <p class="joyhint" id="joyhint">ลากนิ้วบนจอเพื่อเดิน</p>
+    <p class="joyhint" id="joyhint"></p>
     <button class="talk" type="button" id="bTalk" hidden>🛒 คุยกับป้าแมวเหมียว</button>
     <div class="acts">
-      <button class="abtn pot" type="button" id="bPot" aria-label="ดื่มยา">🍯<b id="potN">0</b><span class="cd" id="potCd"></span></button>
-      <button class="abtn skl" type="button" id="bSkill" aria-label="ใช้สกิล"><span id="skillIco">🔥</span><span class="cd" id="skillCd"></span><small id="skillMp"></small></button>
-      <button class="abtn atk" type="button" id="bAtk" aria-label="โจมตี">⚔️<span class="cd" id="atkCd"></span></button>
+      <button class="abtn pot" type="button" id="bPot" aria-label="ดื่มยา">🍯<b id="potN">0</b><span class="cd" id="potCd"></span><kbd class="kb">Q</kbd></button>
+      <button class="abtn skl" type="button" id="bSkill" aria-label="ใช้สกิล"><span id="skillIco">🔥</span><span class="cd" id="skillCd"></span><small id="skillMp"></small><kbd class="kb">E</kbd></button>
+      <button class="abtn atk" type="button" id="bAtk" aria-label="โจมตี">⚔️<span class="cd" id="atkCd"></span><kbd class="kb">Space</kbd></button>
     </div>
     <div class="dead" id="dead" hidden><div><b>หมดแรงซะแล้ว…</b><span id="deadT">กำลังพากลับเมือง</span></div></div>
   </div>
@@ -568,12 +580,13 @@ function chatLine(name, text, sys) {
   while (box.children.length > 5) box.firstChild.remove();
   setTimeout(() => { p.style.transition = 'opacity .6s'; p.style.opacity = '0'; setTimeout(() => p.remove(), 700); }, 12000);
 }
-let sheetRender = null;
-function openSheet(title, render) {
+let sheetRender = null, sheetName = '';
+function openSheet(title, render, name) {
+  sheetName = name || '';
   $('#mTitle').textContent = title; sheetRender = render; render($('#mBody')); $('#modal').hidden = false; keys.clear(); joy.active = false; $('#joy').hidden = true;
 }
 function refreshSheet() { if (sheetRender && !$('#modal').hidden) sheetRender($('#mBody')); }
-function closeSheet() { $('#modal').hidden = true; sheetRender = null; }
+function closeSheet() { $('#modal').hidden = true; sheetRender = null; sheetName = ''; }
 $('#mX').onclick = () => { sfx('tap'); closeSheet(); };
 $('#modal').addEventListener('pointerdown', e => { if (e.target.id === 'modal') closeSheet(); });
 
@@ -623,7 +636,7 @@ async function hatch() {
     <label class="field" for="nameInput">ตั้งชื่อ (คนอื่นในโลกจะเห็นชื่อนี้)
       <input id="nameInput" maxlength="14" autocomplete="off" value="${esc(c.species)}">
     </label>
-    <ul class="how"><li>ลากนิ้วที่ไหนก็ได้บนจอเพื่อเดิน (คอมใช้ WASD)</li><li>กด ⚔️ ค้างไว้เพื่อตีมอนที่อยู่ใกล้ สกิลกดปุ่มสี ยากดปุ่ม 🍯</li><li>เดินทับของที่ดรอปเพื่อเก็บ แล้วเปิด 🎒 เพื่อสวมใส่</li></ul>
+    <ul class="how"><li>มือถือ: ลากนิ้วเพื่อเดิน แตะมอนเพื่อตี · คอม: คลิกพื้นเพื่อเดิน คลิกมอนเพื่อตี หรือใช้ WASD + Space</li><li>สกิลกดปุ่มสี (E) ยากดปุ่ม 🍯 (Q) ดูปุ่มทั้งหมดได้ที่ ❓</li><li>เดินทับของที่ดรอปเพื่อเก็บ แล้วเปิด 🎒 เพื่อสวมใส่</li></ul>
     <button class="btn primary block" id="startBtn" type="button" style="min-height:56px;font-size:19px">เข้าสู่โลก!</button>`;
   rv.hidden = false;
   $('#startBtn').onclick = () => {
@@ -662,7 +675,7 @@ function updateHud(force) {
   $('#hudXp').style.width = (P.xp / xpNeed(P.lv) * 100) + '%';
   $('#hudGold').textContent = P.gold.toLocaleString();
   $('#potN').textContent = P.items.potion;
-  $('#bChar').innerHTML = '🐣' + (P.points > 0 ? '<span class="dot"></span>' : '');
+  $('#bChar').innerHTML = '🐣' + (P.points > 0 ? '<span class="dot"></span>' : '') + '<kbd class="kb">C</kbd>';
 }
 
 /* ================= multiplayer: room presence ================= */
@@ -938,10 +951,10 @@ function attackMon(m, mult, o = {}) {
   }
   return d;
 }
-function doAttack() {
+function doAttack(pref) {
   if (!started || me.dead || me.atkCd > 0) return;
   me.atkCd = atkCooldown(); me.atkCount++; me.swing = .2;
-  const tgt = nearestMon(62);
+  const tgt = pref && pref.hp > 0 && Math.hypot(pref.rx - me.x, pref.ry - me.y) < 62 ? pref : nearestMon(62);
   if (tgt) { me.dir = tgt.rx < me.x ? -1 : 1; attackMon(tgt, 1); }
   else sfx('swing');
   fx.push({ type: 'slash', x: me.x + me.dir * 20, y: me.y - 8, dir: me.dir, t: 0, dur: .2 });
@@ -1062,7 +1075,7 @@ function pickupLoot(dt) {
       P.bag.push(l.val); const it = l.val;
       floatAt(me.x, me.y - 44, itemName(it), RAR[it.r].c, 15); sfx(it.r >= 2 ? 'rare' : 'pick');
       if (it.r >= 3) banner(`ได้ของ${RAR[it.r].th}!`, itemName(it));
-      $('#bBag').innerHTML = '🎒<span class="dot"></span>';
+      $('#bBag').innerHTML = '🎒<span class="dot"></span><kbd class="kb">I</kbd>';
     } else { P.items[l.kind]++; floatAt(me.x, me.y - 40, CONSUME[l.kind].icon + ' +1', '#fff', 15); sfx('pick'); }
     loot.splice(i, 1); save();
   }
@@ -1075,8 +1088,13 @@ let atkHeld = false;
 const typing = () => document.activeElement && document.activeElement.tagName === 'INPUT';
 window.addEventListener('keydown', e => {
   if (typing() || !started || !$('#s-egg').hidden) { if (e.key === 'Escape' && !$('#chatbar').hidden) closeChat(); return; }
-  if (!$('#modal').hidden) { if (e.key === 'Escape') closeSheet(); return; }
   const k = e.key.toLowerCase();
+  setMode('desk');
+  if (!$('#modal').hidden) { if (k === 'escape' || (k === 'i' && sheetName === 'bag') || (k === 'c' && sheetName === 'char') || (k === 'h' && sheetName === 'help')) closeSheet(); return; }
+  if (k === 'escape') { me.targetId = null; me.goal = null; return; }
+  if (k === 'h' || k === '?') { openHelp(); return; }
+  if (k === 'r') { usePotion('ether'); return; }
+  if (k === 'tab') { e.preventDefault(); const m = nearestMon(8 * T); if (m) setTarget(m); return; }
   if (k === 'enter') { e.preventDefault(); openChat(); return; }
   if (k === ' ') { e.preventDefault(); atkHeld = true; doAttack(); return; }
   if (k === 'e') { doSkill(); return; }
@@ -1088,24 +1106,77 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); keys.delete(k); if (k === ' ') atkHeld = false; });
 window.addEventListener('blur', () => { keys.clear(); atkHeld = false; });
 const cv = $('#cv');
+let inputMode = '';
+function setMode(m) {
+  if (m === inputMode) return; inputMode = m;
+  $('#app').classList.toggle('desk', m === 'desk');
+  $('#joyhint').textContent = m === 'desk' ? 'คลิกพื้นเพื่อเดิน · คลิกมอนเพื่อตี · กด H ดูปุ่มทั้งหมด' : 'ลากนิ้วเพื่อเดิน · แตะมอนเพื่อตี';
+}
+setMode(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches ? 'desk' : 'touch');
+const cam = { ox: 0, oy: 0 };
+function toWorld(cx, cy) { const r = cv.getBoundingClientRect(); return { x: cam.ox + (cx - r.left) / ZOOM, y: cam.oy + (cy - r.top) / ZOOM }; }
+function monAt(wx, wy) {
+  let best = null, bd = 1e9;
+  for (const m of monsterList()) {
+    if (m.hp <= 0) continue;
+    const size = m.boss ? 60 : 38, d = Math.hypot(wx - m.rx, wy - (m.ry - size * .5));
+    if (d < size * .6 + 10 && d < bd) { bd = d; best = m; }
+  }
+  return best;
+}
+function setTarget(m) { me.targetId = m.id; me.goal = null; me.wantShop = false; sfx('tap'); }
+function walkTo(w) {
+  me.targetId = null; me.goal = { x: w.x, y: w.y, t: nowS() }; me.stuck = 0;
+  const i = tileAt(w.x, w.y);
+  me.wantShop = i >= 0 && (OBJ[i] === 9 || Math.hypot(w.x - (SHOP.x + 1) * T, w.y - SHOP.y * T) < 1.5 * T);
+  if (me.wantShop) me.goal = { x: (SHOP.x + 1) * T, y: (SHOP.y + 1.5) * T, t: nowS() };
+}
+const ptr = { id: null, type: '', sx: 0, sy: 0, t0: 0, moved: false, hold: false };
+cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('pointerdown', e => {
-  if (!started || joy.active) return;
+  if (!started || ptr.id !== null) return;
+  if (AC && AC.state === 'suspended') AC.resume();
+  const mouse = e.pointerType === 'mouse';
+  setMode(mouse ? 'desk' : 'touch');
+  if (mouse && e.button !== 0) return;
+  ptr.id = e.pointerId; ptr.type = e.pointerType; ptr.sx = e.clientX; ptr.sy = e.clientY; ptr.t0 = performance.now(); ptr.moved = false;
+  try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  if (mouse) {
+    if (me.dead) return;
+    const w = toWorld(e.clientX, e.clientY), m = monAt(w.x, w.y);
+    if (m) setTarget(m); else { walkTo(w); ptr.hold = !me.wantShop; }
+    return;
+  }
   joy.active = true; joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.dx = joy.dy = 0;
   const r = $('#app').getBoundingClientRect(), j = $('#joy');
   j.style.left = (e.clientX - r.left) + 'px'; j.style.top = (e.clientY - r.top) + 'px'; j.hidden = false; $('#joyK').style.transform = '';
-  $('#joyhint').hidden = true;
-  try { cv.setPointerCapture(e.pointerId); } catch (err) {}
-  if (AC && AC.state === 'suspended') AC.resume();
 });
 cv.addEventListener('pointermove', e => {
+  if (e.pointerType === 'mouse' && started) {
+    const w = toWorld(e.clientX, e.clientY);
+    cv.classList.toggle('over-mon', !!monAt(w.x, w.y));
+    if (ptr.hold && e.pointerId === ptr.id && !me.dead) { me.goal = { x: w.x, y: w.y, t: nowS() }; me.targetId = null; }
+    return;
+  }
   if (!joy.active || e.pointerId !== joy.id) return;
   let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy; const d = Math.hypot(dx, dy), max = 50;
+  if (d > 12) ptr.moved = true;
   if (d > max) { dx = dx / d * max; dy = dy / d * max; }
   joy.dx = dx / max; joy.dy = dy / max;
   $('#joyK').style.transform = `translate(${dx}px,${dy}px)`;
 });
-const endJoy = e => { if (e.pointerId !== joy.id) return; joy.active = false; joy.dx = joy.dy = 0; $('#joy').hidden = true; };
-cv.addEventListener('pointerup', endJoy); cv.addEventListener('pointercancel', endJoy);
+const endPtr = e => {
+  if (e.pointerId !== ptr.id) return;
+  if (ptr.type !== 'mouse' && e.type === 'pointerup' && !ptr.moved && performance.now() - ptr.t0 < 300 && !me.dead) {
+    const w = toWorld(e.clientX, e.clientY), m = monAt(w.x, w.y);
+    if (m) setTarget(m); else walkTo(w);
+  }
+  ptr.id = null; ptr.hold = false;
+  joy.active = false; joy.dx = joy.dy = 0; $('#joy').hidden = true;
+};
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+let zoomMul = 1;
+cv.addEventListener('wheel', e => { e.preventDefault(); zoomMul = clamp(zoomMul * (e.deltaY > 0 ? .9 : 1.1), .6, 1.6); resize(); }, { passive: false });
 function holdBtn(el, onPress, repeat) {
   let held = false;
   el.addEventListener('pointerdown', e => { e.preventDefault(); held = true; el.classList.add('held'); onPress(); if (repeat) atkHeld = true; });
@@ -1120,6 +1191,7 @@ holdBtn($('#bPot'), () => usePotion('potion'), false);
 $('#bBag').onclick = () => { sfx('tap'); openBag(); };
 $('#bChar').onclick = () => { sfx('tap'); openChar(); };
 $('#bChat').onclick = () => { sfx('tap'); openChat(); };
+$('#bHelp').onclick = () => { sfx('tap'); openHelp(); };
 $('#bTalk').onclick = () => { sfx('tap'); openShop(); };
 $('#bMute').onclick = () => { muted = !muted; savePrefs(); $('#bMute').textContent = muted ? '🔇' : '🔊'; if (!muted) sfx('tap'); };
 function openChat() { $('#chatbar').hidden = false; keys.clear(); setTimeout(() => $('#chatIn').focus(), 30); }
@@ -1141,9 +1213,9 @@ function slotBtn(it, extra = '') {
 }
 function findItem(id) { for (const s of SLOTS) if (P.eq[s] && P.eq[s].id === id) return { it: P.eq[s], eq: true }; const it = P.bag.find(i => i.id === id); return it ? { it, eq: false } : null; }
 function openBag() {
-  $('#bBag').textContent = '🎒';
+  $('#bBag').innerHTML = '🎒<kbd class="kb">I</kbd>';
   selItem = null;
-  openSheet('กระเป๋า', renderBag);
+  openSheet('กระเป๋า', renderBag, 'bag');
 }
 function renderBag(el) {
   const sel = selItem && findItem(selItem);
@@ -1167,7 +1239,30 @@ function renderBag(el) {
       ${P.bag.length ? `<div class="bag">${bag}</div>` : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีของ ออกไปตีมอนนอกเมืองแล้วเดินทับของที่ดรอปเพื่อเก็บ</p>'}</div>
     <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${c.icon}</span><div><div class="nm">${c.name} × ${P.items[k]}</div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div>`;
 }
-function openChar() { openSheet('ตัวละคร', renderChar); }
+function openChar() { openSheet('ตัวละคร', renderChar, 'char'); }
+function openHelp() {
+  openSheet('วิธีเล่น', el => {
+    el.innerHTML = `<div class="panel"><b style="font-family:var(--f-display)">คอมพิวเตอร์</b><div class="keys" style="margin-top:8px">
+      <span><kbd>คลิกพื้น</kbd></span><span>เดินไปตรงนั้น (กดค้างแล้วลากเมาส์ = เดินตามเมาส์)</span>
+      <span><kbd>คลิกมอน</kbd></span><span>เดินไปหาแล้วตีจนกว่ามอนจะตาย</span>
+      <span><kbd>W A S D</kbd></span><span>เดิน (ปุ่มลูกศรก็ได้)</span>
+      <span><kbd>Space</kbd></span><span>ตี (กดค้างเพื่อตีรัว)</span>
+      <span><kbd>Tab</kbd></span><span>เล็งมอนที่ใกล้ที่สุด</span>
+      <span><kbd>E</kbd></span><span>ใช้สกิล</span>
+      <span><kbd>Q</kbd> <kbd>R</kbd></span><span>ดื่มยา HP / ยา MP</span>
+      <span><kbd>I</kbd> <kbd>C</kbd></span><span>กระเป๋า / ตัวละคร</span>
+      <span><kbd>Enter</kbd></span><span>แชท</span>
+      <span><kbd>ล้อเมาส์</kbd></span><span>ซูมเข้า-ออก</span>
+      <span><kbd>Esc</kbd></span><span>ยกเลิกเป้าหมาย / ปิดหน้าต่าง</span></div></div>
+    <div class="panel"><b style="font-family:var(--f-display)">มือถือ</b><div class="keys" style="margin-top:8px">
+      <span><kbd>ลากนิ้ว</kbd></span><span>เดิน (จุดไหนของจอก็ได้)</span>
+      <span><kbd>แตะมอน</kbd></span><span>เดินไปหาแล้วตีอัตโนมัติ</span>
+      <span><kbd>แตะพื้น</kbd></span><span>เดินไปตรงนั้น</span>
+      <span><kbd>⚔️</kbd></span><span>ตีตัวที่ใกล้ที่สุด (กดค้างเพื่อตีรัว)</span>
+      <span><kbd>สกิล</kbd> <kbd>🍯</kbd></span><span>ใช้สกิล / ดื่มยา</span></div></div>
+    <p class="muted" style="margin:0;font-size:13px">แตะหรือคลิกแผงร้านในเมืองเพื่อเดินไปซื้อของ · ยืนใกล้น้ำพุเพื่อฟื้นพลัง · วงแดงรอบบอสคือท่าทุบพื้น ให้เดินออกก่อน</p>`;
+  }, 'help');
+}
 function renderChar(el) {
   const c = col(), s = stageOf(P.lv);
   el.style.setProperty('--c', c.c[1]); el.style.setProperty('--c-light', c.light);
@@ -1184,7 +1279,7 @@ function renderChar(el) {
     </div>
     <div class="skill-card panel"><div class="skill-ico">${c.skill.icon}</div><div><b>${c.skill.name}</b> <span class="muted">· ${c.skill.cost} MP · คูลดาวน์ 4 วิ</span><div class="muted" style="font-size:13px">${c.skill.desc}</div></div></div>
     <div class="panel records"><div><b>${P.kills}</b><span>ปราบมอน</span></div><div><b>${P.bossKills}</b><span>ปราบบอส</span></div><div><b>${P.bag.length}</b><span>ของในกระเป๋า</span></div></div>
-    <p class="muted" style="margin:0;font-size:12px">คอม: WASD เดิน · Space ตี · E สกิล · Q ยา · I กระเป๋า · C ตัวละคร · Enter แชท</p>
+    
     <button class="btn block" type="button" data-act="reset" style="background:var(--paper-2)">ฟักไข่ใบใหม่ (ลบตัวนี้ เริ่มใหม่)</button>`;
 }
 function nearShop() { return Math.hypot(me.x - (SHOP.x + 1) * T, me.y - (SHOP.y + 1.3) * T) < 2.6 * T; }
@@ -1229,7 +1324,7 @@ function resize() {
   const r = $('#app').getBoundingClientRect();
   DPR = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(r.width * DPR); cv.height = Math.round(r.height * DPR);
-  ZOOM = clamp(Math.min(r.width, r.height * 1.1) / (12 * T), .85, 1.7);
+  ZOOM = clamp(Math.min(r.width, r.height * 1.1) / (12 * T), .85, 1.7) * (typeof zoomMul === 'number' ? zoomMul : 1);
   VW = r.width / ZOOM; VH = r.height / ZOOM;
 }
 window.addEventListener('resize', resize);
@@ -1364,10 +1459,24 @@ function update(dt) {
       if (keys.has('a') || keys.has('arrowleft')) dx -= 1; if (keys.has('d') || keys.has('arrowright')) dx += 1;
       if (keys.has('w') || keys.has('arrowup')) dy -= 1; if (keys.has('s') || keys.has('arrowdown')) dy += 1;
     }
-    const m = Math.hypot(dx, dy);
+    if (Math.hypot(dx, dy) > .15) { me.targetId = null; me.goal = null; me.wantShop = false; }
+    else if (me.targetId != null) {
+      const tm = getMon(me.targetId), d = tm ? Math.hypot(tm.rx - me.x, tm.ry - me.y) : 0;
+      if (!tm || tm.hp <= 0 || d > 12 * T) me.targetId = null;
+      else {
+        if (d > 50) { dx = (tm.rx - me.x) / d; dy = (tm.ry - me.y) / d; }
+        if (d < 60) { me.dir = tm.rx < me.x ? -1 : 1; doAttack(tm); }
+      }
+    } else if (me.goal) {
+      const d = Math.hypot(me.goal.x - me.x, me.goal.y - me.y);
+      if (d < 6) me.goal = null; else { dx = (me.goal.x - me.x) / d; dy = (me.goal.y - me.y) / d; }
+    }
+    if (me.wantShop && nearShop()) { me.wantShop = false; me.goal = null; openShop(); }
+    const m = Math.hypot(dx, dy), px = me.x, py = me.y;
     me.moving = m > .15;
     if (me.moving) { const k = Math.min(1, m) * moveSpeed() * dt / m; moveBody(me, dx * k, dy * k, 12, solid); if (Math.abs(dx) > .1) me.dir = dx < 0 ? -1 : 1; me.walk += dt; }
-    if (atkHeld) doAttack();
+    if ((me.goal || me.targetId != null) && me.moving && Math.hypot(me.x - px, me.y - py) < .2) { me.stuck = (me.stuck || 0) + dt; if (me.stuck > .5) { const tm = me.targetId != null && getMon(me.targetId); if (!tm || Math.hypot(tm.rx - me.x, tm.ry - me.y) >= 60) { me.goal = null; me.targetId = null; } me.stuck = 0; } } else me.stuck = 0;
+    if (atkHeld) doAttack(me.targetId != null ? getMon(me.targetId) : null);
     // regen
     const nearFountain = Math.hypot(me.x - (TOWN.x + 1) * T, me.y - (TOWN.y + 1) * T) < 3.2 * T;
     if (nearFountain) { if (P.hp < maxHp() || P.mp < maxMp()) { P.hp = Math.min(maxHp(), P.hp + maxHp() * .25 * dt); P.mp = Math.min(maxMp(), P.mp + maxMp() * .25 * dt); } }
@@ -1394,10 +1503,14 @@ function render() {
   let cx = clamp(me.x, VW / 2, W * T - VW / 2), cy = clamp(me.y - 20, VH / 2, H * T - VH / 2);
   const ox = Math.round((cx - VW / 2) * s) / s, oy = Math.round((cy - VH / 2) * s) / s;
   ctx.setTransform(s, 0, 0, s, -ox * s, -oy * s);
+  cam.ox = ox; cam.oy = oy;
   const x0 = Math.floor(ox / T) - 1, y0 = Math.floor(oy / T) - 1, x1 = Math.ceil((ox + VW) / T) + 1, y1 = Math.ceil((oy + VH) / T) + 2;
   drawGround(x0, y0, x1, y1);
+  if (me.goal && !me.dead) { const k = (nowS() * 2) % 1; ctx.strokeStyle = `rgba(255,255,255,${1 - k})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(me.goal.x, me.goal.y, 6 + k * 10, 3 + k * 4, 0, 0, 7); ctx.stroke(); }
+  const locked = me.targetId != null && getMon(me.targetId);
+  if (locked) { ctx.strokeStyle = '#F2485B'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(locked.rx, locked.ry + 2, 26, 9, 0, 0, 7); ctx.stroke(); }
   // target ring
-  const tgt = !me.dead && nearestMon(200);
+  const tgt = !me.dead && !locked && nearestMon(200);
   if (tgt) { const inR = Math.hypot(tgt.rx - me.x, tgt.ry - me.y) < 62; ctx.strokeStyle = inR ? '#FFD23F' : 'rgba(255,255,255,.7)'; ctx.lineWidth = 2.5; ctx.setLineDash(inR ? [] : [5, 5]); ctx.beginPath(); ctx.ellipse(tgt.rx, tgt.ry + 2, 22, 8, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
   const ents = [];
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { if (x < 0 || y < 0 || x >= W || y >= H) continue; const o = OBJ[y * W + x]; if (o && o < 20 && o !== 5 && o !== 6) ents.push({ y: (y + 1) * T - (o === 8 ? -T : 0), d: () => drawObstacle(o, x, y, GROUND[y * W + x]) }); }
