@@ -1765,11 +1765,75 @@ const BODY_SHAPES = {
 // Evolved bodies also grow each stage (anchored at the feet) so the new silhouette shows past armour and decorations.
 const bodyGrow = (form, ft) => { if (!form || (ft || 2) < 3) return ''; const k = { 3: [1.08, 1.1], 4: [1.12, 1.16], 5: [1.14, 1.18] }[ft] || [1, 1]; return ` transform="translate(60 110) scale(${k[0]} ${k[1]}) translate(-60 -110)"`; };
 const bodyD = (form, ft) => { const b = form && BODY_SHAPES[form]; return b ? b[(ft || 2) >= 3 ? 1 : 0] : BODY_ROUND; };
+
+// ---------- humanoid forms ----------
+// From the first transformation the slime becomes a small person: its own hair, outfit and weapon per form line,
+// armour, cape and wings added as it evolves, and the outfit tinted by its line and sub-lines.
+const HAIR_C = { red: '#E0483C', blue: '#3F6FD8', yellow: '#F2B830', brown: '#8A5A34', green: '#3FA35A' };
+const SKIN = '#FFDDBF';
+const HUMAN = {
+  // hair(hc) returns [behind-head, over-head] paths; wpn(c, ft) draws the weapon in the right hand
+  atk: { hair: hc => ['', `<path d="M36 38L30 20L44 26L44 10L54 20L60 4L66 20L76 10L76 26L90 20L84 38Q72 24 60 26Q48 24 36 38Z" fill="${hc}" ${K2(2.5)}/>`],
+    wpn: (c, ft) => `<path d="M88 90L104 ${ft >= 4 ? 18 : 30}L110 ${ft >= 4 ? 22 : 34}L94 94Z" fill="#E6ECF5" ${K2(2)}/><path d="M82 86L98 96" stroke="${INK}" stroke-width="7" stroke-linecap="round"/><path d="M82 86L98 96" stroke="#FFD23F" stroke-width="4" stroke-linecap="round"/>` },
+  def: { hair: hc => ['', `<path d="M37 36Q38 16 60 15Q82 16 83 36Q72 28 60 28Q48 28 37 36Z" fill="${hc}" ${K2(2.5)}/><path d="M38 34Q38 14 60 13Q82 14 82 34L84 44H78V34Q60 26 42 34V44H36Z" fill="#C9CCD8" ${K2(2)}/><path d="M60 4V14" stroke="${INK}" stroke-width="3"/><circle cx="60" cy="4" r="3.5" fill="#F2485B" ${K2(1.5)}/>`],
+    wpn: (c, ft) => `<path d="M${ft >= 4 ? 78 : 80} 70H${ft >= 4 ? 110 : 104}V94Q${ft >= 4 ? 94 : 92} 110 ${ft >= 4 ? 78 : 80} 94Z" fill="#C9CCD8" ${K2(2.5)}/><path d="M${ft >= 4 ? 94 : 92} 74V100M${ft >= 4 ? 82 : 83} 84H${ft >= 4 ? 106 : 101}" stroke="${c[1]}" stroke-width="4"/>` },
+  spd: { hair: hc => [`<path d="M78 30Q104 30 110 52Q98 44 84 44Z" fill="${hc}" ${K2(2)}/>`, `<path d="M36 40Q34 16 60 16Q86 16 84 40L78 30L70 34L62 26L52 34L44 28Z" fill="${hc}" ${K2(2.5)}/><path d="M38 34Q60 26 82 34" fill="none" stroke="#F2485B" stroke-width="4"/>`],
+    wpn: (c, ft) => `<path d="M86 88L104 70L108 74L90 92Z" fill="#E6ECF5" ${K2(2)}/><path d="M34 88L16 70L12 74L30 92Z" fill="#E6ECF5" ${K2(2)}/>${ft >= 4 ? `<path d="M100 80L118 62M20 80L2 62" stroke="#9FE3FF" stroke-width="3" stroke-linecap="round"/>` : ''}` },
+  hp:  { hair: hc => ['', `<path d="M38 32Q40 16 60 16Q80 16 82 32Q70 24 60 26Q50 24 38 32Z" fill="${hc}" ${K2(2.5)}/><path d="M44 50Q60 64 76 50Q74 60 60 62Q46 60 44 50Z" fill="${hc}" ${K2(2)}/>`],
+    wpn: (c, ft) => `<path d="M90 96L98 ${ft >= 4 ? 30 : 40}" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="M90 96L98 ${ft >= 4 ? 30 : 40}" stroke="#8A6A52" stroke-width="3" stroke-linecap="round"/><path d="M${ft >= 4 ? 82 : 86} ${ft >= 4 ? 22 : 32}H${ft >= 4 ? 114 : 110}V${ft >= 4 ? 42 : 48}H${ft >= 4 ? 82 : 86}Z" fill="#AEB6C8" ${K2(2.5)}/>` },
+  luk: { hair: hc => [`<path d="M36 36Q30 70 38 84L44 60Z M84 36Q90 70 82 84L76 60Z" fill="${hc}" ${K2(2)}/>`, `<path d="M36 40Q34 16 60 16Q86 16 84 40Q74 26 60 28Q46 26 36 40Z" fill="${hc}" ${K2(2.5)}/><circle cx="38" cy="18" r="8" fill="${hc}" ${K2(2)}/><circle cx="82" cy="18" r="8" fill="${hc}" ${K2(2)}/>`],
+    wpn: (c, ft) => `<path d="M90 98L96 50" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M90 98L96 50" stroke="#C98A4A" stroke-width="2.5" stroke-linecap="round"/>` + STAR(96, 44, ft >= 4 ? 11 : 8, '') },
+  rainbow: { hair: hc => [`<path d="M34 36Q26 80 40 96L46 60ZM86 36Q94 80 80 96L74 60Z" fill="#FFB3C7" ${K2(2)}/>`, `<path d="M35 40Q34 14 60 14Q86 14 85 40Q74 24 60 26Q46 24 35 40Z" fill="#FFB3C7" ${K2(2.5)}/><path d="M42 22Q60 12 78 22" fill="none" stroke="#9FE3FF" stroke-width="4"/><path d="M40 28Q60 18 80 28" fill="none" stroke="#FFE14D" stroke-width="3"/>`],
+    wpn: (c, ft) => `<path d="M90 98L94 44" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M90 98L94 44" stroke="#FFE98A" stroke-width="2.5" stroke-linecap="round"/><circle cx="94" cy="40" r="${ft >= 4 ? 9 : 7}" fill="#FFB3C7" ${K2(2)}/><circle cx="94" cy="40" r="3" fill="#fff"/>` },
+  shadow: { hair: hc => [`<path d="M30 44Q28 8 60 8Q92 8 90 44L96 70Q76 62 60 62Q44 62 24 70Z" fill="#2A2240" ${K2(2.5)}/>`, `<path d="M34 44Q34 14 60 14Q86 14 86 44Q76 26 60 26Q44 26 34 44Z" fill="#2A2240" ${K2(2)}/>`],
+    wpn: (c, ft) => `<path d="M92 104L98 18" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M92 104L98 18" stroke="#6B5A8A" stroke-width="2.5" stroke-linecap="round"/><path d="M98 18Q${ft >= 4 ? 64 : 72} 12 ${ft >= 4 ? 60 : 68} 34Q80 22 98 26Z" fill="#C9C2D6" ${K2(2)}/>` },
+  unique: { hair: hc => ['', `<path d="M36 40Q34 16 60 16Q86 16 84 40Q74 26 60 28Q46 26 36 40Z" fill="#FFE98A" ${K2(2.5)}/><path d="M42 20L44 4L52 12L60 0L68 12L76 4L78 20Z" fill="#FFD23F" ${K2(2)}/><circle cx="60" cy="12" r="3" fill="#4A9DFF"/>`],
+    wpn: (c, ft) => `<path d="M88 92L104 24L110 26L96 94Z" fill="#FFF3B0" ${K2(2)}/><path d="M80 88L100 94" stroke="${INK}" stroke-width="7" stroke-linecap="round"/><path d="M80 88L100 94" stroke="#D4A017" stroke-width="4" stroke-linecap="round"/><circle cx="100" cy="30" r="3" fill="#F2485B"/>` },
+};
+function humanSVG(color, o, form, c, ft, rk, mood, id) {
+  const H = HUMAN[form] || HUMAN.atk, hc = form === 'shadow' ? '#2A2240' : HAIR_C[color] || '#8A5A34';
+  const [hb, hf] = H.hair(hc), cloth = c[1], dark = c[2], lite = c[0];
+  let eyes;
+  if (mood === 'happy') eyes = `<path d="M47 42Q52 36 57 42M63 42Q68 36 73 42" ${SK}/>`;
+  else if (mood === 'hurt') eyes = `<path d="M48 37L56 43M56 37L48 43M64 37L72 43M72 37L64 43" ${SK}/>`;
+  else if (mood === 'sleep') eyes = `<path d="M47 41Q52 44 57 41M63 41Q68 44 73 41" ${SK}/>`;
+  else { const ec = ft >= 5 && o.fb ? (pathNodes(o.fb, o.fs, ft).slice(-1)[0] || {}).art : null; eyes = `<g class="eyes"><ellipse cx="52" cy="40" rx="4.5" ry="6" fill="${form === 'shadow' ? '#FF4D6D' : INK}"/><ellipse cx="68" cy="40" rx="4.5" ry="6" fill="${form === 'shadow' ? '#FF4D6D' : INK}"/><circle cx="53.5" cy="37.5" r="1.8" fill="#fff"/><circle cx="69.5" cy="37.5" r="1.8" fill="#fff"/>${ec ? `<ellipse cx="52" cy="40" rx="6.5" ry="8" fill="none" stroke="${ec[1]}" stroke-width="2"/><ellipse cx="68" cy="40" rx="6.5" ry="8" fill="none" stroke="${ec[1]}" stroke-width="2"/>` : ''}</g>`; }
+  const mouth = mood === 'hurt' ? `<path d="M56 52Q60 48 64 52" ${SK}/>` : `<path d="M56 50Q60 54 64 50" ${SK}/>`;
+  const brow = form === 'atk' || form === 'shadow' ? `<path d="M46 31L56 34M74 31L64 34" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>` : '';
+  let back = hb, front = '';
+  // evolution extras: t3 shoulder guards + gold belt, t4 cape, t5 wings
+  if (ft >= 4 || rk >= 4) back = `<path d="M40 62Q26 98 30 112H90Q94 98 80 62Z" fill="${dark}" ${K2(2.5)}/>` + back;
+  if (ft >= 5 || rk >= 6) back = `<path d="M40 66Q8 40 4 74Q16 70 22 80Q26 70 36 76ZM80 66Q112 40 116 74Q104 70 98 80Q94 70 84 76Z" fill="${ft >= 5 ? '#FFF3B0' : '#fff'}" ${K2(2)}/>` + back;
+  // line and sub-line pieces: only what sits behind or around the body (the face and chest pieces were made for the round slime)
+  if (o.fb && ft >= 3) {
+    back = branchArt(o.fb, c)[0] + back;
+    pathNodes(o.fb, o.fs, ft).slice(1).forEach((x, i) => { const [pb, pf] = subArt(x.art[0], x.art[1]); back = pb + back; front += pf; if (x.unique) back = `<ellipse cx="60" cy="62" rx="58" ry="55" fill="none" stroke="#FFB3C7" stroke-width="3"/><ellipse cx="60" cy="62" rx="53" ry="50" fill="none" stroke="${x.art[1]}" stroke-width="3"/>` + back; if (i === 1) back = `<ellipse cx="60" cy="62" rx="59" ry="56" fill="none" stroke="${x.art[1]}" stroke-width="4" opacity=".75"/>` + back; });
+  }
+  const legs = form === 'rainbow' || form === 'unique' || form === 'luk'
+    ? `<path d="M40 84H80L86 108H34Z" fill="${form === 'unique' ? '#D8333F' : cloth}" ${K2(2.5)}/><path d="M46 106H56V112H44ZM64 106H74L76 112H64Z" fill="${INK}"/>`
+    : `<path d="M47 86H57V104H47ZM63 86H73V104H63Z" fill="${dark}" ${K2(2)}/><path d="M44 102H58V111H42ZM62 102H76L78 111H62Z" fill="#6E4424" ${K2(2)}/>`;
+  const torso = form === 'def'
+    ? `<path d="M38 60H82L84 90H36Z" fill="#C9CCD8" ${K2(2.5)}/><path d="M44 66H76V86H44Z" fill="${cloth}"/>`
+    : form === 'hp'
+      ? `<path d="M36 60Q60 54 84 60Q94 76 86 92H34Q26 76 36 60Z" fill="${cloth}" ${K2(2.5)}/>`
+      : form === 'shadow'
+        ? `<path d="M38 58H82L90 98H30Z" fill="#2A2240" ${K2(2.5)}/><path d="M54 60L60 72L66 60" fill="none" stroke="#FF4D6D" stroke-width="2"/>`
+        : `<path d="M40 60Q60 55 80 60L82 90H38Z" fill="${cloth}" ${K2(2.5)}/><path d="M54 60L60 70L66 60" fill="${lite}" ${K2(1.5)}/>`;
+  const belt = `<path d="M38 84H82" stroke="${INK}" stroke-width="6"/><path d="M38 84H82" stroke="${ft >= 3 ? '#D4A017' : '#6E4424'}" stroke-width="3.5"/><rect x="56" y="80" width="8" height="8" rx="1.5" fill="#FFD23F" ${K2(1.2)}/>`;
+  const arms = `<path d="M42 64Q32 74 32 86" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M42 64Q32 74 32 86" fill="none" stroke="${form === 'def' ? '#C9CCD8' : cloth}" stroke-width="7" stroke-linecap="round"/><path d="M78 64Q88 74 88 86" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M78 64Q88 74 88 86" fill="none" stroke="${form === 'def' ? '#C9CCD8' : cloth}" stroke-width="7" stroke-linecap="round"/><circle cx="32" cy="89" r="5" fill="${SKIN}" ${K2(2)}/><circle cx="88" cy="89" r="5" fill="${SKIN}" ${K2(2)}/>`;
+  const pads = ft >= 3 ? `<path d="M34 66Q34 54 46 58L44 70Q38 72 34 66ZM86 66Q86 54 74 58L76 70Q82 72 86 66Z" fill="${ft >= 5 ? '#FFD23F' : '#C9CCD8'}" ${K2(2)}/>` : '';
+  const head = `<rect x="55" y="54" width="10" height="8" fill="${SKIN}"/><circle cx="60" cy="38" r="22" fill="${SKIN}" ${K2(3)}/><ellipse cx="46" cy="48" rx="4" ry="2.5" fill="#FF6F91" opacity=".45"/><ellipse cx="74" cy="48" rx="4" ry="2.5" fill="#FF6F91" opacity=".45"/>`;
+  const aura = ft >= 5 ? `<ellipse cx="60" cy="62" rx="56" ry="54" fill="${cloth}" opacity=".16"/>` : '';
+  const sparkle = o.shiny ? STAR(104, 28, 7, '') + STAR(14, 50, 5, 'b') : '';
+  const shadow = o.noShadow ? '' : `<ellipse cx="60" cy="112" rx="28" ry="5" fill="rgba(51,40,74,.18)"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="blob-svg" aria-hidden="true">${shadow}<g class="blob-body">${aura}${back}${legs}${torso}${belt}${pads}${arms}${head}${hf}${brow}${eyes}${mouth}${H.wpn(c, ft)}${front}</g>${sparkle}</svg>`;
+}
 function blobSVG(color, st = 1, o = {}) {
   const form = o.form && FORM_ARCH[o.form] ? o.form : null;
   const SL = SECRET_LOOK[color], ft = o.ft || 0, rk = o.rk || 0;
   let c = form === 'shadow' ? SL.sc : form === 'unique' ? ['#FFF6C8', '#FFD23F', '#B98200'] : COLORS[color].c, id = 'g' + (++uid), mood = o.mood || 'idle', eyeC = form === 'shadow' ? SL.se : INK;
   const onPath = !!(form && ft >= 3 && o.fb && BRANCH[o.fb]); if (onPath && form !== 'rainbow') c = pathTint(c, o.fb, o.fs, ft);
+  if (form) return humanSVG(color, o, form, c, ft || 2, rk, mood, id);
   let eyes, mouth;
   if (mood === 'happy') { eyes = `<path d="M39 70Q46 60 53 70" ${SK}/><path d="M67 70Q74 60 81 70" ${SK}/>`; mouth = `<path d="M52 80Q60 92 68 80Z" fill="${INK}"/>`; }
   else if (mood === 'hurt') { eyes = `<path d="M40 61L51 67L40 73" ${SK}/><path d="M80 61L69 67L80 73" ${SK}/>`; mouth = `<path d="M53 85Q60 78 67 85" ${SK}/>`; }
