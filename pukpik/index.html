@@ -120,6 +120,14 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .me-card .bar.xp{height:7px}
 .me-card .bar span{position:absolute;inset:0;font:700 8px/7px var(--f-body);text-align:center;color:var(--ink)}
 .menu-row{position:absolute;top:84px;left:var(--gl);display:flex;gap:6px}
+.pet-hud{position:absolute;top:138px;left:var(--gl);display:flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--ink);border-radius:14px;box-shadow:0 2px 0 var(--ink);padding:4px 10px 4px 6px;cursor:pointer;font:600 12px var(--f-body);color:var(--ink);text-align:left}
+.pet-hud .pe{font-size:26px;line-height:1}
+.pet-hud .pm{font-size:18px;line-height:1;margin-left:-12px;margin-top:-18px;animation:petbob 1.6s ease-in-out infinite}
+.pet-hud .pinfo{display:flex;flex-direction:column;gap:1px;min-width:78px}
+.pet-hud .pinfo small{font:600 10px var(--f-body);opacity:.75}
+.pet-hud .bar.hunger{height:6px;border:1.5px solid var(--ink);border-radius:9px;background:#fff;overflow:hidden}
+.pet-hud .bar.hunger i{display:block;height:100%;background:#FFB347}
+@keyframes petbob{50%{transform:translateY(-3px)}}
 .ibtn{width:39px;height:39px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);box-shadow:0 3px 0 var(--ink);font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;position:relative;padding:0}
 .ibtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .ibtn .dot{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--hp);border:2px solid var(--paper)}
@@ -283,6 +291,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
         </div>
       </div>
     </div>
+    <button class="pet-hud" type="button" id="petHud" hidden aria-label="สัตว์เลี้ยง"></button>
     <div class="menu-row">
       <button class="ibtn" type="button" id="bBag" aria-label="กระเป๋า">🎒<kbd class="kb">I</kbd></button>
       <button class="ibtn" type="button" id="bChar" aria-label="ตัวละคร">🐣<kbd class="kb">C</kbd></button>
@@ -1392,7 +1401,34 @@ const PET_FOODS = {
   sweets: { name: 'เค้กหวาน', icon: '🍰', price: 25, tags: { sweet: 1, cute: 1 } },
   veg:    { name: 'ผักกรอบ', icon: '🥕', price: 12, tags: { nature: 1.5 } },
   bugs:   { name: 'แมลงกรุบกรอบ', icon: '🦗', price: 15, tags: { wild: 1, dark: .5, sly: .5 } },
+  mushroom: { name: 'เห็ดหอมป่า', icon: '🍄', price: 18, tags: { nature: 1, dark: 1 } },
+  egg:      { name: 'ไข่ดาว', icon: '🍳', price: 18, tags: { light: 1, loyal: .5 } },
+  cheese:   { name: 'ชีสเยิ้ม', icon: '🧀', price: 22, tags: { sly: 1, cute: .5 } },
+  shrimp:   { name: 'กุ้งเผา', icon: '🍤', price: 24, tags: { water: 1, fire: .5 } },
+  candy:    { name: 'ลูกอมสายรุ้ง', icon: '🍬', price: 30, mood: 'excited', tags: { sweet: 1, light: 1, cute: .5 } },
+  pepper:   { name: 'พริกไฟนรก', icon: '🌶️', price: 28, mood: 'excited', burn: 1, tags: { fire: 2, wild: .5 } },
+  icecream: { name: 'ไอศกรีมหิมะ', icon: '🍦', price: 26, mood: 'happy', tags: { cool: 1.5, sweet: .5 } },
+  milk:     { name: 'นมอุ่นๆ', icon: '🥛', price: 20, cure: 1, mood: 'sleepy', tags: { loyal: 1, cute: .5 } },
+  steak:    { name: 'สเต็กมังกร', icon: '🥩', price: 0, rare: 1, mood: 'excited', tags: { beast: 2, fire: 1, wild: 1 } },
+  peach:    { name: 'ท้อสวรรค์', icon: '🍑', price: 0, rare: 1, mood: 'excited', tags: { light: 2, sweet: 1, nature: 1 } },
 };
+// Pet moods (Seal Online style): food, hunger and care swing the mood; the mood changes how the pet fights and helps.
+const PET_MOODS = {
+  normal:   { th: 'ปกติ', e: '🙂', atk: 1 },
+  happy:    { th: 'อารมณ์ดี', e: '😊', atk: 1.15, aff: 1.3 },
+  excited:  { th: 'คึกคัก!', e: '🤩', atk: 1.35, spd: .7, drop: .08 },
+  full:     { th: 'อิ่มแปล้', e: '😌', atk: 1, spd: 1.2, slowHunger: 1 },
+  sleepy:   { th: 'ง่วงนอน', e: '😪', atk: 0, heal: 1 },
+  hungry:   { th: 'หิว', e: '🥺', atk: .8 },
+  starving: { th: 'หิวจนไม่มีแรง', e: '😭', atk: 0 },
+  sulky:    { th: 'งอน', e: '😤', atk: .6, refuse: .4 },
+  sick:     { th: 'ท้องเสีย', e: '🤢', atk: 0, refuse: .7 },
+};
+// Which foods monsters in each map drop (index = map). Bosses may drop dragon steak; secret and unique monsters, heavenly peaches.
+const FOOD_ZONE = [['veg', 'fruit', 'bugs'], ['meat', 'mushroom', 'fruit'], ['mushroom', 'bugs'], ['pepper', 'meat'], ['cheese', 'sweets'], ['meat', 'egg'],
+  ['fish', 'icecream'], ['bugs', 'mushroom'], ['candy', 'sweets', 'milk'], ['candy', 'cheese'], ['fruit', 'meat', 'egg'], ['candy', 'milk'],
+  ['fish', 'shrimp'], ['meat', 'egg'], ['meat', 'fruit', 'egg'], ['cheese', 'bugs'], ['icecream', 'milk'], ['sweets', 'candy'],
+  ['bugs', 'mushroom', 'fruit'], ['cheese', 'milk'], ['pepper', 'meat'], ['candy', 'shrimp'], ['fruit', 'milk', 'egg'], ['candy', 'steak', 'peach', 'milk']];
 const PET_ACCS = {
   bow:    { name: 'โบว์ชมพู', icon: '🎀', price: 300, tags: { cute: 1.5 } },
   shades: { name: 'แว่นดำ', icon: '🕶️', price: 400, tags: { cool: 1.5, sly: .5 } },
@@ -1450,7 +1486,7 @@ const PET_TAGS = ['fire', 'water', 'nature', 'light', 'dark', 'thunder', 'cute',
 const PET_EVO_LV = { 2: 10, 3: 25 }, PET_EVO_AFF = { 2: 40, 3: 70 }, PET_LV_CAP = 50;
 const petXpNeed = lv => Math.round(10 * Math.pow(lv, 1.5));
 function newPet() {
-  const pers = pick(Object.keys(PET_PERS)), foods = Object.keys(PET_FOODS);
+  const pers = pick(Object.keys(PET_PERS)), foods = Object.keys(PET_FOODS).filter(k => !PET_FOODS[k].rare);
   const likes = [], dislikes = [];
   // likes lean on personality but are not fixed: 70% from the personality list, else any food
   while (likes.length < 2) { const f = Math.random() < .7 ? pick(PET_PERS[pers].likes) : pick(foods); if (!likes.includes(f)) likes.push(f); }
@@ -2086,9 +2122,11 @@ function hudStatic() {
   $('#hudFace').innerHTML = blobSVG(P.color, stageOf(P.lv), { shiny: P.shiny, form: P.form, ft: P.formTier, fb: P.formBranch, fs: P.formSub, rk: rankOf(P.lv), noShadow: true });
   updateFormBtn();
   updateSkillBar();
+  updatePetHud();
 }
 let hudKey = '';
 function updateHud(force) {
+  updatePetHud();
   const k = [P.hp, maxHp(), P.mp, maxMp(), P.xp, P.lv, P.gold, P.items.potion, P.points, P.sp, P.name].join('|');
   if (!force && k === hudKey) return; hudKey = k;
   $('#hudName').textContent = P.name; $('#hudLv').textContent = 'Lv ' + P.lv;
@@ -2186,6 +2224,25 @@ const activePet = () => P && (P.pets || []).find(pt => pt.id === P.petActive) ||
 const petPers = pt => PET_PERS[pt.pers];
 const petPower = pt => (6 + pt.lv * 2.4) * [0, 1, 1.7, 2.6][pt.stage] * (petPers(pt).atk || 1) * (1 + pt.aff / 250);
 function petEmote(e) { petObj.emo = e; petObj.emoT = 2.2; }
+// A timed mood from food or care wins; otherwise hunger decides.
+function petMood(pt) {
+  if (pt.mood && pt.mood.until > Date.now()) return pt.mood.k;
+  if (pt.hunger < 10) return 'starving';
+  if (pt.hunger < 30) return 'hungry';
+  if (pt.hunger > 95) return 'full';
+  if (pt.aff >= 70) return 'happy';
+  return 'normal';
+}
+function setMood(pt, k, secs) { pt.mood = { k, until: Date.now() + secs * 1000 }; if (pt.id === P.petActive) { petEmote(PET_MOODS[k].e); updatePetHud(); } }
+function updatePetHud() {
+  const el = $('#petHud'); if (!el) return;
+  const pt = P && activePet(); el.hidden = !pt || !started;
+  if (!pt) return;
+  const md = PET_MOODS[petMood(pt)], f = PET_FORMS[pt.sp];
+  const key = pt.sp + md.e + Math.round(pt.hunger / 5) + pt.lv;
+  if (el.dataset.k === key) return; el.dataset.k = key;
+  el.innerHTML = `<span class="pe">${f.e}</span><span class="pm" title="${md.th}">${md.e}</span><span class="pinfo"><b>${esc(pt.name || f.name)} <small>Lv ${pt.lv}</small></b><small>${md.th}</small><span class="bar hunger"><i style="width:${pt.hunger}%"></i></span></span>`;
+}
 function petGainXp(pt, x) {
   if (!pt || pt.lv >= PET_LV_CAP) return;
   pt.xp += Math.round(x * (petPers(pt).exp || 1));
@@ -2199,16 +2256,18 @@ function petTick(dt) {
   const k = Math.min(1, dt * (pt.pers === 'clingy' ? 8 : pt.pers === 'lazy' ? 3 : 5)); petObj.x += (tx - petObj.x) * k; petObj.y += (ty - petObj.y) * k;
   petObj.emoT = Math.max(0, petObj.emoT - dt);
   const per = petPers(pt);
-  petObj.hungerT += dt; if (petObj.hungerT >= 25) { petObj.hungerT = 0; pt.hunger = Math.max(0, pt.hunger - (per.hunger || 1)); if (pt.hunger <= 0) pt.aff = Math.max(0, pt.aff - 1); }
-  if (pt.hunger < 15) { if (!petObj.emoT && Math.random() < dt * .3) petEmote('💢'); return; }
-  if (!petObj.emoT && Math.random() < dt * .05) petEmote(per.emo);
+  const mk = petMood(pt), md = PET_MOODS[mk];
+  petObj.hungerT += dt; if (petObj.hungerT >= 25) { petObj.hungerT = 0; pt.hunger = Math.max(0, pt.hunger - (per.hunger || 1) * (md.slowHunger ? .5 : 1) * (pt.burn > 0 ? 2 : 1)); if (pt.burn > 0) pt.burn--; if (pt.hunger <= 0) pt.aff = Math.max(0, pt.aff - 1); updatePetHud(); }
+  if (!petObj.emoT && Math.random() < dt * (mk === 'normal' ? .05 : .12)) petEmote(mk === 'normal' ? per.emo : md.e);
+  if (md.heal) { petObj.healT -= dt; if (petObj.healT <= 0) { petObj.healT = 6; if (P.hp < maxHp()) { const g = Math.round(maxHp() * .02); P.hp = Math.min(maxHp(), P.hp + g); floatAt(me.x, me.y - 30, '+' + g, '#C9E7FF', 13); } } }
+  if (!md.atk) return;
   if (per.heal) { petObj.healT -= dt; if (petObj.healT <= 0) { petObj.healT = 10; if (P.hp < maxHp()) { const g = Math.round(maxHp() * .03 * (1 + pt.stage * .3)); P.hp = Math.min(maxHp(), P.hp + g); floatAt(me.x, me.y - 30, '+' + g, '#FFB3C7', 14); petEmote('💗'); } } }
   petObj.cd -= dt;
   if (petObj.cd > 0) return;
   const m = nearestMon(120);
   if (!m) { petObj.cd = .3; return; }
-  petObj.cd = (pt.pers === 'playful' ? rnd(.9, 2.3) : 1.6) * (per.spd || 1) / (1 + (pt.stage - 1) * .15);
-  const d = dmgCalc(petPower(pt), m.def, 1, pt.lv + (pt.stage - 1) * 5, m.lv);
+  petObj.cd = (pt.pers === 'playful' ? rnd(.9, 2.3) : 1.6) * (per.spd || 1) * (md.spd || 1) / (1 + (pt.stage - 1) * .15);
+  const d = Math.max(1, Math.round(dmgCalc(petPower(pt), m.def, 1, pt.lv + (pt.stage - 1) * 5, m.lv) * md.atk));
   myHits.set(m.id, nowS());
   fx.push({ type: 'bolt', x: petObj.x, y: petObj.y - 14, x2: m.rx, y2: m.ry - 12, t: 0, dur: .25 });
   floatAt(m.rx + 10, m.ry - 18, d, '#FFB3C7', 14);
@@ -2696,7 +2755,11 @@ function reward(s, x, y, mlv, tierOverride) {
       if (per.gold && Math.random() < .5) dropLoot('gold', x, y, Math.max(1, Math.round(s.gold * per.gold)));
       if (per.drop && Math.random() < per.drop) dropLoot('item', x, y, makeItem(tier, 0));
     } }
-  if (Math.random() < .06) dropLoot('petfood', x, y, pick(Object.keys(PET_FOODS)));
+  { const fz = FOOD_ZONE[clamp(s.zi || 0, 0, FOOD_ZONE.length - 1)] || FOOD_ZONE[0];
+    if (Math.random() < .1) dropLoot('petfood', x, y, pick(fz.filter(f => !PET_FOODS[f].rare)));
+    if (s.boss && Math.random() < .5) dropLoot('petfood', x, y, 'steak');
+    if ((s.sec || s.uniq) && Math.random() < .8) dropLoot('petfood', x, y, 'peach');
+    const pm = activePet() && PET_MOODS[petMood(activePet())]; if (pm && pm.drop && Math.random() < pm.drop) dropLoot('petfood', x, y, pick(fz)); }
   if (s.boss && Math.random() < .3) dropLoot('stone', x, y, pick(Object.keys(PET_STONES)));
   if (Math.random() < (s.boss ? .4 : s.sec ? 1 : .025) * (1 + uqFx('drop'))) dropLoot('rune', x, y, rollRune(mlv, s.boss || s.sec ? .3 : 0));
   const xp = Math.max(1, Math.round(s.xp * xpScale(mlv) * (1 + uqFx('xp'))));
@@ -2877,6 +2940,7 @@ $('#bBag').onclick = () => { sfx('tap'); openBag(); };
 $('#bChar').onclick = () => { sfx('tap'); openChar(); };
 $('#bChat').onclick = () => { sfx('tap'); openChat(); };
 $('#bHelp').onclick = () => { sfx('tap'); openHelp(); };
+$('#petHud').onclick = () => { sfx('tap'); openPets(); };
 $('#bEnc').onclick = () => { if (encounterOffer) enterEncounter(encounterOffer.k); };
 $('#bTalk').onclick = () => { sfx('tap'); if (DG) { if (!DG.clear) leaveDungeon('ออกจากดันเจี้ยนแล้ว (ไม่ได้รับรางวัล)'); return; } const n = nearNpc(); if (n) n.open(); else if (nearWarp() >= 0) openWarps(); };
 $('#bSkills').onclick = () => { sfx('tap'); openSkills(); };
@@ -3145,7 +3209,7 @@ function renderPets(el) {
       <div><div style="font:700 19px var(--f-display)">${f.name} <span class="chip">Lv ${pt.lv}</span></div>
         <div class="muted" style="font-size:13px">ร่างขั้น ${pt.stage} · นิสัย <b>${per.th}</b> ${per.emo} · ${per.desc}</div>
         <div style="font-size:13px;margin-top:4px">ความผูกพัน ${hearts(pt.aff)} <span class="muted">${Math.round(pt.aff)}/100</span></div>
-        <div class="bar-row" style="margin-top:4px"><span>อิ่ม</span><div class="bar hp"><i style="width:${pt.hunger}%"></i></div><span class="v">${Math.round(pt.hunger)}%</span></div>
+        <div style="font-size:13px;margin-top:2px">อารมณ์: <b>${PET_MOODS[petMood(pt)].e} ${PET_MOODS[petMood(pt)].th}</b></div><div class="bar-row" style="margin-top:4px"><span>อิ่ม</span><div class="bar hp"><i style="width:${pt.hunger}%"></i></div><span class="v">${Math.round(pt.hunger)}%</span></div>
         <div class="bar-row"><span>EXP</span><div class="bar xp"><i style="width:${pt.lv >= PET_LV_CAP ? 100 : pt.xp / petXpNeed(pt.lv) * 100}%"></i></div><span class="v">${pt.lv >= PET_LV_CAP ? 'MAX' : `${pt.xp}/${petXpNeed(pt.lv)}`}</span></div>
       </div></div>
     ${pt.id !== P.petActive ? `<button class="btn primary block" type="button" data-pet="active">ให้ตัวนี้ออกเดินทางด้วย</button>` : '<p class="muted" style="margin:0;font-size:12px">ตัวนี้กำลังเดินทางด้วย ช่วยตีมอนและได้ EXP เมื่อคุณปราบมอน (ต้องไม่หิว)</p>'}
@@ -3161,8 +3225,11 @@ function renderPets(el) {
 }
 function feedPet(pt, k) {
   if (!(P.petItems.food[k] > 0)) return;
-  if (pt.hunger >= 95) { petMsg = `${PET_FORMS[pt.sp].name} อิ่มแล้ว ไม่ยอมกิน`; return; }
+  const fd = PET_FOODS[k], mk0 = petMood(pt);
+  if (pt.hunger >= 95 && !fd.cure) { petMsg = `${PET_FORMS[pt.sp].name} อิ่มแปล้ ไม่ยอมกินแล้ว 😌`; if (pt.id === P.petActive) petEmote('😌'); return; }
+  if (PET_MOODS[mk0].refuse && !fd.cure && !fd.rare && Math.random() < PET_MOODS[mk0].refuse) { petMsg = `${PET_FORMS[pt.sp].name} ${PET_MOODS[mk0].e} สะบัดหน้าหนี ไม่ยอมกิน`; if (pt.id === P.petActive) petEmote(PET_MOODS[mk0].e); return; }
   P.petItems.food[k]--; pt.fed[k] = (pt.fed[k] || 0) + 1; act('feed');
+  pt.streak = pt.lastFood === k ? (pt.streak || 0) + 1 : 1; pt.lastFood = k;
   const like = pt.likes.includes(k), hate = pt.dislikes.includes(k), per = petPers(pt);
   if ((like || hate) && !pt.known.includes(k)) pt.known.push(k);
   pt.hunger = Math.min(100, pt.hunger + (like ? 35 : 25));
@@ -3170,6 +3237,15 @@ function feedPet(pt, k) {
   petMsg = like ? `${PET_FORMS[pt.sp].e} ชอบ${PET_FORMS && PET_FOODS[k].name}มาก! 💕` : hate ? `${PET_FORMS[pt.sp].e} ทำหน้าเบ้… ไม่ชอบ${PET_FOODS[k].name}` : `${PET_FORMS[pt.sp].e} กิน${PET_FOODS[k].name}หมดเกลี้ยง`;
   if (pt.id === P.petActive) petEmote(like ? '💕' : hate ? '😖' : '😋');
   sfx(like ? 'heal' : 'tap');
+  // mood swings: sick from the same food 4 times in a row, sulky from hated food, then the food's own mood, liked food cheers up
+  if (fd.cure && (mk0 === 'sick' || mk0 === 'sulky')) { setMood(pt, 'sleepy', 40); petMsg += ' · หายป่วยแล้ว หลับปุ๋ย 😪'; }
+  else if (pt.streak >= 4 && !fd.cure) { setMood(pt, 'sick', 120); petMsg += ' · กินซ้ำเกินไปจนท้องเสีย! 🤢 (นมอุ่นๆ ช่วยได้)'; }
+  else if (hate) { setMood(pt, 'sulky', 90); petMsg += ' · งอนแล้ว 😤'; }
+  else if (fd.mood) { setMood(pt, fd.mood, fd.rare ? 180 : 90); petMsg += ` · ${PET_MOODS[fd.mood].th} ${PET_MOODS[fd.mood].e}`; }
+  else if (like) { setMood(pt, 'happy', 120); petMsg += ' · อารมณ์ดีมาก 😊'; }
+  if (fd.burn) pt.burn = 4;
+  if (fd.rare) { pt.aff = clamp(pt.aff + 10, 0, 100); petGainXp(pt, 40 * pt.lv); }
+  updatePetHud();
 }
 // Evolution: every candidate form is scored from the pet's whole story, then dice are rolled.
 function evolvePet(pt, stoneKey) {
