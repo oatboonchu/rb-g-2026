@@ -357,11 +357,9 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
    A 3px ring built from four one-axis shadows gives square panels with notched corners, like 16-bit RPG windows.
    Latin letters and digits use Pixelify Sans; Thai has no pixel font so it falls back to Mali. */
 :root{--pxr:0 -3px 0 0 var(--ink),0 3px 0 0 var(--ink),-3px 0 0 0 var(--ink),3px 0 0 0 var(--ink);--pxr2:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink);--pxhi:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(51,40,74,.14)}
-.panel,.me-card,.modal,.hotbar,.btn,.gold,.online,.talk,.formbtn,.x{border:0!important;border-radius:0!important;box-shadow:var(--pxr),0 6px 0 0 rgba(51,40,74,.3)!important}
-.btn,.x{box-shadow:var(--pxr),var(--pxhi),0 6px 0 0 rgba(51,40,74,.3)!important}
-.btn:active:not(:disabled),.x:active{transform:translateY(3px);box-shadow:var(--pxr),var(--pxhi)!important}
-.btn.sm{box-shadow:var(--pxr2),var(--pxhi),0 4px 0 0 rgba(51,40,74,.3)!important}
-.modal{box-shadow:var(--pxr),0 8px 0 0 rgba(51,40,74,.35)!important}
+.panel,.me-card,.hotbar,.gold,.online,.talk,.formbtn,.x{border:0!important;border-radius:0!important;box-shadow:var(--pxr),0 6px 0 0 rgba(51,40,74,.3)!important}
+.x{box-shadow:var(--pxr),var(--pxhi),0 6px 0 0 rgba(51,40,74,.3)!important}
+.x:active{transform:translateY(3px);box-shadow:var(--pxr),var(--pxhi)!important}
 .panel{background:var(--paper)}
 .hotbar{background:rgba(51,40,74,.72)}
 .hotbar .abtn{border:0!important;border-radius:0!important;box-shadow:var(--pxr2),var(--pxhi),0 4px 0 0 rgba(0,0,0,.35)!important}
@@ -373,6 +371,43 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .slot{border-width:3px}
 .chip{border-width:2px}
 .kb{border-radius:2px!important}
+
+/* ---------- wooden window, parchment slots and wooden buttons: hand-made pixel 9-slice pieces (sprites/ui/) ---------- */
+.modal{border:32px solid transparent!important;border-radius:0!important;border-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAEZklEQVR4AdSZzYtPURjHT/ISEkkkCykhUmoslBTKZsrGgo2yk6W1slKylBX/gGJho2yUlJTyktKIEpFJwzR5achL8fv8pu+d5z733HvP+c0dzWi+85znOd/n5XvuHb+ZexcMbRv+O5+xIPT+nT2yMFw6uXreoTd66Atg8fzVh5CDa7ceZ/Gpffv+s+BB/NP41+xa9GfuQgDO5TtLggfxmWJ0bDwA6mxYtyZYELOAJ/hZ8C2XdUkAgUcPj4dH1yf7wO8CTQPb+gwunxzWbfNUBIQ3V8gLI09e9G3bN5oKlqsY1saz15F5qLl65eJweMfo9M+ALczwo+/GbCh7zQkKbclPX76t3GI2x89D3Ykvv8LNkQ1VAbuPLg8nLgyFM1eHbY3aNcWEWlJvg1MTem7pa9fWjcXPRWmj57TNU7qFTh38GTzUFNurV/vFvhAjSSQ2tm9jqsMt4uexPNYlAQQEFcGnKWBdB/aFOk5qXHWwbTm1AkgWYkX4IbIiY5yuY+qHVe2oAAiCiN7yQySB4mI9r0tf/bCqGxUAQRCxyYqLbeLNxl5UQBeNuBpCF/XqahQC7j19G3JAwRifoYm//jAZBPwm3Lj7vLE3NQXV+fz9NyNMfw7s27Ux5IDskYktwYMPFx9r84/s397Ym1tT0Iyrli1ihGkBfW+Abw8eXAwzgW3JKVs/ZV3cQinkucjJFpBySj++fUzSmsprKlYSwHBCUxJ7fJBhY1i6Ym0sXIl5Hvd5hdQSKAQwOAWElrw5s10IaJ9oioHAqdXsfudAUzpkC0gpajm593nq4OpRCMg9WX4XUpEmq/s8V0isZkxcISCW0GVMQlJrph5otoDYKaQOlcJLHVy1sgUoMdWm3Dr2b2LVjR1UTFwnAjSkrIbo2iJK0OdQSYA2sXXNY6eg+1vW5sZidj93rf76T6QkgE0ht/AgfF0xnkr4fObwsZhfEhAj2BhXRrDxQdepV6epZ5YATkXIHVqnnZPH4PDVEysfCwoBIhPMwZ49p0MKDhw6H+XZXswAbIx1LEYcFAJwtm9eH1IBP+WdAg+n2njUOrR3ZwCsGRiwZh5Z1sKx4SHC5b/IeFZfB/tcHw7Z2Dak8OCoPmtuFYH6xLAWlfcDJECsA/uC5XBSgo3XrcXFWo5qY22cdSxGHJRuIYp6QGoCxYUYjz0bxxds3K/tHH7P+iUBKmytJXe91pD6VUI+fVJnKAkgsUtoIFlfW0PyQaY11vKUi7VxrUsCeAflISKWIgJ+GxjGIsannq6A32cWnjMJ+J5TEsCmfydFA+LAD8OewP4goKauQCzfz+M5FQH+HRkNfJJ89gTFOreRd2S2R1VAb9e+k9IJY3tbaV8ds+w8vnRFgH8npRPG+uT/4ft5fM+SAP8+Cl8JXAFBsdmw6oGlv4fvWQggQfAkfK6AgJ8C1cOm8OGoBxa/DYUAPcvH6hl8k6Vw0z571BLw65BSy+eSA/oCzt34U3nO3/ZM//77Tdk5dTUH7Y+AfwAAAP//1sn6yQAAAAZJREFUAwBOKSBsK7Uw3gAAAABJRU5ErkJggg==) 16 fill / 32px round!important;background:none!important;box-shadow:0 10px 0 rgba(23,17,42,.35)!important;padding:2px 4px 6px!important;image-rendering:pixelated;gap:10px}
+.modal>.h{font-size:22px;color:#4A2E1A;text-shadow:0 2px 0 rgba(255,255,255,.6)}
+.modal .x{top:0;right:0;width:36px;height:36px;z-index:2;background:#C0392B;color:#FFF3E0;font-size:16px}
+.btn{border:14px solid transparent!important;border-radius:0!important;border-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAgUlEQVR4AeySsQmAQAxFPzeHjVb2lm7gRC7iBuIW2tm4gKCFIO6hl6tyVZrEKgcPwl24Hx4JTd29lgTEM/UVNGmLC0T8GimACiuygP24oQEfNgvgD1q1B4gmXZErEg2IDb5Frkg0IDakLRrGGcSyndCAp6YAfqFd/xOwPiUsIBsfAAAA//8Fs4zKAAAABklEQVQDAP3Xx5FJG2T6AAAAAElFTkSuQmCC) 7 fill / 14px stretch!important;background:none!important;box-shadow:0 4px 0 rgba(51,40,74,.35)!important;color:#FFF6E4!important;text-shadow:0 2px 0 #5E3A24;padding:0 6px!important;min-height:44px}
+.btn.primary,.btn.on{border-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAfklEQVR4AeySIQ6AMAxFf3YaBA6HQnMfToEjHAJuMYVCkV2CU8A61amadqpLXtJszX7z0jB082dJQD73MUGTZUwg8tcoAVRYUQW8T4QGfNgqgD9o1R4gmnRFrkg0IDb4Frki0YDYULbo3HYQMSZowFNLAL/QrtsErFcPC8jGDwAA///Z8wj5AAAABklEQVQDADuMx5F61BRxAAAAAElFTkSuQmCC) 7 fill / 14px stretch!important;color:#3B2410!important;text-shadow:0 1px 0 rgba(255,255,255,.5)}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 rgba(51,40,74,.35)!important}
+.btn:disabled{filter:grayscale(.85) brightness(1.1);opacity:.6}
+.btn.sm{min-height:34px;font-size:13px;border-width:10px!important;border-image-width:10px!important;padding:0 4px!important}
+.slot{border:12px solid transparent!important;border-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAkElEQVR4AeySsQmAMBBFPw4gYif2op2gKAguIK5gpY21I7iGI1m4kXoBIcHiiiTdBR4JSbh3fC6o8uH2SYB3rVMCl5zXAeItDSWggy8MQde3cIHerCGghzCKYQvV+fgJvgdXuwjYJCUiiYhNgP0gUyQRsQmwH9QUzdsOomhGpFlnjW5VAv3C9VkJ6nKBD6jZBwAA///65MgiAAAABklEQVQDANDyaZEVQQZ1AAAAAElFTkSuQmCC) 6 fill / 12px stretch!important;background:none!important;box-shadow:none!important;border-radius:0!important;font-size:24px}
+.slot.empty{opacity:.75}
+.slot.r1{outline:3px solid #2FAE62;outline-offset:-3px}.slot.r2{outline:3px solid #3F86F5;outline-offset:-3px}.slot.r3{outline:3px solid #A155E8;outline-offset:-3px}.slot.r4{outline:3px solid #FF8A1F;outline-offset:-3px}.slot.r5{outline:3px solid #D4A017;outline-offset:-3px}
+.slot.sel{outline:3px solid #FFD23F!important;outline-offset:-1px;filter:drop-shadow(0 0 4px #FFD23F)}
+.slot .lv{bottom:-9px;right:-8px;font:700 10px var(--f-display);color:#FFF6E4;background:#4A2E1A;padding:0 3px}
+.slot .ghost{filter:brightness(0) opacity(.18)}
+/* bag layout */
+.sec{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 6px;font:700 15px var(--f-display);color:#4A2E1A}
+.sec b{background:#8A3B2B;color:#FFF3E0;padding:2px 12px 3px;clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 50%,calc(100% - 6px) 100%,6px 100%,0 50%);text-shadow:0 1px 0 #4A1A10}
+.sec small{font:700 12px var(--f-display);color:#8A6A4A}
+.eqs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.eqs>div{display:flex;flex-direction:column;align-items:center;gap:3px}
+.eqs>div>.slot{width:100%}
+.eqs small{font:600 11px var(--f-body);color:#6E5436}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px}
+.stats span{display:flex;align-items:center;justify-content:center;gap:3px;font:700 14px var(--f-display);color:#3B2410;background:#EADBB9;padding:3px 2px;box-shadow:var(--pxr2)}
+.stats .hic{font-size:16px}
+.cons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cons>div{display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto 1fr;gap:0 8px;padding:6px;background:#F3E6C8;box-shadow:var(--pxr2)}
+.cons .slot{grid-row:1/4;width:52px;height:52px;font-size:22px;cursor:default}
+.cons .n{position:absolute;right:-8px;bottom:-9px;font:700 12px var(--f-display);color:#FFF6E4;background:#4A2E1A;padding:0 4px}
+.cons b{font:700 13px var(--f-display);color:#3B2410;line-height:1.25}
+.cons em{font:500 11px/1.3 var(--f-body);color:#6E5436;font-style:normal}
+.cons .btn{justify-self:start;align-self:start;margin-top:4px;min-height:30px!important}
+.cons>div.none{opacity:.55}
+.bag,.eqs{grid-template-columns:repeat(var(--cols,6),minmax(0,1fr))!important}.eqs{--cols:5}
+@media (max-width:480px){.cons{grid-template-columns:1fr}.slot{border-width:8px!important;border-image-width:8px!important}.bag{gap:5px!important}}
 </style>
 
 <div id="app">
@@ -2296,6 +2331,7 @@ function artImg(url) { if (!url) return null; let im = artImgs.get(url); if (!im
 const skArtUrl = e => ART_URL[SKILL_ART[e]] || null;
 const monIco = k => MON_ART[k] ? `<img class="mon-ico" src="${MON_ART[k]}" alt="">` : FOES[k].e;
 const col = () => COLORS[P.color];
+const STAT_ICO = { hp: '<i class="hic" style="background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACkklEQVR4nO2WT0gUcRTHPzM7aoIr9ofCVWvByo1dyFooUREsNAIvVrdCNImgrJO3oKigS1GnThJ0KAg6dqtAkoogigItW7I/QrsdomwtdtzZnV+HZUx35jczarf2c5vfe/Pe2+/vzXsLJUr87yheDt2tXQLAnMsCkBU5xl4+cXzP8l3o//DFI9ccrsZ4ZIfoWxvGSGToidcBIDSVU6mELXDHzjbRYlRytG4TAHrA5Py3aX4HVO4/fSDNIzW0x1pEX3UDHdXVNpseMDmdSswr0bGzTRysXM++4BqbH7DItxhNVkAmNyczseXMEYYv3qA8rgkoXEsx9dcGAXg/PCKNA6A6HXa3don9PzYAMJZOM5ZOL7JPX7rDnqtDXN/aBMBAsMH26y02XznGSFN0UX94FuCFkjPJZw3qzvZzuKp2OSH+xnI67G7tEoeoYXpqlo2Nwflzp36QoQdMKhSNhssDABwYPOfYjK4KLEwO2K7CCyv5lws3pT7LugI/bO9cRT5rePpJC5j6OOt47leF16M6gGcR0jnQHI6JE6FtALZeAH/9IDQVNahwMvFOOhGlc8BKvFIyaQO1olxqdx3F0VBE9ObD88/FKoC7EkJTOZ58I52C4KMJDRVG1ZRjcjeEVghdrriK7L0No6GIiGu1tNevc/UrVkIPmPRPPOfVp/Hlb0OL5nBMGNkcPSJMWWG/uCqSUXLc0797rmLfBUBBiRpRQadZS2OkBsPI23x2ra4CYOjzWx6PP/MV2/cgmkhOKjNKYUNOTc5Ikw9//eA7OSxBAYtoKCKsq1h4DWVlAW7/SvmSfUUFyIq4pSddPzcZ7t+IhInkpEII0aOGySg57v5MLUn2f0Z7rEX07t7r+EejRAm//AEFterIeiIiwAAAAABJRU5ErkJggg==)"></i>', def: '<i class="hic" style="background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEY0lEQVR4nO2X308cVRTHP+Aduhs1kSA/SgwigQYUEFbZFJtulSjUNKZGY/rouzUmNAURXQhsgGobefI/0CbYQCF9sk2I0LQQNuySXQIb+SFuAgLa0IIWwlx2fRhm2GH2R4gPfek3mWT33nvO+Z7vnHvuHXiKJ4y0oxrUOWqj+m8hFMv87YnRI/kURw3c0uExxq55OrHbbFxsaj5Y6OmMHoVISgL1TldUSpVLrW6+7WznRl8fAIpQ2NraYmtryxgD2N7ZprHVDd8TtdtsDI3eTkok6WS90xW97G7jSrsbVUoqHDUEfV7LOkUIVCkBOOk6w+T9e6hS4u7q4Yer3yUlkXDivKs+erGpmRt9fdhtdvwTY8Zc2fHnkHsRi83c+mPjd4WjBlWqfHLhQlIS6Ykyb/ymjcH+ARShML2f9bk3iwEoyM2hKD/P8uhrFCEMpQb7B/j0s8+pd7qi8WLFJSClivtyIwBBn5e68gJefkEgpZZ1aClMcVmW8Rh2qvYa6qsKaagqIhSYQpUqvd0etne244WyEqhz1Ebffv+cEdxus7P29walhQVxHQAIkU5xWRZCERSWZFJYkokQ6ShCEApMAfDeB+dNWzipAnduDVHhqAHAVXocQAsgtOUZGRkJyeiQMkJduUa62lnLnVtDcfuGhcClVjfVzlpTtZ86rb37wpJMAHZ3d1MSKC7LYnFlFQD/xBgVjhq+aG5JTkAvFLm/pRqqigCYn32QMmAs+m5OAHCiIN8oXCG0lnP4NVgU2N0PHptJLPRCS4ZnbVappYxvZ+mE/T/9SPiP343/m+s7ZgMldfdueOe1/aARo26CPi+qVI2GpcOiwF9rq9htdovT4V9nNacpFPD7V5jwhk1jUpUoQrAwM40izAlY0imtrEJKSdDn3S8ircHIvQhLcxsIRZi25NLcBmCuk9wXM5mffUB4bV0LoghKK6sBCAX8pngmBaRUAXj37NkDhvsSFuXnGY1ID6gHjZX6edsxk52ODz/+yCjEhAQ0Z5Lebu3InVt/jJQRYzvFw+KyNvdbeOWQnwhyL8Lsn/8A0N7cFNfeRGDYN5YW9HnJzsnTjlQwZEyEgtwcAOMs0BGrQGOrm5zsbPwTYwz7xkyHkkUBRQheKnzFUCEYfqhlurJqKBFaCh82M2EytMDi8iobm/8C0Nvt4URlpaUA4xIY9o2l6Z3ry7YO7HYbs8ubpjWxRZhIoWD4IY+kgrurhwpHDeOjI5bs4xLQoUqVocGbtF25it1uM531qV7LI6kgFEFLh4fB/oGka+MSuBvwpi3MTAPw8/Xrxj0wloSOY88oJkK/TC2iSonnWi+D/QOoUmV+Zpq7AW/cC0nKK1nxq+WEAn7DqX5PSAR3Vw+er78CtFMwFJhKekFNeXM9XVkTVYTgjbdOMT46wknXGWNu8v49hFB43ek0xsZHR0x3x0SZ60jZ2GMcRBUhWF89kFvv67FjoHW7VIF1/K8PEx1CKEipIoRy5A+Tp3ji+A+R0d1qBJVcIwAAAABJRU5ErkJggg==)"></i>', atk: '<i class="hic hic-eq-weapon-2"></i>', spd: '<i class="hic hic-eq-shoes-4"></i>', luk: '<i class="hic hic-eq-charm-0"></i>' };
 const consIcon = k => `<i class="hic hic-${k}"></i>`;
 const itemStat = (it, k) => Math.round((it.stats[k] || 0) * (1 + .08 * (it.en || 0)));
 function gearBonus(k) { let v = 0; for (const s of SLOTS) { const it = P.eq[s]; if (it) v += itemStat(it, k); } return v; }
@@ -3398,7 +3434,7 @@ function renderBag(el) {
       <div class="m-btns">${sel.eq ? `<button class="btn sm" type="button" data-act="unequip">ถอดออก</button>` : `<button class="btn sm primary" type="button" data-act="equip">สวมใส่</button><button class="btn sm" type="button" data-act="sell">ขาย <span class="coin" style="width:13px;height:13px;vertical-align:-2px"></span> ${itemPrice(it)}</button>`}</div>
     </div>`;
   }
-  const eq = SLOTS.map(s => P.eq[s] ? slotBtn(P.eq[s], selItem === P.eq[s].id ? ' sel' : '') : `<span class="slot empty">${SLOT[s].th}</span>`).join('');
+  const eq = SLOTS.map(s => `<div>${P.eq[s] ? slotBtn(P.eq[s], selItem === P.eq[s].id ? ' sel' : '') : `<span class="slot empty"><i class="hic hic-eq-${s}-0 ghost"></i></span>`}<small>${SLOT[s].th}</small></div>`).join('');
   if (sellMode) {
     for (const id of [...picked]) if (!P.bag.some(i => i.id === id)) picked.delete(id);
     const list = pickedItems(), gold = list.reduce((a, i) => a + itemPrice(i), 0), rare = list.filter(i => i.r >= 3).length;
@@ -3417,12 +3453,14 @@ function renderBag(el) {
     return;
   }
   const bag = P.bag.map(it => slotBtn(it, selItem === it.id ? ' sel' : '')).join('') + Array.from({ length: Math.max(0, 12 - P.bag.length) }, () => '<span class="slot empty"></span>').join('');
+  const runeN = Object.values(P.runes).reduce((a, b) => a + b, 0);
   el.innerHTML = `${detail}
-    <div><p class="eyebrow" style="margin-bottom:6px">ที่สวมอยู่ · ${STATS.map(k => `${STAT_SHORT[k]} ${st(k)}`).join(' · ')}</p><div class="eq-row">${eq}</div></div>
-    <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><p class="eyebrow">ของในกระเป๋า ${P.bag.length}/${BAG_MAX}</p>${P.bag.length ? `<button class="btn sm" type="button" data-act="sellmode" style="min-height:32px;font-size:12px">🪙 เลือกขายหลายชิ้น</button>` : ''}</div>
+    <div><div class="sec"><b>ที่สวมอยู่</b></div><div class="eqs">${eq}</div>
+      <div class="stats">${STATS.map(k => `<span title="${STAT_NAME[k]}">${STAT_ICO[k]}${st(k)}</span>`).join('')}</div></div>
+    <div><div class="sec"><b>ของในกระเป๋า</b><small>${P.bag.length}/${BAG_MAX}</small>${P.bag.length ? `<button class="btn sm" type="button" data-act="sellmode"><span class="coin" style="width:14px;height:14px;vertical-align:-3px"></span> ขายหลายชิ้น</button>` : ''}</div>
       ${P.bag.length ? `<div class="bag">${bag}</div>` : '<p class="muted" style="margin:0;font-size:13px">ยังไม่มีของ ออกไปตีมอนนอกเมืองแล้วเดินทับของที่ดรอปเพื่อเก็บ</p>'}</div>
-    <button class="btn block" type="button" data-act="runes">💠 รูน (${Object.values(P.runes).reduce((a, b) => a + b, 0)})${Object.keys(runeCounts()).length ? ' · ' + Object.entries(runeCounts()).map(([t, n]) => `${RUNES[t].icon}${n}`).join(' ') : ''}</button>
-    <div class="panel rows">${Object.entries(CONSUME).map(([k, c]) => `<div class="row"><span class="ico">${consIcon(k)}</span><div><div class="nm">${c.name} × ${P.items[k]}</div><div class="ds">${c.desc}</div></div><button class="btn sm" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div>`;
+    <button class="btn block" type="button" data-act="runes">💠 รูน (${runeN})${Object.keys(runeCounts()).length ? ' · ' + Object.entries(runeCounts()).map(([t, n]) => `${RUNES[t].icon}${n}`).join(' ') : ''}</button>
+    <div><div class="sec"><b>ยาและของใช้</b></div><div class="cons">${Object.entries(CONSUME).map(([k, c]) => `<div class="${P.items[k] ? '' : 'none'}"><span class="slot">${consIcon(k)}<span class="n">×${P.items[k]}</span></span><b>${c.name}</b><em>${c.desc}</em><button class="btn sm${P.items[k] ? ' primary' : ''}" type="button" data-use="${k}" ${P.items[k] ? '' : 'disabled'}>ใช้</button></div>`).join('')}</div></div>`;
 }
 function openChar() { openSheet('ตัวละคร', renderChar, 'char'); }
 let rolling = false, lastRoll = null;
