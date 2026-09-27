@@ -2787,7 +2787,8 @@ function petTick(dt) {
   myHits.set(m.id, nowS());
   fx.push({ type: 'bolt', x: petObj.x, y: petObj.y - 14, x2: m.rx, y2: m.ry - 12, t: 0, dur: .25 });
   floatAt(m.rx + 10, m.ry - 18, d, '#FFB3C7', 14);
-  if (DG) dDamage(m, d);
+  if (m.dummy) dummyHit(m, d);
+  else if (DG) dDamage(m, d);
   else if (hosting) damageMon(m, d, myPeer || 'me');
   else { hitsOut.push([++hitSeq, m.id, d]); if (hitsOut.length > 10) hitsOut.shift(); m.predHp = Math.max(0, (m.predHp != null && nowS() - m.predT < .8 ? m.predHp : m.hp) - d); m.predT = nowS(); m.flash = .15; }
 }
@@ -2800,7 +2801,53 @@ function drawPet(x, y, formKey, acc, stage, emo) {
   if (emo) ctx.drawImage(emojiSprite(emo, 18), x - 8, y - size - 20 + bob, 18, 18);
 }
 function monsterList() { return DG ? DG.mons.values() : hosting ? (sim ? sim.mons.values() : []) : views.values(); }
-function getMon(id) { return DG ? DG.mons.get(id) : hosting ? sim && sim.mons.get(id) : views.get(id); }
+// ---- training dummies in town: local only, never die, no EXP or loot; show DPS / last / max hit ----
+const DUMMY_KINDS = [
+  { name: 'หุ่นไม้', def: 0, wood: '#B07A45', dark: '#7A4E2A', head: '#E8C66A' },
+  { name: 'หุ่นเหล็ก', def: 60, wood: '#9AA3B5', dark: '#5E6679', head: '#C9D1DE' },
+  { name: 'หุ่นหินยักษ์', def: 200, wood: '#8C8577', dark: '#5A5449', head: '#B3AC9C', big: true },
+];
+const DUMMIES = DUMMY_KINDS.map((k, i) => { const x = (13 + i * 4 + .5) * T, y = (47 + .6) * T; return { id: -1 - i, kind: k, name: k.name, x, y, rx: x, ry: y, hp: 1e9, maxHp: 1e9, def: k.def, spd: 0, lv: 1, dir: 1, dummy: true, hits: [], last: 0, max: 0, flash: 0, wob: 0 }; });
+function dummiesHere() { return !DG && inTown(me.x, me.y) ? DUMMIES : []; }
+function* targetables() { yield* monsterList(); yield* dummiesHere(); }
+function dummyHit(m, d) {
+  const t = nowS(); m.hits.push([t, d]); m.last = d; m.max = Math.max(m.max, d); m.flash = .15; m.wob = 1; m.lastT = t;
+}
+function dummyDps(m) { const t = nowS(); while (m.hits.length && t - m.hits[0][0] > 5) m.hits.shift(); if (!m.hits.length) return 0; const span = Math.max(1, Math.min(5, t - m.hits[0][0] + atkCooldown())); return Math.round(m.hits.reduce((a, h) => a + h[1], 0) / span); }
+const dummyPics = new Map();
+function dummyPic(k) { // 16x28 pixel art drawn once, scaled up with smoothing off
+  if (dummyPics.has(k.name)) return dummyPics.get(k.name);
+  const c = document.createElement('canvas'); c.width = 20; c.height = 30; const g = c.getContext('2d');
+  const px = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  px(9, 12, 2, 18, k.dark); px(9, 12, 1, 18, k.wood);                        // post
+  px(6, 28, 8, 2, k.dark);                                                    // foot
+  px(2, 13, 16, 2, k.dark); px(2, 13, 16, 1, k.wood);                         // arms
+  px(1, 12, 2, 4, k.head); px(17, 12, 2, 4, k.head);                          // hands
+  px(6, 15, 8, 9, k.dark); px(7, 15, 6, 8, k.wood);                           // body
+  px(8, 17, 4, 4, '#F4F0E6'); px(9, 18, 2, 2, '#E0474C');                     // target
+  px(7, 16, 1, 1, '#E0474C'); px(12, 16, 1, 1, '#E0474C'); px(7, 21, 1, 1, '#E0474C'); px(12, 21, 1, 1, '#E0474C');
+  px(6, 3, 8, 9, INK); px(7, 4, 6, 7, k.head);                                // head
+  px(7, 4, 6, 1, '#FFF3C4'); px(8, 6, 1, 2, INK); px(11, 6, 1, 2, INK); px(9, 9, 2, 1, INK);
+  px(6, 11, 8, 1, k.dark);                                                    // rope collar
+  if (k.big) { px(5, 2, 10, 2, k.dark); px(4, 15, 2, 8, k.dark); px(14, 15, 2, 8, k.dark); }
+  dummyPics.set(k.name, c); return c;
+}
+function drawDummy(m) {
+  const t = nowS(), k = m.kind, S = (k.big ? 3.2 : 2.6) * ART_PX * 1.25, w = 20 * S, h = 30 * S;
+  m.flash = Math.max(0, m.flash - 1 / 60); m.wob = Math.max(0, m.wob - 1 / 40);
+  ctx.fillStyle = 'rgba(51,40,74,.25)'; ctx.beginPath(); ctx.ellipse(m.x, m.y + 2, w * .3, w * .09, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(Math.sin(t * 22) * .12 * m.wob);
+  if (m.flash > 0) ctx.filter = 'brightness(2.2) saturate(0)';
+  ctx.imageSmoothingEnabled = false; ctx.drawImage(dummyPic(k), -w / 2, -h, w, h); ctx.imageSmoothingEnabled = true;
+  ctx.filter = 'none'; ctx.restore();
+  const top = m.y - h - 6, near = Math.hypot(m.x - me.x, m.y - me.y) < 260;
+  drawName(`${k.name} DEF ${k.def}`, m.x, top, '#FFE08A', '700 11px "IBM Plex Sans Thai",system-ui,sans-serif');
+  if (near && m.max) {
+    drawName(`DPS ${dummyDps(m).toLocaleString()}`, m.x, top - 14, '#fff', '700 11px "IBM Plex Sans Thai",system-ui,sans-serif');
+    drawName(`ล่าสุด ${m.last.toLocaleString()} · สูงสุด ${m.max.toLocaleString()}`, m.x, top - 27, '#C9C2D6', '600 10px "IBM Plex Sans Thai",system-ui,sans-serif');
+  }
+}
+function getMon(id) { if (id < 0) return dummiesHere().find(m => m.id === id); return DG ? DG.mons.get(id) : hosting ? sim && sim.mons.get(id) : views.get(id); }
 
 let DG = null;
 function enterDungeon(i) {
@@ -3090,10 +3137,10 @@ function dmgCalc(atk, def, mult, aLv, dLv) { atk = Math.max(1, atk); return Math
 const sameMap = m => DG || zoneAt(m.rx, m.ry) === zoneAt(me.x, me.y);
 function nearestMon(range, exclude) {
   let best = null, bd = range;
-  for (const m of monsterList()) { if (m.hp <= 0 || (exclude && exclude.has(m.id)) || !sameMap(m)) continue; const d = Math.hypot(m.rx - me.x, m.ry - me.y); if (d < bd) { bd = d; best = m; } }
+  for (const m of targetables()) { if (m.hp <= 0 || (exclude && exclude.has(m.id)) || !sameMap(m)) continue; const d = Math.hypot(m.rx - me.x, m.ry - me.y); if (d < bd) { bd = d; best = m; } }
   return best;
 }
-function monsIn(range) { const out = []; for (const m of monsterList()) if (m.hp > 0 && sameMap(m) && Math.hypot(m.rx - me.x, m.ry - me.y) < range) out.push(m); return out; }
+function monsIn(range) { const out = []; for (const m of targetables()) if (m.hp > 0 && sameMap(m) && Math.hypot(m.rx - me.x, m.ry - me.y) < range) out.push(m); return out; }
 function attackMon(m, mult, o = {}) {
   const t0 = nowS();
   myHits.set(m.id, t0);
@@ -3106,7 +3153,8 @@ function attackMon(m, mult, o = {}) {
   const stl = ap('steal') + uqFx('steal') + ((branchOn() || {}).steal || 0); if (stl) P.hp = Math.min(maxHp(), P.hp + d * stl);
   floatAt(m.rx, m.ry - 26, crit ? d + '!' : d, crit ? '#FFD23F' : '#fff', crit ? 24 : 19);
   sfx(crit ? 'crit' : 'hit');
-  if (DG) dDamage(m, d);
+  if (m.dummy) dummyHit(m, d);
+  else if (DG) dDamage(m, d);
   else if (hosting) damageMon(m, d, myPeer || 'me');
   else {
     hitsOut.push([++hitSeq, m.id, d]); if (hitsOut.length > 10) hitsOut.shift();
@@ -3197,7 +3245,7 @@ function castSkill(i) {
     const sx = me.x, sy = me.y, hitSet = new Set();
     for (let k = 0; k < sk.dist; k += 8) {
       moveBody(me, vx * 8, vy * 8, 12, solid);
-      for (const m of monsterList()) if (m.hp > 0 && !hitSet.has(m.id) && Math.hypot(m.rx - me.x, m.ry - me.y) < 40) { hitSet.add(m.id); hit(m, { sure: true }); }
+      for (const m of targetables()) if (m.hp > 0 && !hitSet.has(m.id) && Math.hypot(m.rx - me.x, m.ry - me.y) < 40) { hitSet.add(m.id); hit(m, { sure: true }); }
     }
     if (Math.abs(vx) > .1) me.dir = vx < 0 ? -1 : 1;
     fx.push({ type: 'trail', x: sx, y: sy - 12, x2: me.x, y2: me.y - 12, t: 0, dur: .35 });
@@ -3409,9 +3457,9 @@ const cam = { ox: 0, oy: 0 };
 function toWorld(cx, cy) { const r = cv.getBoundingClientRect(); return { x: cam.ox + (cx - r.left) / ZOOM, y: cam.oy + (cy - r.top) / ZOOM }; }
 function monAt(wx, wy) {
   let best = null, bd = 1e9;
-  for (const m of monsterList()) {
+  for (const m of targetables()) {
     if (m.hp <= 0) continue;
-    const size = m.boss ? 60 : 38, d = Math.hypot(wx - m.rx, wy - (m.ry - size * .5));
+    const size = m.dummy ? 70 : m.boss ? 60 : 38, d = Math.hypot(wx - m.rx, wy - (m.ry - size * .5));
     if (d < size * .75 + 16 && d < bd) { bd = d; best = m; }
   }
   return best;
@@ -4509,7 +4557,7 @@ function update(dt) {
     const mt = me.meteors[i]; mt.t -= dt;
     if (mt.t <= 0) {
       me.meteors.splice(i, 1);
-      for (const m of monsterList()) if (m.hp > 0 && Math.hypot(m.rx - mt.x, m.ry - mt.y) < mt.r) attackMon(m, mt.mult);
+      for (const m of targetables()) if (m.hp > 0 && Math.hypot(m.rx - mt.x, m.ry - mt.y) < mt.r) attackMon(m, mt.mult);
       ringFx(mt.x, mt.y + 10, mt.r, '#FF5A1F'); fx.push({ type: 'emoji', e: '💥', x: mt.x, y: mt.y - 20, t: 0, dur: .5 }); sfx('crit'); buzz(40);
     }
   }
@@ -4605,6 +4653,7 @@ function render() {
   if (DG && DG.portal) { const pt = DG.portal; ents.push({ y: pt.y, d: () => { const tt = nowS(); for (let k = 0; k < 3; k++) { ctx.strokeStyle = ['#C9A6FF', '#8C5CF0', '#FFD1FF'][k]; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(pt.x, pt.y - 14, 22 - k * 6, 26 - k * 7, 0, tt * (2 + k) + k, tt * (2 + k) + k + 4.5); ctx.stroke(); } drawName('วงวาร์ปกลับเมือง', pt.x, pt.y - 46, '#E9D5FF'); } }); }
   for (const l of loot) if (inView(l.x, l.y)) ents.push({ y: l.y - 8, d: () => drawLoot(l) });
   for (const m of monsterList()) if (inView(m.rx, m.ry) && (curZ < 0 || zoneAt(m.rx, m.ry) === curZ)) ents.push({ y: m.ry, d: () => drawMon(m) });
+  for (const m of dummiesHere()) if (inView(m.x, m.y)) ents.push({ y: m.y, d: () => drawDummy(m) });
   for (const r of remotes.values()) if (!DG && !inDungeonRows(r.ty) && zoneAt(r.x, r.y) === curZ && inView(r.x, r.y)) ents.push({ y: r.y, d: () => drawBlob({ x: r.x, y: r.y, color: r.c, st: r.s, form: r.f, ft: r.ft, fb: r.fb, fs: r.fs, race: r.race || 'human', rk: rankOf(r.lv), title: r.tt, shiny: r.sh, mood: r.dead ? 'sleep' : r.hp < 30 ? 'hurt' : 'idle', dir: r.d, moving: r.mv, walk: r.walk, swing: r.swing, name: r.name, lv: r.lv, hpPct: r.hp, hat: r.hat, wp: r.wp, bubble: r.bubbleT > 0 ? r.bubble : '' }) });
   ents.push({ y: me.y, d: () => drawBlob({ x: me.x, y: me.y, color: P.color, st: stageOf(P.lv), form: P.form, ft: P.formTier, fb: P.formBranch, fs: P.formSub, race: P.race, rk: rankOf(P.lv), title: titleName(), shiny: P.shiny, mood: me.dead ? 'sleep' : P.hp < maxHp() * .3 ? 'hurt' : 'idle', dir: me.dir, moving: me.moving, walk: me.walk, swing: me.swing, name: P.name, lv: P.lv, hpPct: P.hp / maxHp() * 100, hat: gearCode(P.eq.hat), wp: gearCode(P.eq.weapon), self: true, hurt: me.hurtT > .15, shield: me.shieldT > 0, aura: buff('atk') ? '#FF8A2A' : buff('haste') ? '#FFD23F' : buff('crit') ? '#5CCB6B' : '', bubble: me.chatT > 0 ? me.chat : '' }) });
   { const pt = activePet(); if (pt && petObj.placed && !me.dead) ents.push({ y: petObj.y, d: () => drawPet(petObj.x, petObj.y, pt.sp, pt.acc, pt.stage, petObj.emoT > 0 ? petObj.emo : (pt.hunger < 15 ? '💢' : '')) }); }
