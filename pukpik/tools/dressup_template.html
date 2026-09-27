@@ -66,6 +66,12 @@ ol.plan li::marker{color:var(--gold);font-family:var(--f-display)}
   </section>
 
   <section class="note">
+    <h2>m12 เปลี่ยนทรงผม</h2>
+    <p>แบบ A ใช้คำสั่งกับ seed เดิมของ m12 แล้วเปลี่ยนแค่คำบรรยายผม ตัวจะออกมาต่างกันนิดหน่อย แบบ B วาดผมใหม่ทับตัว m12 เดิม ตัวกับหน้าจึงเหมือนเดิมทุกภาพ</p>
+    <div class="looks" id="m12hair"></div>
+  </section>
+
+  <section class="note">
     <h2>ตัวเปล่า 12 แบบที่ลองไว้</h2>
     <p>รอบนี้ใช้ m12 เป็นตัวหลัก ส่วนหน้าตาตาวิ้งแบบ m11 อยู่ในตัวเลือกตาแล้ว</p>
     <div class="looks" id="bases"></div>
@@ -171,6 +177,8 @@ document.getElementById('rand').addEventListener('click', () => {
   st.hair = pick(HAIR.slice(1))[0]; st.hairc = pick(HAIRC)[0]; st.eye = pick(EYES)[0]; st.brow = pick(EYES)[0]; st.eyec = pick(EYEC)[0]; st.skin = Math.floor(Math.random() * 4);
   save(); build(); draw();
 });
+const M12H = ['m12 เดิม', 'A1 ชี้ฟู', 'A2 อันเดอร์คัท', 'A3 หางม้าต่ำ', 'A4 ฟูมีปอยชี้', 'A5 วูล์ฟคัทแดง', 'A6 บ็อบหน้าม้า', 'A7 เปียคู่', 'A8 หยิกฟู', 'B1 สั้นปัดข้าง', 'B2 ยาวเงิน', 'B3 ชี้แดง', 'B4 หางม้าสูง', 'B5 บ็อบม่วง', 'B6 วูล์ฟคัทกรม'];
+document.getElementById('m12hair').innerHTML = ART.m12hair.map((u, i) => `<figure><img src="${u}" alt="${M12H[i]}"><figcaption>${M12H[i]}</figcaption></figure>`).join('');
 const BASE_NAMES = ['m01 · 2 หัว', 'm02 · 2.5 หัว', 'm03 · 3 หัว เท่', 'm04 · กลมอ้วน', 'm05 · อนิเมะ', 'm06 · เด็กหญิง', 'm07 · ผิวเข้ม', 'm08 · ผิวขาว', 'm09 · หูแมว', 'm10 · เรโทร', 'm11 · ตาวิ้ง', 'm12 · เท่ ปรกตา'];
 document.getElementById('bases').innerHTML = ART.bases.map((u, i) => `<figure><img src="${u}" alt="ตัวเปล่า ${BASE_NAMES[i]}"><figcaption>${BASE_NAMES[i]}</figcaption></figure>`).join('');
 document.getElementById('looks').innerHTML = ART.looks.map((u, i) => `<figure><img src="${u}" alt="แบบ ${i + 1}"><figcaption>${i < 4 ? 'แบบเต็มตัว ' + (i + 1) : 'm11 ชุดเลเยอร์'}</figcaption></figure>`).join('');
