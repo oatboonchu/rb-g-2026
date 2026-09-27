@@ -197,9 +197,11 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .pet-hud .bar.hunger{height:6px;border:1.5px solid var(--ink);border-radius:9px;background:#fff;overflow:hidden}
 .pet-hud .bar.hunger i{display:block;height:100%;background:#FFB347}
 @keyframes petbob{50%{transform:translateY(-3px)}}
-.ibtn{width:39px;height:39px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);box-shadow:0 3px 0 var(--ink);font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;position:relative;padding:0}
-.ibtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
-.ibtn .dot{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--hp);border:2px solid var(--paper)}
+/* menu buttons: just the pixel icon, no circle; a white outline keeps it readable on any ground */
+.ibtn{width:42px;height:42px;border:0;background:none;font-size:31px;line-height:1;display:grid;place-items:center;cursor:pointer;position:relative;padding:0}
+.ibtn .hic{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) drop-shadow(0 2px 1px rgba(51,40,74,.45))}
+.ibtn:active{transform:translateY(2px) scale(.94)}
+.ibtn .dot{position:absolute;top:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--hp);border:2px solid var(--paper)}
 .side{position:absolute;top:10px;right:var(--gr);display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 #mini{width:150px;height:52px;border:2px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink);background:#86C66A;display:block}
 .gold{display:inline-flex;align-items:center;gap:5px;font:700 14px var(--f-display);font-variant-numeric:tabular-nums;background:var(--paper);border:2px solid var(--ink);border-radius:99px;padding:1px 10px 1px 3px}
@@ -346,7 +348,7 @@ button:focus-visible{outline:3px solid var(--mp);outline-offset:3px}
 .records b{display:block;font:700 19px var(--f-display);font-variant-numeric:tabular-nums}
 .records span{font-size:12px;color:var(--ink-soft)}
 .toast{position:absolute;left:50%;top:170px;transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font:600 14px var(--f-display);padding:8px 16px;border-radius:99px;animation:rise .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-@media (max-width:380px){.ibtn{width:38px;height:38px;font-size:17px}.menu-row{gap:6px}}
+@media (max-width:380px){.ibtn{width:35px;height:40px;font-size:27px}.menu-row{gap:3px}}
 @media (max-height:560px){.acts{transform:scale(.85);transform-origin:100% 100%}.chatlog{bottom:96px;width:min(40vw,320px)}.talk{bottom:112px}}
 @media (min-width:900px){.acts{bottom:28px;right:28px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
