@@ -3922,7 +3922,7 @@ function resize() {
   const r = $('#app').getBoundingClientRect();
   DPR = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(r.width * DPR); cv.height = Math.round(r.height * DPR);
-  ZOOM = clamp(Math.min(r.width, r.height * 1.1) / (8.5 * T), .95, 2.2) * (typeof zoomMul === 'number' ? zoomMul : 1);
+  ZOOM = clamp(Math.min(r.width, r.height * 1.1) / (11 * T), .8, 1.7) * (typeof zoomMul === 'number' ? zoomMul : 1);
   VW = r.width / ZOOM; VH = r.height / ZOOM;
 }
 window.addEventListener('resize', resize);
