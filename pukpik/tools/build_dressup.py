@@ -9,6 +9,7 @@ art = {
   'hat': {k: du(f'{S}/dressup/hat_{k}_dn12.png') for k in ('wizard', 'helm')},
   'outfit': {k: du(f'{S}/dressup/out_{k}.png') for k in ('ranger', 'knight')},
   'weapon': [du(f'{S}/items/weapon_{i}.png') for i in range(10)],
+  'bases': [du(f'{S}/style_trial/bases/m{i:02d}.png') for i in range(1, 13)],
   'looks': [du(f'{S}/style_trial/{n}.png') for n in ('hero_s11_hero_a', 'hero_s42_hero_a', 'hero_s11_hero_b', 'hero_s42_hero_b')],
 }
 page = open(f'{here}/dressup_template.html', encoding='utf-8').read().replace('/*ART*/null', json.dumps(art))

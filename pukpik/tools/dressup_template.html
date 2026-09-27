@@ -66,6 +66,12 @@ ol.plan li::marker{color:var(--gold);font-family:var(--f-display)}
   </section>
 
   <section class="note">
+    <h2>ตัวเปล่าแบบอื่นๆ</h2>
+    <p>ลองสัดส่วน ดวงตา และสีผิวหลายแบบ ทุกแบบใส่เสื้อยืดมือเปล่า เลือกแบบที่ชอบแล้วจะทำผม หมวก และชุดให้เข้ากับตัวนั้น</p>
+    <div class="looks" id="bases"></div>
+  </section>
+
+  <section class="note">
     <h2>หน้าตาแบบเต็มตัว (ไม่แยกเลเยอร์)</h2>
     <p>ตัวเลือกที่ gen มาพร้อมชุดในภาพเดียว ใช้เทียบสไตล์ได้ แต่เปลี่ยนชุดไม่ได้</p>
     <div class="looks" id="looks"></div>
@@ -174,5 +180,7 @@ document.getElementById('rand').addEventListener('click', () => {
   st.hair = pick(HAIR)[0]; st.hairc = pick(HAIRC)[0]; st.hat = Math.random() < .4 ? pick(HAT)[0] : ''; st.outfit = pick(OUTFIT)[0]; st.outc = pick(OUTC)[0]; st.weapon = Math.floor(Math.random() * 11) - 1;
   save(); build(); draw();
 });
+const BASE_NAMES = ['m01 · 2 หัว', 'm02 · 2.5 หัว', 'm03 · 3 หัว เท่', 'm04 · กลมอ้วน', 'm05 · อนิเมะ', 'm06 · เด็กหญิง', 'm07 · ผิวเข้ม', 'm08 · ผิวขาว', 'm09 · หูแมว', 'm10 · เรโทร', 'm11 · ตาวิ้ง', 'm12 · เท่ ปรกตา'];
+document.getElementById('bases').innerHTML = ART.bases.map((u, i) => `<figure><img src="${u}" alt="ตัวเปล่า ${BASE_NAMES[i]}"><figcaption>${BASE_NAMES[i]}</figcaption></figure>`).join('');
 document.getElementById('looks').innerHTML = ART.looks.map((u, i) => `<figure><img src="${u}" alt="หน้าตาแบบที่ ${i + 1}"><figcaption>แบบ ${i + 1}</figcaption></figure>`).join('');
 </script>
