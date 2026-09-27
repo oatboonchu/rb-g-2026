@@ -46,7 +46,7 @@ ol.plan li::marker{color:var(--gold);font-family:var(--f-display)}
 <div class="wrap">
   <header>
     <h1>ห้องแต่งตัวปุ๊กปิ๊ก</h1>
-    <p>ตัวละครคนแบบ m12 เลือกทรงผม ตา และคิ้วแยกกันได้ ตากับคิ้วมาจากชุดเดียวกันแต่ตัดแยก เลยจับคู่ข้ามแบบได้ สีผม สีตา และสีผิวเปลี่ยนด้วยโค้ด ไม่เสียเครดิต</p>
+    <p>ตัวละครคนแบบ m12 เลือกทรงผม (20 แบบ) ตา และคิ้วแยกกันได้ ตากับคิ้วมาจากชุดเดียวกันแต่ตัดแยก เลยจับคู่ข้ามแบบได้ สีผม สีตา และสีผิวเปลี่ยนด้วยโค้ด ไม่เสียเครดิต</p>
   </header>
 
   <section class="room">
@@ -56,6 +56,7 @@ ol.plan li::marker{color:var(--gold);font-family:var(--f-display)}
     </div>
     <div class="ctrl">
       <div class="grp"><h2>ทรงผม</h2><div class="chips" id="g-hair"></div></div>
+      <div class="grp"><h2>ทรงผม m12 ชุดใหม่</h2><div class="chips" id="g-hair12"></div></div>
       <div class="grp"><h2>สีผม</h2><div class="chips" id="g-hairc"></div></div>
       <div class="grp"><h2>ตา</h2><div class="chips" id="g-eye"></div></div>
       <div class="grp"><h2>สีตา</h2><div class="chips" id="g-eyec"></div></div>
@@ -68,6 +69,7 @@ ol.plan li::marker{color:var(--gold);font-family:var(--f-display)}
   <section class="note">
     <h2>m12 เปลี่ยนทรงผม</h2>
     <p>แบบ A ใช้คำสั่งกับ seed เดิมของ m12 แล้วเปลี่ยนแค่คำบรรยายผม ตัวจะออกมาต่างกันนิดหน่อย แบบ B วาดผมใหม่ทับตัว m12 เดิม ตัวกับหน้าจึงเหมือนเดิมทุกภาพ</p>
+    <p>ทรงผมแบบ A ตัวไม่ตรงกับ m12 จึงเอามาแยกเลเยอร์ไม่ได้ เลยวาดทรงเดียวกันใหม่ทับ m12 แบบเดียวกับ B (ภาพ A1′–A8′ ท้ายแถว) แล้วตัดเฉพาะผมไปไว้ใน "ทรงผม m12 ชุดใหม่" ด้านบน</p>
     <div class="looks" id="m12hair"></div>
   </section>
 
@@ -94,6 +96,7 @@ ol.plan li::marker{color:var(--gold);font-family:var(--f-display)}
 <script>
 const ART = /*ART*/null;
 const W = 64, H = 64, BROW_END = 19; // eye inpaints cover rows 16-26: rows up to 19 are the brows, the rest the eyes
+const HAIR12 = [['a01', 'ชี้ฟูยุ่ง'], ['a02', 'อันเดอร์คัทเงิน'], ['a03', 'ยาวตรง'], ['a04', 'ฟูมีปอยชี้'], ['a05', 'วูล์ฟคัทแดง'], ['a06', 'บ็อบหน้าม้า'], ['a07', 'เปียคู่'], ['a08', 'หยิกฟู'], ['b01', 'สั้นปัดข้าง'], ['b02', 'ยาวเงิน'], ['b03', 'ชี้แดง'], ['b04', 'หางม้าสูง'], ['b05', 'บ็อบม่วง'], ['b06', 'วูล์ฟคัทกรม']];
 const HAIR = [['', 'หัวโล้น'], ['emo', 'ปรกตา'], ['spiky', 'ชี้ฟู'], ['short', 'สั้นเรียบ'], ['pony', 'ทวินเทล'], ['bob', 'บ็อบฟู'], ['wolf', 'วูล์ฟคัท']];
 const EYES = [['sparkle', 'ตาวิ้ง'], ['sharp', 'ตาคม'], ['sleepy', 'ตาง่วง'], ['cat', 'ตาแมว'], ['happy', 'ยิ้มหยี'], ['fierce', 'ดุ']];
 const HAIRC = [['', 'สีเดิม', '#8b93af'], ['#1a1c2c', 'ดำ', '#2b2a3f'], ['#8a5a44', 'น้ำตาล', '#8a5a44'], ['#e0616a', 'แดง', '#e0616a'], ['#ffcd75', 'ทอง', '#ffcd75'], ['#41a6f6', 'ฟ้า', '#41a6f6'], ['#a7f070', 'เขียว', '#a7f070'], ['#c78ce0', 'ม่วง', '#c78ce0'], ['#f4f4f4', 'ขาว', '#f4f4f4']];
@@ -129,8 +132,12 @@ const hex = (r, g, b) => ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0'
 let L = null;
 (async () => {
   const B = pix(await load(ART.blank));
-  L = { body: B, hair: {}, eye: {}, brow: {} };
+  L = { body: B, hair: {}, eye: {}, brow: {}, erase: {} };
   for (const k in ART.hair) L.hair[k] = diff(pix(await load(ART.hair[k])), B);
+  // m12 hair layers come cut out already; magenta marks bald scalp to erase from the body
+  for (const k in ART.hair12) { const h = pix(await load(ART.hair12[k])), e = new Uint8Array(W * H), d = h.data;
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3] && d[i] === 255 && d[i + 1] === 0 && d[i + 2] === 255) { d[i + 3] = 0; e[i / 4] = 1; }
+    L.hair[k] = h; L.erase[k] = e; }
   const SKINS = new Set(['fff1b0', 'f2c29c', 'f59a9a']); // repainted skin around the eyes is not part of the eye or brow layer
   for (const k in ART.eye) { const e = pix(await load(ART.eye[k])); L.brow[k] = diff(e, B, 0, BROW_END, SKINS); L.eye[k] = diff(e, B, BROW_END + 1, H - 1, SKINS); }
   build(); draw(); setInterval(draw, 420);
@@ -148,6 +155,8 @@ function draw() {
   let body = L.body;
   const sk = SKIN[st.skin] && SKIN[st.skin][0];
   if (sk) { const map = {}; SKIN_SRC.forEach((srcs, r) => srcs.forEach(h => map[h] = hexRgb(sk[r]))); body = tint(body, (r, gg, b) => map[hex(r, gg, b)]); }
+  const er = st.hair && L.erase[st.hair];
+  if (er) { body = copy(body); for (let p = 0; p < W * H; p++) if (er[p]) body.data[p * 4 + 3] = 0; }
   put(body, bob);
   const rc = (img, target, keep) => { if (!target) return img; const [th, ts, tl] = hexHsl(target); return tint(img, (r, gg, b) => { const [h, s, l] = rgb2hsl(r, gg, b); return keep(h, s, l) ? null : hsl2rgb(th, Math.max(ts * .85, .2), Math.min(.94, l * .55 + tl * .5)); }); };
   if (L.brow[st.brow]) put(rc(L.brow[st.brow], st.hairc, () => false), bob);
@@ -166,6 +175,7 @@ const chip = k => ([v, n]) => `<button class="chip" type="button" data-v="${v}" 
 const sw = (k, label) => ([v, n, c], i) => `<button class="chip sw" type="button" data-v="${typeof st[k] === 'number' ? i : v}" aria-pressed="${pressed(k, typeof st[k] === 'number' ? i : v)}" title="${n}" aria-label="${label}${n}" style="background:${c}"></button>`;
 function build() {
   chips('g-hair', HAIR, 'hair', chip('hair'));
+  chips('g-hair12', HAIR12, 'hair', chip('hair'));
   chips('g-hairc', HAIRC, 'hairc', sw('hairc', 'สีผม'));
   chips('g-eye', EYES, 'eye', chip('eye'));
   chips('g-eyec', EYEC, 'eyec', sw('eyec', 'สีตา'));
@@ -174,10 +184,10 @@ function build() {
 }
 document.getElementById('rand').addEventListener('click', () => {
   const pick = a => a[Math.floor(Math.random() * a.length)];
-  st.hair = pick(HAIR.slice(1))[0]; st.hairc = pick(HAIRC)[0]; st.eye = pick(EYES)[0]; st.brow = pick(EYES)[0]; st.eyec = pick(EYEC)[0]; st.skin = Math.floor(Math.random() * 4);
+  st.hair = pick(HAIR.slice(1).concat(HAIR12))[0]; st.hairc = pick(HAIRC)[0]; st.eye = pick(EYES)[0]; st.brow = pick(EYES)[0]; st.eyec = pick(EYEC)[0]; st.skin = Math.floor(Math.random() * 4);
   save(); build(); draw();
 });
-const M12H = ['m12 เดิม', 'A1 ชี้ฟู', 'A2 อันเดอร์คัท', 'A3 หางม้าต่ำ', 'A4 ฟูมีปอยชี้', 'A5 วูล์ฟคัทแดง', 'A6 บ็อบหน้าม้า', 'A7 เปียคู่', 'A8 หยิกฟู', 'B1 สั้นปัดข้าง', 'B2 ยาวเงิน', 'B3 ชี้แดง', 'B4 หางม้าสูง', 'B5 บ็อบม่วง', 'B6 วูล์ฟคัทกรม'];
+const M12H = ['m12 เดิม', 'A1 ชี้ฟู', 'A2 อันเดอร์คัท', 'A3 หางม้าต่ำ', 'A4 ฟูมีปอยชี้', 'A5 วูล์ฟคัทแดง', 'A6 บ็อบหน้าม้า', 'A7 เปียคู่', 'A8 หยิกฟู', 'B1 สั้นปัดข้าง', 'B2 ยาวเงิน', 'B3 ชี้แดง', 'B4 หางม้าสูง', 'B5 บ็อบม่วง', 'B6 วูล์ฟคัทกรม', "A1′ ชี้ฟูยุ่ง", "A2′ อันเดอร์คัทเงิน", "A3′ ยาวตรง", "A4′ ฟูมีปอยชี้", "A5′ วูล์ฟคัทแดง", "A6′ บ็อบหน้าม้า", "A7′ เปียคู่", "A8′ หยิกฟู"];
 document.getElementById('m12hair').innerHTML = ART.m12hair.map((u, i) => `<figure><img src="${u}" alt="${M12H[i]}"><figcaption>${M12H[i]}</figcaption></figure>`).join('');
 const BASE_NAMES = ['m01 · 2 หัว', 'm02 · 2.5 หัว', 'm03 · 3 หัว เท่', 'm04 · กลมอ้วน', 'm05 · อนิเมะ', 'm06 · เด็กหญิง', 'm07 · ผิวเข้ม', 'm08 · ผิวขาว', 'm09 · หูแมว', 'm10 · เรโทร', 'm11 · ตาวิ้ง', 'm12 · เท่ ปรกตา'];
 document.getElementById('bases').innerHTML = ART.bases.map((u, i) => `<figure><img src="${u}" alt="ตัวเปล่า ${BASE_NAMES[i]}"><figcaption>${BASE_NAMES[i]}</figcaption></figure>`).join('');

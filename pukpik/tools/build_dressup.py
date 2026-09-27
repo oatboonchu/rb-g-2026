@@ -6,8 +6,9 @@ du = lambda f: 'data:image/png;base64,' + base64.b64encode(open(f, 'rb').read())
 art = {
   'blank': du(f'{S}/dressup3/blank.png'),
   'hair': {k: du(f'{S}/dressup3/hair_{k}.png') for k in ('emo', 'spiky', 'short', 'pony', 'bob', 'wolf')},
+  'hair12': {k: du(f'{S}/dressup3/hair12/{k}.png') for k in [f'a{i:02d}' for i in range(1, 9)] + [f'b{i:02d}' for i in range(1, 7)]},
   'eye': {k: du(f'{S}/dressup3/eye_{k}.png') for k in ('sparkle', 'sharp', 'sleepy', 'cat', 'happy', 'fierce')},
-  'm12hair': [du(f'{S}/style_trial/bases/m12.png')] + [du(f'{S}/style_trial/m12_hair/h{i:02d}.png') for i in range(1, 9)] + [du(f'{S}/style_trial/m12_hair/b{i:02d}.png') for i in range(1, 7)],
+  'm12hair': [du(f'{S}/style_trial/bases/m12.png')] + [du(f'{S}/style_trial/m12_hair/h{i:02d}.png') for i in range(1, 9)] + [du(f'{S}/style_trial/m12_hair/{k}{i:02d}.png') for k, n in (('b', 6), ('a', 8)) for i in range(1, n + 1)],
   'bases': [du(f'{S}/style_trial/bases/m{i:02d}.png') for i in range(1, 13)],
   'looks': [du(f'{S}/style_trial/{n}.png') for n in ('hero_s11_hero_a', 'hero_s42_hero_a', 'hero_s11_hero_b', 'hero_s42_hero_b')],
 }

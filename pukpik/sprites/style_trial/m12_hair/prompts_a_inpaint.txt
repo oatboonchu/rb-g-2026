@@ -1,0 +1,8 @@
+a01|messy spiky black hair
+a02|short silver undercut hair swept to the side
+a03|long straight dark hair with a low ponytail
+a04|fluffy messy brown hair with an ahoge strand
+a05|layered wolf cut hair, dark red
+a06|short bob hair with blunt bangs, navy blue
+a07|long hair with twin braids, lavender
+a08|curly fluffy black hair

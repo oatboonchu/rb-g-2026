@@ -35,3 +35,4 @@
 | dressup2/tail_cat/fox/dragon.png | หาง (pixflux 32px) | ม้วนเป็นรูปเกือกม้าทุกอัน | – |
 | dressup2/face_cool_try1.png | หน้าเท่ | ออกมาเป็นหน้ายิ้มเยาะ | – |
 | dressup2/m12_bald_white_face.png | ตัวเปล่า m12 หัวโล้น | หน้าขาวซีดไม่เข้ากับตัว | – |
+| dressup3/hair_a0*_on_bald.png | ทรงผมแบบ A วาดใหม่บนตัวหัวโล้น (inpaint) | ผมเล็กแบนเหมือนหมวก สีน้ำตาล/กรมกลายเป็นสีผิว | – |
