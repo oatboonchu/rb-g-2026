@@ -1,0 +1,22 @@
+bald|hair|hair_fluffy|cute chibi character with fluffy messy dark navy hair with an ahoge strand and bangs
+bald|hair|hair_emo|cute chibi character with long dark hair and long bangs covering one eye, cool
+bald|hair|hair_spiky|cute chibi character with spiky short black anime hair
+bald|hair|hair_twin|cute chibi character with long pink hair in twin tails with bangs
+bald|hair|hair_long|cute chibi character with long straight silver hair with hime cut bangs
+bald12|top12|ear_cat|cute chibi character with fluffy black cat ears on top of the head
+bald12|top12|ear_fox|cute chibi character with big orange fox ears with white tips on top of the head
+bald12|top12|ear_bunny|cute chibi character with long white rabbit ears standing up on top of the head
+bald12|top12|ear_wolf|cute chibi character with pointed gray wolf ears on top of the head
+bald12|top12|ear_bear|cute chibi character with small round brown bear ears on top of the head
+bald|elf|ear_elf|cute chibi character with long pointed elf ears sticking out sideways
+bald12|top12|horn_dragon|cute chibi character with two curved dragon horns on the head, red and gold
+bald|tusk|tusk_orc|cute chibi character with two small white orc tusks from the lower lip
+bald|tail|tail_cat|cute chibi character with a long black cat tail curving up behind the body
+bald|tail|tail_fox|cute chibi character with a big fluffy orange fox tail with white tip behind the body
+bald|tail|tail_dragon|cute chibi character with a red scaly dragon tail with spikes behind the body
+bald|outfit|out_ranger|cute chibi character wearing a green adventurer tunic with red scarf, brown belt, brown boots
+bald|outfit|out_knight|cute chibi character wearing shiny silver plate armor with blue cloth, metal boots
+bald|outfit|out_mage|cute chibi character wearing a purple mage robe with gold trim and a sash, soft shoes
+bald12|hat12|hat_wizard|cute chibi character wearing a big tall purple pointy wizard hat with a golden star
+bald12|hat12|hat_helm|cute chibi character wearing a shiny round silver knight helmet with a blue plume
+bald|face|face_cool|cute chibi character with half-closed calm cool eyes and a small cool neutral mouth

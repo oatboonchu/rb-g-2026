@@ -1,0 +1,12 @@
+blank|eyes|eye_sparkle|cute cool chibi character with big round sparkly eyes with white highlights and thin eyebrows
+blank|eyes|eye_sharp|cute cool chibi character with sharp narrow cool eyes and straight confident eyebrows
+blank|eyes|eye_sleepy|cute cool chibi character with half-closed sleepy calm eyes and relaxed eyebrows
+blank|eyes|eye_cat|cute cool chibi character with cat-like eyes with slit pupils and arched eyebrows
+blank|eyes|eye_happy|cute cool chibi character with happy closed smiling eyes and raised eyebrows
+blank|eyes|eye_fierce|cute cool chibi character with fierce determined eyes and thick angled eyebrows
+blank|hair|hair_emo|cute cool chibi character with long dark navy hair and long bangs covering one eye, cool
+blank|hair|hair_spiky|cute cool chibi character with messy spiky black anime hair
+blank|hair|hair_short|cute cool chibi character with short neat brown hair with side part
+blank|hair|hair_pony|cute cool chibi character with long red hair tied in a high ponytail with bangs
+blank|hair|hair_bob|cute cool chibi character with fluffy pink bob cut hair with bangs
+blank|hair|hair_wolf|cute cool chibi character with silver wolf cut layered hair, cool

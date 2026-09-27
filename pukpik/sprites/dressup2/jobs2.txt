@@ -1,0 +1,4 @@
+bald12|top12|ear_bear|cute chibi character with two small round fuzzy brown bear ears on the left and right of the top of the head
+bald12|hat12|hat_helm|cute chibi character wearing a round shiny silver steel knight helmet that covers the top of the head and forehead, small blue plume on top
+bald|tusk2|tusk_orc|cute chibi character orc with two big white tusks pointing up from the lower jaw, fangs clearly visible
+bald|face2|face_cool|cute chibi character with sharp narrow cool eyes, confident eyebrows and a small smirk, cool expression
