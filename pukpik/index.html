@@ -2464,7 +2464,23 @@ const xpNeed = lv => Math.round(14 * Math.pow(lv, 1.55) * (1 + Math.pow(Math.min
 const xpScale = mlv => { const d = P.lv - mlv; return d <= 3 ? 1 : Math.max(.1, 1 - .2 * (d - 3)); };
 const stageOf = lv => (lv >= 12 ? 3 : lv >= 5 ? 2 : 1);
 const buff = k => { const b = me.buffs[k]; return b && b.until > nowS() ? b.amt : 0; };
-const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) / (1 + buff('haste') + ap('haste'));
+// Basic-attack weapon per form (matches what the form sprite holds). range = how close you must be; mult = damage per hit;
+// cd = attack-speed multiplier. melee hits one target, 'sweep' hits everything in front, 'bolt' fires from range
+// (pierce: through every monster on the line), 'wave' sends a short-range sword wave.
+const WEAPONS = {
+  none:    { th: 'พุ่งชน', kind: 'ใกล้', type: 'melee', range: 62, mult: 1, cd: 1 },
+  atk:     { th: 'ดาบใหญ่', kind: 'ใกล้', type: 'melee', range: 70, mult: 1.25, cd: 1.1, desc: 'ฟันแรง' },
+  def:     { th: 'โล่', kind: 'ใกล้', type: 'melee', range: 58, mult: .9, cd: 1, guard: .15, desc: 'ตีโดนแล้วได้เกราะลดดาเมจ 15% ชั่วครู่' },
+  spd:     { th: 'มีดคู่', kind: 'ใกล้', type: 'melee', range: 56, mult: .65, cd: .6, hits: 2, desc: 'ฟัน 2 ครั้งต่อการตี ตีเร็ว' },
+  hp:      { th: 'ค้อนยักษ์', kind: 'ใกล้', type: 'melee', range: 66, mult: 1.5, cd: 1.45, splash: 56, desc: 'ตีช้าแต่หนัก กระแทกมอนรอบๆ 50%' },
+  luk:     { th: 'คทาดาว', kind: 'ไกล', type: 'bolt', range: 200, mult: .85, cd: 1.1, proj: '#FFE14D', desc: 'ยิงดาวจากระยะไกล' },
+  rainbow: { th: 'คทาลูกแก้ว', kind: 'ไกล', type: 'bolt', range: 220, mult: .8, cd: 1.15, pierce: 1, proj: '#FF8FE8', desc: 'ยิงแสงทะลุทุกตัวในแนว' },
+  shadow:  { th: 'เคียวเงา', kind: 'ใกล้ (กว้าง)', type: 'sweep', range: 86, mult: 1, cd: 1.2, desc: 'กวาดทุกตัวด้านหน้า' },
+  unique:  { th: 'ดาบจักรพรรดิ', kind: 'กลาง', type: 'bolt', range: 150, mult: 1.15, cd: 1, proj: '#FFD23F', wave: 1, desc: 'ปล่อยคลื่นดาบ' },
+};
+const weapon = () => WEAPONS[(P && P.form) || 'none'] || WEAPONS.none;
+const atkRange = () => weapon().range;
+const atkCooldown = () => clamp(0.75 - st('spd') * 0.006, 0.32, 0.75) * weapon().cd / (1 + buff('haste') + ap('haste'));
 const moveSpeed = () => Math.min(270, (118 + st('spd') * 1.3) * (1 + buff('haste') * .75)) * (1 + uqFx('move'));
 const mySkills = () => { const fs = P.form && formSkillFor(P.color, P.form, P.formTier, P.formBranch, P.formSub); const ns = normalSkillsFor(P.color, P.form, P.formTier, P.formBranch, P.formSub); return fs ? [...ns, fs] : ns; };
 const skLv = sk => (P.lv >= sk.unlock ? clamp(P.skills[sk.id] || 1, 1, SKILL_MAX) : 0);
@@ -3101,9 +3117,32 @@ function attackMon(m, mult, o = {}) {
 function doAttack(pref) {
   if (!started || me.dead || me.atkCd > 0) return;
   me.atkCd = atkCooldown(); me.atkCount++; me.swing = .2;
-  const tgt = pref && pref.hp > 0 && Math.hypot(pref.rx - me.x, pref.ry - me.y) < 62 ? pref : nearestMon(62);
-  if (tgt) { me.dir = tgt.rx < me.x ? -1 : 1; attackMon(tgt, 1); }
-  else sfx('swing');
+  const wp = weapon(), R = wp.range;
+  const tgt = pref && pref.hp > 0 && Math.hypot(pref.rx - me.x, pref.ry - me.y) < R ? pref : nearestMon(R);
+  if (tgt) me.dir = tgt.rx < me.x ? -1 : 1;
+  if (wp.type === 'bolt') {
+    if (!tgt) { sfx('swing'); return; }
+    const hitList = wp.pierce ? monsIn(R).filter(m => { // everything close to the line from me to the target and beyond
+      const vx = tgt.rx - me.x, vy = tgt.ry - me.y, L = Math.hypot(vx, vy) || 1, t = ((m.rx - me.x) * vx + (m.ry - me.y) * vy) / L;
+      return t > 0 && Math.abs(((m.rx - me.x) * vy - (m.ry - me.y) * vx) / L) < 22; }) : [tgt];
+    hitList.forEach(m => attackMon(m, wp.mult));
+    const ex = wp.pierce ? me.x + (tgt.rx - me.x) / (Math.hypot(tgt.rx - me.x, tgt.ry - me.y) || 1) * R : tgt.rx, ey = wp.pierce ? me.y - 14 + (tgt.ry - me.y) / (Math.hypot(tgt.rx - me.x, tgt.ry - me.y) || 1) * R : tgt.ry - 14;
+    fx.push({ type: 'shot', x: me.x + me.dir * 14, y: me.y - 22, x2: ex, y2: ey, c: wp.proj, wave: wp.wave, t: 0, dur: .22 });
+    return;
+  }
+  if (wp.type === 'sweep') {
+    const hitList = monsIn(R).filter(m => (m.rx - me.x) * me.dir > -12);
+    if (tgt && !hitList.includes(tgt)) hitList.push(tgt);
+    hitList.forEach(m => attackMon(m, wp.mult)); if (!hitList.length) sfx('swing');
+    fx.push({ type: 'sweep', x: me.x, y: me.y - 12, dir: me.dir, r: R, t: 0, dur: .25 });
+    return;
+  }
+  if (tgt) {
+    for (let h = 0; h < (wp.hits || 1); h++) attackMon(tgt, wp.mult);
+    if (wp.splash) for (const m of monsIn(R + wp.splash)) if (m !== tgt && Math.hypot(m.rx - tgt.rx, m.ry - tgt.ry) < wp.splash) attackMon(m, wp.mult * .5);
+    if (wp.guard) addShield(wp.guard, 1.2);
+    if (wp.splash) fx.push({ type: 'ring', x: tgt.rx, y: tgt.ry + 10, r0: 8, r1: wp.splash, t: 0, dur: .3, c: '#E2C08A' });
+  } else sfx('swing');
   fx.push({ type: 'slash', x: me.x + me.dir * 20, y: me.y - 8, dir: me.dir, t: 0, dur: .2 });
 }
 function preferTarget(range) {
@@ -3399,7 +3438,7 @@ cv.addEventListener('pointerdown', e => {
   if (mouse) {
     if (me.dead) return;
     const w = toWorld(e.clientX, e.clientY), m = monAt(w.x, w.y);
-    if (m) { setTarget(m); if (Math.hypot(m.rx - me.x, m.ry - me.y) < 62) doAttack(m); }
+    if (m) { setTarget(m); if (Math.hypot(m.rx - me.x, m.ry - me.y) < atkRange()) doAttack(m); }
     else if (e.shiftKey) { me.goal = null; me.targetId = null; doAttack(); }
     else { walkTo(w); ptr.hold = !me.wantShop; }
     return;
@@ -3427,7 +3466,7 @@ const endPtr = e => {
   if (e.pointerId !== ptr.id) return;
   if (ptr.type !== 'mouse' && e.type === 'pointerup' && !ptr.moved && performance.now() - ptr.t0 < 300 && !me.dead) {
     const w = toWorld(e.clientX, e.clientY), m = monAt(w.x, w.y);
-    if (m) { setTarget(m); if (Math.hypot(m.rx - me.x, m.ry - me.y) < 62) doAttack(m); } else walkTo(w);
+    if (m) { setTarget(m); if (Math.hypot(m.rx - me.x, m.ry - me.y) < atkRange()) doAttack(m); } else walkTo(w);
   }
   ptr.id = null; ptr.hold = false;
   joy.active = false; joy.dx = joy.dy = 0; $('#joy').hidden = true;
@@ -3537,13 +3576,13 @@ function renderForm(el) {
   const known = f => P.form === f || lastRoll === f || (P.seen || []).includes(f);
   const cards = ALL_FORMS.map(f => { const sec = FORM_ARCH[f].secret, show = !sec || known(f); return `<div class="fcard${sec ? ' secret' : ''}${sec && show ? ' known' : ''}${P.form === f || lastRoll === f ? ' win' : ''}${lastRoll && lastRoll !== f ? ' dim' : ''}" data-f="${f}">
       <div class="pic">${charPic(P.color, 3, { form: f, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div>
-      <b>${show ? formName(f) : '???'}</b><span class="arch">${FORM_ARCH[f].th}</span>
+      <b>${show ? formName(f) : '???'}</b><span class="arch">${FORM_ARCH[f].th}</span><span class="arch">⚔ ${show ? `${WEAPONS[f].th} · ตี${WEAPONS[f].kind}` : '???'}</span>
       <span class="odds">${odds[f] < .01 ? (odds[f] * 100).toFixed(1) : Math.round(odds[f] * 100)}%<small> โอกาส</small></span><span class="oddbar"><i style="width:${odds[f] * 100}%"></i></span></div>`; }).join('');
   const tierBox = P.form ? `<div class="panel"><b style="font-family:var(--f-display)">ขั้นของร่าง</b><div class="tiers" style="margin-top:6px">${[2, 3, 4, 5].map(t => `<span class="btn${(P.formTier || 2) === t ? ' on' : ''}" style="cursor:default;display:flex;flex-direction:column;align-items:flex-start;gap:0"><b>ร่าง ${t} · ${t >= 3 && pathNodes(P.formBranch, P.formSub, t).length < t - 2 ? stageFormName(formName(P.form), t) + ' (แตกสาย)' : fullFormName(P.form, t)}</b><small style="font:600 11px var(--f-body)">Lv ${t > 2 ? FORM_TIER_LV[t] : 20} · สกิล ${formSkillFor(P.color, P.form, t, P.formBranch, P.formSub).name}</small></span>`).join('')}</div>
       <p class="muted" style="margin:6px 0 0;font-size:12px">แต่ละขั้นทำให้โบนัสของร่างและสกิลร่างแรงขึ้น และหน้าตาอลังการขึ้น</p>
       ${(P.formTier || 2) === 2 ? `<p style="margin:8px 0 4px;font-size:13px"><b>ตอนขึ้นร่าง 3 จะแตกสายเป็น 1 ใน 3 สาย (หรือร่างยูนิค 1%)</b> <span class="muted">โอกาสขึ้นกับค่าสถานะ</span></p><div class="forms">${BRANCH_KEYS.map(k => { const o = branchOdds()[k]; return `<div class="fcard${BRANCH[k].unique ? ' secret' : ''}"><div class="pic">${charPic(P.color, 3, { form: P.form, ft: 3, fb: k, rk: rankOf(P.lv), shiny: P.shiny, noShadow: true })}</div><b>${BRANCH[k].unique ? '???' : fullFormName(P.form, 3, k)}</b><span class="arch">${BRANCH[k].th}</span><span class="odds">${o < .02 ? (o * 100).toFixed(0) : Math.round(o * 100)}%<small> โอกาส</small></span><span class="muted" style="font-size:11px">${BRANCH[k].unique ? 'ยังไม่มีใครรู้' : BRANCH[k].desc}</span></div>`; }).join('')}</div>` : branchOn() ? `<p style="margin:8px 0 0;font-size:13px"><b>${branchOn().th}</b><br><span class="muted">${branchOn().nodes.map(x => x.desc || fxDesc(x)).join(' + ')}</span></p>${subCards()}` : ''}${canEvolve() ? `<button class="btn primary block" type="button" data-act="evolve" style="margin-top:8px">✨ วิวัฒน์เป็นร่าง ${(P.formTier || 2) + 1}</button>` : ''}</div>` : '';
   const uqCard = (P.seen || []).includes('unique') && P.form !== 'unique' ? `<button class="btn block" type="button" data-act="gounique" style="background:#FFF3B0">👑 กลับเป็น${formName('unique')} (ฟรี)</button>` : '';
-  const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${fullFormName()}</b>${RACES[P.race] ? `<div style="font-size:14px">เผ่า${RACES[P.race].th} ${RACES[P.race].e} · <span class="muted">${RACES[P.race].desc}</span></div>` : ''}<div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div></div>` : '';
+  const cur = P.form ? `<div class="panel center" style="background:#FFF8DE"><b style="font:700 19px var(--f-display)">ร่างปัจจุบัน: ${fullFormName()}</b>${RACES[P.race] ? `<div style="font-size:14px">เผ่า${RACES[P.race].th} ${RACES[P.race].e} · <span class="muted">${RACES[P.race].desc}</span></div>` : ''}<div class="muted" style="font-size:13px">${FORM_ARCH[P.form].th} · ${FORM_ARCH[P.form].desc}</div><div style="font-size:13px">⚔ อาวุธ: <b>${weapon().th}</b> · ตี${weapon().kind} (ระยะ ${weapon().range}) · ${weapon().desc}</div></div>` : '';
   el.innerHTML = `${cur}${tierBox}${uqCard}<p style="margin:0;font-size:14px">${ready ? '' : `<b>ปลดล็อกที่ Lv ${FORM_LV}</b> · `}${c.species}เปลี่ยนร่างได้ 5 แบบ และมีร่างลับอีก 2 แบบ (โอกาสแบบละ 0.5%) ร่างที่ได้เป็นการสุ่ม แต่ค่าสถานะไหนสูงกว่าปกติ โอกาสได้ร่างสายนั้นก็ยิ่งมาก <span class="muted">(อยากได้ร่างไหน ลองแจกแต้มสถานะให้ค่านั้นก่อน)</span></p>
     <div class="forms" id="formCards">${cards}</div>
     <div class="panel" style="font-size:13px">${FORM_KEYS.map(f => `<div><b>${FORM_ARCH[f].th}:</b> <span class="muted">${FORM_ARCH[f].desc} · สกิลร่าง ${formSkillFor(P.color, f).icon} ${formSkillFor(P.color, f).name}</span></div>`).join('')}${SECRET_KEYS.map(f => `<div><b>${known(f) ? formName(f) : 'ร่างลับ ???'}:</b> <span class="muted">${known(f) ? `${FORM_ARCH[f].desc} · สกิล ${formSkillFor(P.color, f).icon} ${formSkillFor(P.color, f).name}` : 'ยังไม่มีใครรู้ความสามารถ'}</span></div>`).join('')}</div>
@@ -4487,8 +4526,9 @@ function update(dt) {
       const tm = getMon(me.targetId), d = tm ? Math.hypot(tm.rx - me.x, tm.ry - me.y) : 0;
       if (!tm || tm.hp <= 0 || d > 12 * T) me.targetId = null;
       else {
-        if (d > 50) { dx = (tm.rx - me.x) / d; dy = (tm.ry - me.y) / d; }
-        if (d < 60) { me.dir = tm.rx < me.x ? -1 : 1; doAttack(tm); }
+        const R = atkRange();
+        if (d > R - 12) { dx = (tm.rx - me.x) / d; dy = (tm.ry - me.y) / d; }
+        if (d < R - 2) { me.dir = tm.rx < me.x ? -1 : 1; doAttack(tm); }
       }
     } else if (me.goal) {
       const d = Math.hypot(me.goal.x - me.x, me.goal.y - me.y);
@@ -4558,7 +4598,7 @@ function render() {
   if (locked) { ctx.strokeStyle = '#F2485B'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(locked.rx, locked.ry + 2, 26, 9, 0, 0, 7); ctx.stroke(); }
   // target ring
   const tgt = !me.dead && !locked && nearestMon(200);
-  if (tgt) { const inR = Math.hypot(tgt.rx - me.x, tgt.ry - me.y) < 62; ctx.strokeStyle = inR ? '#FFD23F' : 'rgba(255,255,255,.7)'; ctx.lineWidth = 2.5; ctx.setLineDash(inR ? [] : [5, 5]); ctx.beginPath(); ctx.ellipse(tgt.rx, tgt.ry + 2, 22, 8, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+  if (tgt) { const inR = Math.hypot(tgt.rx - me.x, tgt.ry - me.y) < atkRange(); ctx.strokeStyle = inR ? '#FFD23F' : 'rgba(255,255,255,.7)'; ctx.lineWidth = 2.5; ctx.setLineDash(inR ? [] : [5, 5]); ctx.beginPath(); ctx.ellipse(tgt.rx, tgt.ry + 2, 22, 8, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
   const ents = [], curZ = DG ? -1 : zoneAt(me.x, me.y);
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { if (x < 0 || y < 0 || x >= W || y >= H) continue; if (curZ >= 0 && y < HW && GROUND[y * W + x] !== curZ) continue; const o = OBJ[y * W + x]; if (o && (o < 20 || o === 33 || o >= 40) && o !== 5 && o !== 6 && o !== 18) ents.push({ y: (y + 1) * T - (o === 8 ? -T : 0), d: () => drawObstacle(o, x, y, GROUND[y * W + x]) }); }
   const inView = (x, y) => x > ox - 80 && x < ox + VW + 80 && y > oy - 80 && y < oy + VH + 120;
@@ -4576,6 +4616,11 @@ function render() {
     const k = f.t / f.dur;
     if (f.type === 'trail') { ctx.strokeStyle = `rgba(255,225,74,${.8 * (1 - k)})`; ctx.lineWidth = 14 * (1 - k) + 2; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x2, f.y2); ctx.stroke(); continue; }
     if (f.type === 'ring') { ctx.strokeStyle = f.c; ctx.globalAlpha = 1 - k; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(f.x, f.y - 10, f.r0 + (f.r1 - f.r0) * k, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
+    else if (f.type === 'shot') { const px = f.x + (f.x2 - f.x) * Math.min(1, k * 1.6), py = f.y + (f.y2 - f.y) * Math.min(1, k * 1.6); ctx.globalAlpha = 1 - Math.max(0, k - .6) / .4;
+      if (f.wave) { ctx.strokeStyle = f.c; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(px, py, 14, -1.1, 1.1); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); }
+      else { ctx.strokeStyle = f.c; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(px - (f.x2 - f.x) * .08, py - (f.y2 - f.y) * .08); ctx.lineTo(px, py); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(px, py, 4.5, 0, 7); ctx.fill(); ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(px, py, 3, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1; }
+    else if (f.type === 'sweep') { ctx.strokeStyle = `rgba(190,140,255,${1 - k})`; ctx.lineWidth = 7; ctx.beginPath(); const a0 = f.dir > 0 ? -1.4 : Math.PI + 1.4, a1 = f.dir > 0 ? 1.4 : Math.PI - 1.4; ctx.arc(f.x, f.y, f.r * (.55 + .45 * k), Math.min(a0, a1) , Math.max(a0, a1) , f.dir < 0 && false); ctx.stroke(); }
     else if (f.type === 'slash') { ctx.strokeStyle = `rgba(255,255,255,${1 - k})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(f.x, f.y, 18, f.dir > 0 ? -1.3 + k : Math.PI + 1.3 - k, f.dir > 0 ? .4 + k : Math.PI - .4 - k, f.dir < 0); ctx.stroke(); }
     else if (f.type === 'bolt') { ctx.strokeStyle = `rgba(255,225,74,${1 - k})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(f.x, f.y); const n = 5; for (let i = 1; i <= n; i++) ctx.lineTo(f.x + (f.x2 - f.x) * i / n + (i < n ? rnd(-8, 8) : 0), f.y + (f.y2 - f.y) * i / n + (i < n ? rnd(-8, 8) : 0)); ctx.stroke(); }
     else if (f.type === 'emoji') { ctx.globalAlpha = 1 - k; const ai = f.art && artImg(f.art); ctx.imageSmoothingEnabled = !ai; ctx.drawImage(ai || emojiSprite(f.e, 30), f.x - 20, f.y - 20 - k * 20, 40, 40); ctx.imageSmoothingEnabled = true; ctx.globalAlpha = 1; }
