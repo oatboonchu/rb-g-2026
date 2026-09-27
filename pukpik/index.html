@@ -3249,7 +3249,8 @@ cv.addEventListener('pointerdown', e => {
 cv.addEventListener('pointermove', e => {
   if (e.pointerType === 'mouse' && started) {
     const w = toWorld(e.clientX, e.clientY);
-    cv.classList.toggle('over-mon', !!monAt(w.x, w.y));
+    const hm = monAt(w.x, w.y); me.hoverId = hm ? hm.id : null;
+    cv.classList.toggle('over-mon', !!hm);
     if (ptr.hold && e.pointerId === ptr.id && !me.dead) { me.goal = { x: w.x, y: w.y, t: nowS() }; me.targetId = null; }
     return;
   }
@@ -3269,6 +3270,7 @@ const endPtr = e => {
   ptr.id = null; ptr.hold = false;
   joy.active = false; joy.dx = joy.dy = 0; $('#joy').hidden = true;
 };
+cv.addEventListener('pointerleave', () => { me.hoverId = null; });
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 let zoomMul = 1;
 cv.addEventListener('wheel', e => { e.preventDefault(); zoomMul = clamp(zoomMul * (e.deltaY > 0 ? .9 : 1.1), .6, 1.6); resize(); }, { passive: false });
@@ -4071,7 +4073,15 @@ function drawMon(m) {
   const top = m.ry - size - 4;
   if (s.sec) { const tt = nowS(); for (let k = 0; k < 3; k++) { const a = tt * 2 + k * 2.1; ctx.drawImage(emojiSprite('✨', 14), m.rx + Math.cos(a) * 26 - 9, m.ry - size * .5 + Math.sin(a) * 18 - 9, 18, 18); } drawName(`${s.name} Lv${m.lv}`, m.rx, top - 6, '#FFE08A', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif'); }
   if (s.boss) { ctx.drawImage(emojiSprite('👑', 20), m.rx - 13, top - 22, 26, 26); drawName(`${s.name} Lv${m.lv}`, m.rx, top - 22, xpScale(m.lv) < 1 ? '#C9C2D6' : '#FFB0B8', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif'); }
-  if (hp < m.maxHp || s.boss) { const w = s.boss ? 60 : 34; ctx.fillStyle = INK; ctx.fillRect(m.rx - w / 2 - 1, top - 1, w + 2, 6); ctx.fillStyle = '#FF5C6C'; ctx.fillRect(m.rx - w / 2, top, w * clamp(hp / m.maxHp, 0, 1), 4); }
+  // mouse over a monster: name, level and a numbered HP bar
+  if (me.hoverId === m.id) {
+    const w = s.boss ? 70 : 56, y = top - (s.boss ? 40 : 4);
+    if (!s.boss && !s.sec) drawName(`${s.name} Lv${m.lv}`, m.rx, y - 14, xpScale(m.lv) < 1 ? '#C9C2D6' : m.lv >= P.lv + 3 ? '#FFB0B8' : '#fff', '700 12px "IBM Plex Sans Thai",system-ui,sans-serif');
+    ctx.fillStyle = INK; ctx.fillRect(m.rx - w / 2 - 1.5, y - 10, w + 3, 12); ctx.fillStyle = '#5A1E2A'; ctx.fillRect(m.rx - w / 2, y - 8.5, w, 9);
+    ctx.fillStyle = '#FF5C6C'; ctx.fillRect(m.rx - w / 2, y - 8.5, w * clamp(hp / m.maxHp, 0, 1), 9);
+    drawName(`${Math.max(0, Math.ceil(hp)).toLocaleString()}/${m.maxHp.toLocaleString()}`, m.rx, y - .5, '#fff', '700 9px "IBM Plex Sans Thai",system-ui,sans-serif');
+  }
+  else if (hp < m.maxHp || s.boss) { const w = s.boss ? 60 : 34; ctx.fillStyle = INK; ctx.fillRect(m.rx - w / 2 - 1, top - 1, w + 2, 6); ctx.fillStyle = '#FF5C6C'; ctx.fillRect(m.rx - w / 2, top, w * clamp(hp / m.maxHp, 0, 1), 4); }
   else if (Math.hypot(m.rx - me.x, m.ry - me.y) < 150) drawName(`Lv${m.lv}`, m.rx, top + 4, xpScale(m.lv) < 1 ? '#B8B0C8' : m.lv >= P.lv + 3 ? '#FF9AA6' : '#fff', '600 10px "IBM Plex Sans Thai",system-ui,sans-serif');
 }
 const LOOT_ICON = { gold: '🪙', potion: '🍯', ether: '💧', elixir: '✨' };
